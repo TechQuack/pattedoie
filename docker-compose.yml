@@ -1,0 +1,6 @@
+services:
+  pattedoie:
+    image: ${DOCKER_REGISTRY-}pattedoie
+    build:
+      context: .
+      dockerfile: PatteDoie/Dockerfile
