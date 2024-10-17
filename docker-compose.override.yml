@@ -10,3 +10,30 @@ services:
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+  pattedoie-sqlserver:
+    user: root
+    volumes:
+        - backup_pattedoie:/var/opt/mssql/backups
+        - data_pattedoie:/var/opt/mssql/data
+        - log_pattedoie:/var/opt/mssql/log
+    healthcheck:
+      test: timeout 1 bash -c 'cat < /dev/null > /dev/tcp/127.0.0.1/1433'
+      interval: 10s
+      retries: 10
+      start_period: 10s
+      timeout: 3s
+  
+  pattedoie-sqlserver.configurator:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+    depends_on:
+      pattedoie-sqlserver:
+        condition: service_healthy
+    command: bash -c "/opt/mssql-tools18/bin/sqlcmd -S pattedoie-sqlserver -U sa -P Password1* -d master -i docker-entrypoint-initdb.d/init.sql -C"
+
+volumes:
+  backup_pattedoie:
+  data_pattedoie:
+  log_pattedoie:  

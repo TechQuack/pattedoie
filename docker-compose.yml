@@ -1,6 +1,18 @@
 services:
+
   pattedoie:
     image: ${DOCKER_REGISTRY-}pattedoie
     build:
       context: .
       dockerfile: PatteDoie/Dockerfile
+    environment:
+      - MSSQL_SA_PASSWORD=Password1*
+
+  pattedoie-sqlserver:
+    container_name: pattedoie-sqlserver
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password1*
+    ports:
+      - "1433:1433"
