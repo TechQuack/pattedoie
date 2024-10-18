@@ -1,7 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using PatteDoie;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<PatteDoieContext>(options =>
+    options.UseSqlServer(string.Format(builder.Configuration.GetConnectionString("PatteDoieContext") ?? "", Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD"))));
 
 var app = builder.Build();
 
