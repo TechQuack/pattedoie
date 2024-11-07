@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using PatteDoie.Models.SpeedTyping;
 
 namespace PatteDoie;
 
@@ -22,4 +23,6 @@ public partial class PatteDoieContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingWord> SpeedTypingWord { get; set; } = default!;
 }
