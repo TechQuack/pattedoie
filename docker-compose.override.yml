@@ -23,15 +23,18 @@ services:
       retries: 10
       start_period: 10s
       timeout: 3s
-  
-  pattedoie-sqlserver.configurator:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    volumes:
-      - ./init:/docker-entrypoint-initdb.d
+
+  migrations:
+    container_name: service-migrations
+    build:
+      context: .
+      dockerfile: PatteDoie/Dockerfile
+      target: migrations
+    environment:
+      - MSSQL_SA_PASSWORD=${DATABASE_PASSWORD}
     depends_on:
-      pattedoie-sqlserver:
-        condition: service_healthy
-    command: bash -c "/opt/mssql-tools18/bin/sqlcmd -S pattedoie-sqlserver -U sa -P Password1* -d master -i docker-entrypoint-initdb.d/init.sql -C"
+        pattedoie-sqlserver:
+            condition: service_healthy
 
 volumes:
   backup_pattedoie:
