@@ -27,4 +27,6 @@ public partial class PatteDoieContext : DbContext
 public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingWord> SpeedTypingWord { get; set; } = default!;
 
 public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingTimeProgress> SpeedTypingTimeProgress { get; set; } = default!;
+
+public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingScore> SpeedTypingScore { get; set; } = default!;
 }
