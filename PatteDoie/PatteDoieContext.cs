@@ -29,4 +29,6 @@ public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingWord> SpeedTypingWord { get
 public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingTimeProgress> SpeedTypingTimeProgress { get; set; } = default!;
 
 public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingScore> SpeedTypingScore { get; set; } = default!;
+
+public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingGame> SpeedTypingGame { get; set; } = default!;
 }
