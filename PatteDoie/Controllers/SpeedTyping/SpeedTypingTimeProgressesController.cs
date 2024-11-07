@@ -2,24 +2,24 @@
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.SpeedTyping;
 
-namespace PatteDoie
+namespace PatteDoie.Controllers.SpeedTyping
 {
-    public class SpeedTypingWordsController : Controller
+    public class SpeedTypingTimeProgressesController : Controller
     {
         private readonly PatteDoieContext _context;
 
-        public SpeedTypingWordsController(PatteDoieContext context)
+        public SpeedTypingTimeProgressesController(PatteDoieContext context)
         {
             _context = context;
         }
 
-        // GET: SpeedTypingWords
+        // GET: SpeedTypingTimeProgresses
         public async Task<IActionResult> Index()
         {
-            return View(await _context.SpeedTypingWord.ToListAsync());
+            return View(await _context.SpeedTypingTimeProgress.ToListAsync());
         }
 
-        // GET: SpeedTypingWords/Details/5
+        // GET: SpeedTypingTimeProgresses/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -27,40 +27,40 @@ namespace PatteDoie
                 return NotFound();
             }
 
-            var speedTypingWord = await _context.SpeedTypingWord
+            var speedTypingTimeProgress = await _context.SpeedTypingTimeProgress
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (speedTypingWord == null)
+            if (speedTypingTimeProgress == null)
             {
                 return NotFound();
             }
 
-            return View(speedTypingWord);
+            return View(speedTypingTimeProgress);
         }
 
-        // GET: SpeedTypingWords/Create
+        // GET: SpeedTypingTimeProgresses/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: SpeedTypingWords/Create
+        // POST: SpeedTypingTimeProgresses/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Value")] SpeedTypingWord speedTypingWord)
+        public async Task<IActionResult> Create([Bind("Id,UserId,TimeProgress")] SpeedTypingTimeProgress speedTypingTimeProgress)
         {
             if (ModelState.IsValid)
             {
-                speedTypingWord.Id = Guid.NewGuid();
-                _context.Add(speedTypingWord);
+                speedTypingTimeProgress.Id = Guid.NewGuid();
+                _context.Add(speedTypingTimeProgress);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(speedTypingWord);
+            return View(speedTypingTimeProgress);
         }
 
-        // GET: SpeedTypingWords/Edit/5
+        // GET: SpeedTypingTimeProgresses/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -68,22 +68,22 @@ namespace PatteDoie
                 return NotFound();
             }
 
-            var speedTypingWord = await _context.SpeedTypingWord.FindAsync(id);
-            if (speedTypingWord == null)
+            var speedTypingTimeProgress = await _context.SpeedTypingTimeProgress.FindAsync(id);
+            if (speedTypingTimeProgress == null)
             {
                 return NotFound();
             }
-            return View(speedTypingWord);
+            return View(speedTypingTimeProgress);
         }
 
-        // POST: SpeedTypingWords/Edit/5
+        // POST: SpeedTypingTimeProgresses/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Value")] SpeedTypingWord speedTypingWord)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,UserId,TimeProgress")] SpeedTypingTimeProgress speedTypingTimeProgress)
         {
-            if (id != speedTypingWord.Id)
+            if (id != speedTypingTimeProgress.Id)
             {
                 return NotFound();
             }
@@ -92,12 +92,12 @@ namespace PatteDoie
             {
                 try
                 {
-                    _context.Update(speedTypingWord);
+                    _context.Update(speedTypingTimeProgress);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SpeedTypingWordExists(speedTypingWord.Id))
+                    if (!SpeedTypingTimeProgressExists(speedTypingTimeProgress.Id))
                     {
                         return NotFound();
                     }
@@ -108,10 +108,10 @@ namespace PatteDoie
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(speedTypingWord);
+            return View(speedTypingTimeProgress);
         }
 
-        // GET: SpeedTypingWords/Delete/5
+        // GET: SpeedTypingTimeProgresses/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -119,34 +119,34 @@ namespace PatteDoie
                 return NotFound();
             }
 
-            var speedTypingWord = await _context.SpeedTypingWord
+            var speedTypingTimeProgress = await _context.SpeedTypingTimeProgress
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (speedTypingWord == null)
+            if (speedTypingTimeProgress == null)
             {
                 return NotFound();
             }
 
-            return View(speedTypingWord);
+            return View(speedTypingTimeProgress);
         }
 
-        // POST: SpeedTypingWords/Delete/5
+        // POST: SpeedTypingTimeProgresses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var speedTypingWord = await _context.SpeedTypingWord.FindAsync(id);
-            if (speedTypingWord != null)
+            var speedTypingTimeProgress = await _context.SpeedTypingTimeProgress.FindAsync(id);
+            if (speedTypingTimeProgress != null)
             {
-                _context.SpeedTypingWord.Remove(speedTypingWord);
+                _context.SpeedTypingTimeProgress.Remove(speedTypingTimeProgress);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool SpeedTypingWordExists(Guid id)
+        private bool SpeedTypingTimeProgressExists(Guid id)
         {
-            return _context.SpeedTypingWord.Any(e => e.Id == id);
+            return _context.SpeedTypingTimeProgress.Any(e => e.Id == id);
         }
     }
 }

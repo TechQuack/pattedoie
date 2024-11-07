@@ -25,4 +25,6 @@ public partial class PatteDoieContext : DbContext
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
 public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingWord> SpeedTypingWord { get; set; } = default!;
+
+public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingTimeProgress> SpeedTypingTimeProgress { get; set; } = default!;
 }
