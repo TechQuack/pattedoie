@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: PatteDoie/Dockerfile
+      target: final
     environment:
       - MSSQL_SA_PASSWORD=${DATABASE_PASSWORD}
 
