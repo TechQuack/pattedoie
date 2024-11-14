@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.SpeedTyping;
+using PatteDoie.Models.Platform;
 
 namespace PatteDoie;
 
@@ -31,4 +32,6 @@ public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingTimeProgress> SpeedTypingTi
 public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingScore> SpeedTypingScore { get; set; } = default!;
 
 public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingGame> SpeedTypingGame { get; set; } = default!;
+
+public DbSet<PatteDoie.Models.Platform.PlatformUser> PlatformUser { get; set; } = default!;
 }
