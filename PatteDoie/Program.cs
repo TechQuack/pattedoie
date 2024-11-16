@@ -1,13 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using PatteDoie;
+using PatteDoie.Configuration;
+using PatteDoie.Services.SpeedTyping;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
 builder.Services.AddDbContext<PatteDoieContext>(options =>
     options.UseSqlServer(string.Format(builder.Configuration.GetConnectionString("PatteDoieContext") ?? "", Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD"))));
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<ISpeedTypingService, SpeedTypingService>();
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 var app = builder.Build();
 

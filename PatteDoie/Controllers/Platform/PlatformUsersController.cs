@@ -1,62 +1,66 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PatteDoie.Models.SpeedTyping;
-using PatteDoie.Queries.SpeedTyping;
-using PatteDoie.Rows.SpeedTypingGame;
-using PatteDoie.Services.SpeedTyping;
+using PatteDoie.Models.Platform;
 
-namespace PatteDoie.Controllers.SpeedTyping
+namespace PatteDoie.Controllers.Platform
 {
-    public class SpeedTypingGamesController : Controller
+    public class PlatformUsersController : Controller
     {
         private readonly PatteDoieContext _context;
 
-        private readonly ISpeedTypingService _service;
-        public SpeedTypingGamesController(PatteDoieContext context, ISpeedTypingService speedTypingService)
+        public PlatformUsersController(PatteDoieContext context)
         {
             _context = context;
-            _service = speedTypingService;
         }
 
-        // GET: SpeedTypingGames
+        // GET: PlatformUsers
         public async Task<IActionResult> Index()
         {
-            return View(await _context.SpeedTypingGame.ToListAsync());
+            return View(await _context.PlatformUser.ToListAsync());
         }
 
-        // GET: SpeedTypingGames/GetGame/5
-        public async Task<ActionResult<SpeedTypingGameRow>> GetGame(Guid id)
+        // GET: PlatformUsers/Details/5
+        public async Task<IActionResult> Details(Guid? id)
         {
-            var game = await _service.GetGame(id);
-
-
-            if (game == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            return game;
+            var platformUser = await _context.PlatformUser
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (platformUser == null)
+            {
+                return NotFound();
+            }
+
+            return View(platformUser);
         }
 
-        // GET: SpeedTypingGames/Create
+        // GET: PlatformUsers/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: SpeedTypingGames/Create
+        // POST: PlatformUsers/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult<SpeedTypingGameRow>> Create(CreateSpeedTypingGameCommand command)
+        public async Task<IActionResult> Create([Bind("Id,Nickname")] PlatformUser platformUser)
         {
-            var speeedTypingGame_created = await _service.CreateGame(command, []);
-
-            return CreatedAtAction("GetGame", new { id = speeedTypingGame_created.Id }, speeedTypingGame_created);
+            if (ModelState.IsValid)
+            {
+                platformUser.Id = Guid.NewGuid();
+                _context.Add(platformUser);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(platformUser);
         }
 
-        // GET: SpeedTypingGames/Edit/5
+        // GET: PlatformUsers/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -64,22 +68,22 @@ namespace PatteDoie.Controllers.SpeedTyping
                 return NotFound();
             }
 
-            var speedTypingGame = await _context.SpeedTypingGame.FindAsync(id);
-            if (speedTypingGame == null)
+            var platformUser = await _context.PlatformUser.FindAsync(id);
+            if (platformUser == null)
             {
                 return NotFound();
             }
-            return View(speedTypingGame);
+            return View(platformUser);
         }
 
-        // POST: SpeedTypingGames/Edit/5
+        // POST: PlatformUsers/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,LaunchTime")] SpeedTypingGame speedTypingGame)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Nickname")] PlatformUser platformUser)
         {
-            if (id != speedTypingGame.Id)
+            if (id != platformUser.Id)
             {
                 return NotFound();
             }
@@ -88,12 +92,12 @@ namespace PatteDoie.Controllers.SpeedTyping
             {
                 try
                 {
-                    _context.Update(speedTypingGame);
+                    _context.Update(platformUser);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SpeedTypingGameExists(speedTypingGame.Id))
+                    if (!PlatformUserExists(platformUser.Id))
                     {
                         return NotFound();
                     }
@@ -104,10 +108,10 @@ namespace PatteDoie.Controllers.SpeedTyping
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(speedTypingGame);
+            return View(platformUser);
         }
 
-        // GET: SpeedTypingGames/Delete/5
+        // GET: PlatformUsers/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -115,34 +119,34 @@ namespace PatteDoie.Controllers.SpeedTyping
                 return NotFound();
             }
 
-            var speedTypingGame = await _context.SpeedTypingGame
+            var platformUser = await _context.PlatformUser
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (speedTypingGame == null)
+            if (platformUser == null)
             {
                 return NotFound();
             }
 
-            return View(speedTypingGame);
+            return View(platformUser);
         }
 
-        // POST: SpeedTypingGames/Delete/5
+        // POST: PlatformUsers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var speedTypingGame = await _context.SpeedTypingGame.FindAsync(id);
-            if (speedTypingGame != null)
+            var platformUser = await _context.PlatformUser.FindAsync(id);
+            if (platformUser != null)
             {
-                _context.SpeedTypingGame.Remove(speedTypingGame);
+                _context.PlatformUser.Remove(platformUser);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool SpeedTypingGameExists(Guid id)
+        private bool PlatformUserExists(Guid id)
         {
-            return _context.SpeedTypingGame.Any(e => e.Id == id);
+            return _context.PlatformUser.Any(e => e.Id == id);
         }
     }
 }

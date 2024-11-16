@@ -26,4 +26,18 @@ public partial class PatteDoieContext : DbContext
     public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingScore> SpeedTypingScore { get; set; } = default!;
 
     public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingGame> SpeedTypingGame { get; set; } = default!;
+
+    public DbSet<PatteDoie.Models.Platform.PlatformUser> PlatformUser { get; set; } = default!;
+
+    public DbSet<PatteDoie.Models.Scattergories.ScattergoriesCategory> ScattergoriesCategory { get; set; } = default!;
+
+    public DbSet<PatteDoie.Models.Platform.PlatformLobby> PlatformLobby { get; set; } = default!;
+
+    public DbSet<PatteDoie.Models.Platform.PlatformHighScore> PlatformHighScore { get; set; } = default!;
+
+    public DbSet<PatteDoie.Models.Scattergories.ScattergoriesPlayer> ScattergoriesPlayer { get; set; } = default!;
+
+    public DbSet<PatteDoie.Models.Platform.PlatformGame> PlatformGame { get; set; } = default!;
+
+    public DbSet<PatteDoie.Models.Scattergories.ScattergoriesGame> ScattergoriesGame { get; set; } = default!;
 }
