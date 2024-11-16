@@ -29,7 +29,14 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "PatteDoie.dll"]
 
-FROM build as migrations
+
+FROM build AS efbundle
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
+
+FROM efbundle AS migrations-apply
 ENTRYPOINT dotnet-ef database update
+
+FROM efbundle AS migrations-create
+ARG MIGRATION_NAME
+ENTRYPOINT dotnet-ef migrations add $MIGRATION_NAME

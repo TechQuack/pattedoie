@@ -5,8 +5,8 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
     ports:
-      - "8080"
-      - "8081"
+      - "8080:8080"
+      - "8081:8081"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -24,12 +24,12 @@ services:
       start_period: 10s
       timeout: 3s
 
-  migrations:
-    container_name: service-migrations
+  migrations-apply:
+    container_name: service-migrations-apply
     build:
       context: .
       dockerfile: PatteDoie/Dockerfile
-      target: migrations
+      target: migrations-apply
     environment:
       - MSSQL_SA_PASSWORD=${DATABASE_PASSWORD}
     depends_on:

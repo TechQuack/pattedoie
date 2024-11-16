@@ -3,8 +3,24 @@
     "Docker Compose": {
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchServiceName": "pattedoie",
+      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}",
       "serviceActions": {
-        "pattedoie": "StartDebugging"
+        "pattedoie": "StartDebugging",
+        "migrations-apply": "StartWithoutDebugging",
+        "pattedoie-sqlserver": "StartWithoutDebugging",
+        "migrations-create": "DoNotStart"
+      }
+    },
+    "Migrations Create": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "migrations-apply": "DoNotStart",
+        "migrations-create": "StartWithoutDebugging",
+        "pattedoie": "DoNotStart",
+        "pattedoie-sqlserver": "DoNotStart"
       }
     }
   }
