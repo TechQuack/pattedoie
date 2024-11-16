@@ -45,4 +45,6 @@ public DbSet<PatteDoie.Models.Platform.PlatformHighScore> PlatformHighScore { ge
 public DbSet<PatteDoie.Models.Scattergories.ScattergoriesPlayer> ScattergoriesPlayer { get; set; } = default!;
 
 public DbSet<PatteDoie.Models.Platform.PlatformGame> PlatformGame { get; set; } = default!;
+
+public DbSet<PatteDoie.Models.Scattergories.ScattergoriesGame> ScattergoriesGame { get; set; } = default!;
 }
