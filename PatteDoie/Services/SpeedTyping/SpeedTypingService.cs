@@ -21,7 +21,7 @@ namespace PatteDoie.Services.SpeedTyping
 
         public async Task<SpeedTypingGameRow> CreateGame(CreateSpeedTypingGameCommand command, PlatformUser[] platformUsers)
         {
-            List<SpeedTypingScore> scores = new List<SpeedTypingScore>();
+            List<SpeedTypingScore> scores = [];
             foreach (PlatformUser platformUser in platformUsers)
             {
                 var SpeedTypingScore = new SpeedTypingScore
@@ -32,13 +32,18 @@ namespace PatteDoie.Services.SpeedTyping
                 scores.Add(SpeedTypingScore);
                 _context.SpeedTypingScore.Add(SpeedTypingScore);
             }
+            String ApiUrl = "https://random-word-api.herokuapp.com/word?lang=fr&number=10";
+            String result = ApiCall.GetAsync(ApiUrl).Result.Remove(0, 1);
+            result = result.Remove(result.Length - 1);
+            String[] words = result.Replace("\"", "").Split(',');
+
 
             var speedTypingGame = new SpeedTypingGame
             {
                 LaunchTime = DateTime.Now,
-                Scores = scores.ToArray(),
-                Words = [],
-                TimeProgresses = Array.Empty<SpeedTypingTimeProgress>()
+                Scores = [.. scores],
+                Words = words,
+                TimeProgresses = []
             };
             _context.SpeedTypingGame.Add(speedTypingGame);
 

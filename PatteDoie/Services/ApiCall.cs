@@ -1,11 +1,10 @@
-﻿namespace PatteDoie.Services.SpeedTyping
+﻿namespace PatteDoie.Services
 {
     public class ApiCall
     {
-        private static IHttpClientFactory httpClientFactory;
-        public static async Task<String> GetAsync(String url)
+        public static async Task<string> GetAsync(string url)
         {
-            using HttpClient client = httpClientFactory.CreateClient();
+            using HttpClient client = new();
             using HttpResponseMessage response = await client.GetAsync(url);
             response.EnsureSuccessStatusCode();
             var jsonResponse = await response.Content.ReadAsStringAsync();
