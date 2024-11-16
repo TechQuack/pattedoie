@@ -34,4 +34,6 @@ public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingScore> SpeedTypingScore { g
 public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingGame> SpeedTypingGame { get; set; } = default!;
 
 public DbSet<PatteDoie.Models.Platform.PlatformUser> PlatformUser { get; set; } = default!;
+
+public DbSet<PatteDoie.Models.Platform.PlatformLobby> PlatformLobby { get; set; } = default!;
 }
