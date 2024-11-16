@@ -5,7 +5,11 @@ services:
           context: .
           dockerfile: PatteDoie/Dockerfile
           target: migrations-apply
-        entrypoint: "dotnet-ef database update"
-        labels:
-          com.microsoft.visualstudio.debuggee.program: ""
-          com.microsoft.visualstudio.debuggee.arguments: ""
+        entrypoint: "dotnet ef database update"
+
+    migrations-create:
+        container_name: service-migrations-create
+        build:
+          context: .
+          dockerfile: PatteDoie/Dockerfile
+          target: migrations-create
