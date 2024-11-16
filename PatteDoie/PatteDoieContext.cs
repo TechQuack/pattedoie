@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.SpeedTyping;
 using PatteDoie.Models.Platform;
+using PatteDoie.Models.Scattergories;
 
 namespace PatteDoie;
 
@@ -34,6 +35,8 @@ public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingScore> SpeedTypingScore { g
 public DbSet<PatteDoie.Models.SpeedTyping.SpeedTypingGame> SpeedTypingGame { get; set; } = default!;
 
 public DbSet<PatteDoie.Models.Platform.PlatformUser> PlatformUser { get; set; } = default!;
+
+public DbSet<PatteDoie.Models.Scattergories.ScattergoriesCategory> ScattergoriesCategory { get; set; } = default!;
 
 public DbSet<PatteDoie.Models.Platform.PlatformLobby> PlatformLobby { get; set; } = default!;
 
