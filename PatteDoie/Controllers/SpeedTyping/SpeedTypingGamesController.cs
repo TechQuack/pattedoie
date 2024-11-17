@@ -35,7 +35,7 @@ namespace PatteDoie.Controllers.SpeedTyping
                 return NotFound();
             }
 
-            return game;
+            return View(game);
         }
 
         // GET: SpeedTypingGames/Create
