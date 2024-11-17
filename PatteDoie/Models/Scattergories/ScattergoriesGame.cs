@@ -7,5 +7,6 @@
         public int MaxRound { get; set; }
         public int CurrentRound { get; set; }
         public char CurrentLetter { get; set; }
+        public ScattergoriesCategory[] Categories { get; set; }
     }
 }
