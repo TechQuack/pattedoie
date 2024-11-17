@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.SpeedTyping;
+using PatteDoie.Queries.SpeedTyping;
+using PatteDoie.Rows.SpeedTypingGame;
+using PatteDoie.Services.SpeedTyping;
 
 namespace PatteDoie.Controllers.SpeedTyping
 {
@@ -8,9 +11,11 @@ namespace PatteDoie.Controllers.SpeedTyping
     {
         private readonly PatteDoieContext _context;
 
-        public SpeedTypingGamesController(PatteDoieContext context)
+        private readonly ISpeedTypingService _service;
+        public SpeedTypingGamesController(PatteDoieContext context, ISpeedTypingService speedTypingService)
         {
             _context = context;
+            _service = speedTypingService;
         }
 
         // GET: SpeedTypingGames
@@ -19,22 +24,18 @@ namespace PatteDoie.Controllers.SpeedTyping
             return View(await _context.SpeedTypingGame.ToListAsync());
         }
 
-        // GET: SpeedTypingGames/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        // GET: SpeedTypingGames/GetGame/5
+        public async Task<ActionResult<SpeedTypingGameRow>> GetGame(Guid id)
         {
-            if (id == null)
+            var game = await _service.GetGame(id);
+
+
+            if (game == null)
             {
                 return NotFound();
             }
 
-            var speedTypingGame = await _context.SpeedTypingGame
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (speedTypingGame == null)
-            {
-                return NotFound();
-            }
-
-            return View(speedTypingGame);
+            return game;
         }
 
         // GET: SpeedTypingGames/Create
@@ -48,16 +49,11 @@ namespace PatteDoie.Controllers.SpeedTyping
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,LaunchTime")] SpeedTypingGame speedTypingGame)
+        public async Task<ActionResult<SpeedTypingGameRow>> Create(CreateSpeedTypingGameCommand command)
         {
-            if (ModelState.IsValid)
-            {
-                speedTypingGame.Id = Guid.NewGuid();
-                _context.Add(speedTypingGame);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(speedTypingGame);
+            var speeedTypingGame_created = await _service.CreateGame(command, []);
+
+            return CreatedAtAction("GetGame", new { id = speeedTypingGame_created.Id }, speeedTypingGame_created);
         }
 
         // GET: SpeedTypingGames/Edit/5

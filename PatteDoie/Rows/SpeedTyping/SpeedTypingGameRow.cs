@@ -1,6 +1,8 @@
-﻿namespace PatteDoie.Models.SpeedTyping
+﻿using PatteDoie.Models.SpeedTyping;
+
+namespace PatteDoie.Rows.SpeedTypingGame
 {
-    public class SpeedTypingGame
+    public class SpeedTypingGameRow
     {
         public Guid Id { get; set; }
         public SpeedTypingScore[] Scores { get; set; }
