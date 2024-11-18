@@ -8,9 +8,7 @@
       "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}",
       "serviceActions": {
         "pattedoie": "StartDebugging",
-        "migrations-apply": "StartWithoutDebugging",
-        "pattedoie-sqlserver": "StartWithoutDebugging",
-        "migrations-create": "DoNotStart"
+        "pattedoie-sqlserver": "StartWithoutDebugging"
       }
     }
   }

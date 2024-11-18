@@ -4,18 +4,19 @@
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
     <DockerPublishLocally>False</DockerPublishLocally>
-    <ProjectGuid>720c4e9b-a34b-436b-9952-9cc25476f818</ProjectGuid>
-    <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
+    <ProjectGuid>32295a6e-f2f3-48a7-98c0-015cf83f73b9</ProjectGuid>
     <DockerServiceName>pattedoie</DockerServiceName>
     <DockerComposeProjectName>pattedoie</DockerComposeProjectName>
   </PropertyGroup>
   <ItemGroup>
+    <None Include=".dockerignore" />
     <None Include=".env" />
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
+    <None Include="docker-compose.vs.debug.yml">
+      <DependentUpon>docker-compose.yml</DependentUpon>
+    </None>
     <None Include="docker-compose.yml" />
-    <None Include=".dockerignore" />
   </ItemGroup>
 </Project>
