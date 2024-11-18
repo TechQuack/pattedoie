@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatteDoie", "PatteDoie\PatteDoie.csproj", "{45FE8FEC-D01E-431E-84BF-B47624592C1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatteDoie", "PatteDoie\PatteDoie.csproj", "{45FE8FEC-D01E-431E-84BF-B47624592C1B}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{720C4E9B-A34B-436B-9952-9CC25476F818}"
 EndProject

@@ -1,0 +1,33 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+
+
+<PageTitle>SpeedTyping</PageTitle>
+
+<h1>GetGame</h1>
+
+<div>
+    <h4>Speed Typing</h4>
+    <hr />
+
+    <div>
+        <InputText type="text" value="test" id="inputText" name="inputText" @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")'/>
+        <script>
+            function hasSpace() {
+                var text = document.getElementById("inputText")
+                if (text.hasSpace) {
+                    console.log(text.trim())
+                }
+            }
+        </script>
+        <hr />
+        @foreach (string Word in Model.Words)
+        {
+            <span>@Word </span>
+        }
+     </div>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
