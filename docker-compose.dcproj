@@ -8,10 +8,13 @@
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
     <DockerServiceName>pattedoie</DockerServiceName>
+    <AdditionalComposeFilePaths>docker-compose.migration_create.yml</AdditionalComposeFilePaths>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
+    </None>
+    <None Include="docker-compose.vs.release.yml">
     </None>
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
