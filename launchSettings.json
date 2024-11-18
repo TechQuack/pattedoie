@@ -12,16 +12,6 @@
         "pattedoie-sqlserver": "StartWithoutDebugging",
         "migrations-create": "DoNotStart"
       }
-    },
-    "Migrations Create": {
-      "commandName": "DockerCompose",
-      "commandVersion": "1.0",
-      "serviceActions": {
-        "migrations-apply": "DoNotStart",
-        "migrations-create": "StartWithoutDebugging",
-        "pattedoie": "DoNotStart",
-        "pattedoie-sqlserver": "DoNotStart"
-      }
     }
   }
 }

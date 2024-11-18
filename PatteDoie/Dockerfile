@@ -36,7 +36,3 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 
 FROM efbundle AS migrations-apply
 ENTRYPOINT dotnet-ef database update
-
-FROM efbundle AS migrations-create
-ARG MIGRATION_NAME
-ENTRYPOINT dotnet-ef migrations add $MIGRATION_NAME
