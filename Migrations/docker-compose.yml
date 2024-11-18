@@ -1,0 +1,37 @@
+services:
+    pattedoie-sqlserver:
+        container_name: pattedoie-sqlserver
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        environment:
+          - ACCEPT_EULA=Y
+          - MSSQL_SA_PASSWORD=${DATABASE_PASSWORD}
+        ports:
+          - "1433:1433"
+
+    migrations-apply:
+        container_name: service-migrations-apply
+        build:
+            context: ../
+            dockerfile: PatteDoie/DockerfileDatabase
+        environment:
+            - MSSQL_SA_PASSWORD=${DATABASE_PASSWORD}
+        depends_on:
+            pattedoie-sqlserver:
+                condition: service_healthy
+
+    migrations-create:
+        container_name: service-migrations-create
+        build:
+            context: ../
+            dockerfile: PatteDoie/DockerfileDatabase
+        environment:
+            - MSSQL_SA_PASSWORD=${DATABASE_PASSWORD}
+        depends_on:
+            pattedoie-sqlserver:
+                condition: service_healthy
+
+
+volumes:
+  backup_pattedoie:
+  data_pattedoie:
+  log_pattedoie:  

@@ -24,18 +24,6 @@ services:
       start_period: 10s
       timeout: 3s
 
-  migrations-apply:
-    container_name: service-migrations-apply
-    build:
-      context: .
-      dockerfile: PatteDoie/Dockerfile
-      target: migrations-apply
-    environment:
-      - MSSQL_SA_PASSWORD=${DATABASE_PASSWORD}
-    depends_on:
-        pattedoie-sqlserver:
-            condition: service_healthy
-
 volumes:
   backup_pattedoie:
   data_pattedoie:
