@@ -27,7 +27,6 @@
 	<ItemGroup>
 		<Folder Include="Services\SpeedTyping\" />
 		<Folder Include="Services\Scattergories\" />
-		<Folder Include="Services\Platform\" />
 	</ItemGroup>
 
 </Project>
