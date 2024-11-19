@@ -13,6 +13,11 @@ namespace PatteDoie.Controllers
             _logger = logger;
         }
 
+        public IActionResult Blazor()
+        {
+            return View("_Host");
+        }
+
         public IActionResult Index()
         {
             return View();

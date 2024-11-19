@@ -12,6 +12,7 @@ builder.Services.AddDbContext<PatteDoieContext>(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ISpeedTypingService, SpeedTypingService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+builder.Services.AddServerSideBlazor();
 
 var app = builder.Build();
 
@@ -22,6 +23,9 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.MapBlazorHub();
+app.MapFallbackToController("Blazor", "Home");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
