@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
-using PatteDoie.Models.SpeedTyping;
+using Microsoft.AspNetCore.Mvc;
 using PatteDoie.Rows.SpeedTypingGame;
 using PatteDoie.Services.SpeedTyping;
 
@@ -7,17 +7,32 @@ namespace PatteDoie.Views.SpeedTypingGames
 {
     public partial class GetGame : ComponentBase
     {
-        public SpeedTypingGameRow GameRow;
+        [BindProperty(SupportsGet = true)]
+        [Parameter]
+        public required string Id { get; set; }
 
-        public SpeedTypingService Service;
+        private string hasSpace = "No Space detected";
 
-        public SpeedTypingGame Model;
+        private SpeedTypingGameRow? Row { get; set; } = null;
+
+
+        [Inject]
+        protected ISpeedTypingService SpeedTypingService { get; set; } = default!;
+
+        protected override async Task OnInitializedAsync()
+        {
+            this.Row = await SpeedTypingService.GetGame(new Guid(this.Id));
+        }
 
         public void CheckTextSpace(string Text)
         {
             if (Text.Contains(' '))
             {
-                Console.WriteLine("success");
+                this.hasSpace = "Space detected";
+            }
+            else
+            {
+                this.hasSpace = "No Space detected";
             }
         }
     }

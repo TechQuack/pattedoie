@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web
+@page "/speedtyping/{Id}"
 
 
 <PageTitle>SpeedTyping</PageTitle>
@@ -9,9 +10,10 @@
 <div>
     <h4>Speed Typing</h4>
     <hr />
+    
 
     <div>
-        <InputText type="text" value="test" id="inputText" name="inputText" @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")'/>
+        <input type="text" id="inputText" name="inputText" @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")'/>
         <script>
             function hasSpace() {
                 var text = document.getElementById("inputText")
@@ -21,13 +23,13 @@
             }
         </script>
         <hr />
-        @foreach (string Word in Model.Words)
+        @foreach (string Word in Row?.Words ?? [])
         {
             <span>@Word </span>
         }
+        <p>@hasSpace</p>
      </div>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
