@@ -1,5 +1,4 @@
-﻿using PatteDoie.Models.Platform;
-using PatteDoie.Queries.Platform;
+﻿using PatteDoie.Queries.Platform;
 using PatteDoie.Rows.Platform;
 
 namespace PatteDoie.Services.Platform
@@ -17,8 +16,10 @@ namespace PatteDoie.Services.Platform
 
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command);
 
-        public Task<PlatformLobbyRow> CreateLobby(CreatePlatformLobbyCommand command, PlatformUser creator, string password);
+        public Task<PlatformLobbyRow> CreateLobby(CreatePlatformLobbyCommand command, Guid creatorId, string password);
 
         public Task<PlatformUserRow> CreateUser(CreatePlatformUserCommand command, string nickname);
+
+        public Task<PlatformUserRow> GetUser(Guid userId);
     }
 }

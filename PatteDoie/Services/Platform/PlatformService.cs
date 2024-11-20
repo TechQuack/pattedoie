@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.Platform;
 using PatteDoie.Queries.Platform;
 using PatteDoie.Rows.Platform;
@@ -18,12 +19,19 @@ namespace PatteDoie.Services.Platform
             _mapper = mapper;
         }
 
-        public async Task<PlatformLobbyRow> CreateLobby(CreatePlatformLobbyCommand command, PlatformUser creator, string password)
+        public async Task<PlatformLobbyRow> CreateLobby(CreatePlatformLobbyCommand command, Guid creatorId, string password)
         {
+
+            var creator = _context.PlatformUser.AsQueryable().Where(u => u.Id == creatorId).FirstOrDefault<PlatformUser>();
+
+            if (creator == null)
+            {
+                throw new Exception("creator = null " + creatorId);
+            }
 
             var PlatformLobby = new PlatformLobby
             {
-                users = [creator],
+                users = [],
                 creator = creator,
                 password = password,
                 started = false
@@ -73,6 +81,12 @@ namespace PatteDoie.Services.Platform
             await _context.SaveChangesAsync();
 
             return _mapper.Map<PlatformUserRow>(PlatformUser);
+        }
+
+        public async Task<PlatformUserRow> GetUser(Guid userId)
+        {
+            var creator = (await _context.PlatformUser.AsQueryable().Where(u => u.Id == userId).ToListAsync())[0];
+            return _mapper.Map<PlatformUserRow>(creator);
         }
     }
 }
