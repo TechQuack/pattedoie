@@ -7,15 +7,15 @@ namespace PatteDoie.Rows.Platform
 
         public Guid Id { get; set; }
 
-        public PlatformUser[] users { get; set; }
+        public PlatformUser[] Users { get; set; } = [];
 
-        public PlatformUser creator { get; set; }
+        public required PlatformUser Creator { get; set; }
 
-        public Guid gameId { get; set; }
+        public Guid GameId { get; set; }
 
-        public string password { get; set; }
+        public string? Password { get; set; }
 
-        public bool started { get; set; }
+        public bool Started { get; set; }
 
     }
 }
