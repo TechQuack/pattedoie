@@ -1,0 +1,45 @@
+﻿@page "/lobby"
+
+<PageTitle>Lobbies</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="/lobby/create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Password
+            </th>
+            <th>
+                Started
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Items) {
+        <tr>
+            <td>
+                @item.Id
+            </td>
+            <td>
+                @item.Password
+            </td>
+            <td>
+                @item.Started
+            </td>
+            <td>
+                <a href="/lobby/edit">Edit</a> |
+                <a href="/lobby/details">Details</a> |
+                <a href="/lobby/delete">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
