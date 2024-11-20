@@ -35,9 +35,10 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<PlatformLobbyRow>(PlatformLobby);
         }
 
-        public Task<IEnumerable<PlatformLobbyRow>> GetAllLobbies()
+        public async Task<IEnumerable<PlatformLobbyRow>> GetAllLobbies()
         {
-            throw new NotImplementedException();
+            var lobbies = await _context.PlatformLobby.AsQueryable().ToListAsync();
+            return _mapper.Map<List<PlatformLobbyRow>>(lobbies);
         }
 
         public Task<IEnumerable<PlatformLobbyRow>> GetLobbiesByGame(Guid gameId)
