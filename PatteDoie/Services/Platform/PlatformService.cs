@@ -21,7 +21,7 @@ namespace PatteDoie.Services.Platform
         public async Task<PlatformLobbyRow> CreateLobby(CreatePlatformLobbyCommand command, PlatformUser creator, string password)
         {
 
-            var PlatfromLobby = new PlatformLobby
+            var PlatformLobby = new PlatformLobby
             {
                 users = [creator],
                 creator = creator,
@@ -29,11 +29,11 @@ namespace PatteDoie.Services.Platform
                 started = false
             };
 
-            _context.PlatformLobby.Add(PlatfromLobby);
+            _context.PlatformLobby.Add(PlatformLobby);
 
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<PlatformLobbyRow>(PlatfromLobby);
+            return _mapper.Map<PlatformLobbyRow>(PlatformLobby);
         }
 
         public Task<IEnumerable<PlatformLobbyRow>> GetAllLobbies()
@@ -59,6 +59,20 @@ namespace PatteDoie.Services.Platform
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command)
         {
             throw new NotImplementedException();
+        }
+
+        async Task<PlatformUserRow> IPlatformService.CreateUser(CreatePlatformUserCommand command, string nickname)
+        {
+            var PlatformUser = new PlatformUser
+            {
+                Nickname = nickname,
+            };
+
+            _context.PlatformUser.Add(PlatformUser);
+
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<PlatformUserRow>(PlatformUser);
         }
     }
 }

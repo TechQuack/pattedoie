@@ -18,5 +18,7 @@ namespace PatteDoie.Services.Platform
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command);
 
         public Task<PlatformLobbyRow> CreateLobby(CreatePlatformLobbyCommand command, PlatformUser creator, string password);
+
+        public Task<PlatformUserRow> CreateUser(CreatePlatformUserCommand command, string nickname);
     }
 }
