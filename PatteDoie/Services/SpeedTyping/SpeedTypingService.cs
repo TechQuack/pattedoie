@@ -77,5 +77,28 @@ namespace PatteDoie.Services.SpeedTyping
         {
             throw new NotImplementedException();
         }
+
+        public async Task<bool> CheckWord(Guid gameId, Guid playerId, string word)
+        {
+            var game = _context.SpeedTypingGame.AsQueryable()
+                .Where(g => g.Id == gameId)
+                .FirstOrDefault<SpeedTypingGame>();
+            var player = _context.SpeedTypingScore.Single(p => p.UserId == playerId);
+            var wordIndexToCheck = player.Score;
+            var wordToCheck = game.Words[wordIndexToCheck];
+            if (wordToCheck == word)
+            {
+                player.Score += 1;
+                await _context.SaveChangesAsync();
+
+                // check si le joueur a fini, si oui, mettre fin à la partie et remplir SpeedTypingTimeProgress
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
     }
 }
