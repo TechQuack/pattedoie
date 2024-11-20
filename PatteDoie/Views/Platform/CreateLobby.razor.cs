@@ -19,6 +19,6 @@ public partial class CreateLobby : ComponentBase
         var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
         var name = await ProtectedLocalStorage.GetAsync<string>("name");
 
-        await PlatformService.CreateLobby(new Guid(uuid.ToString() ?? ""), name.ToString() ?? "", Password);
+        await PlatformService.CreateLobby(new Guid(uuid.Value ?? ""), name.Value ?? "", Password);
     }
 }
