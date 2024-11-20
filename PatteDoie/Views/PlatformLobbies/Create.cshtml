@@ -18,14 +18,14 @@
                 <span asp-validation-for="gameId" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="creator" class="control-label">Creator</label>
+                <input asp-for="creator" class="form-control" />
+                <span asp-validation-for="creator" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="password" class="control-label"></label>
                 <input asp-for="password" class="form-control" />
                 <span asp-validation-for="password" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="started" /> @Html.DisplayNameFor(model => model.started)
-                </label>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.Platform;
+using PatteDoie.Queries.Platform;
+using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Controllers.Platform
 {
@@ -8,9 +10,12 @@ namespace PatteDoie.Controllers.Platform
     {
         private readonly PatteDoieContext _context;
 
-        public PlatformLobbiesController(PatteDoieContext context)
+        private readonly IPlatformService _service;
+
+        public PlatformLobbiesController(PatteDoieContext context, IPlatformService platformService)
         {
             _context = context;
+            _service = platformService;
         }
 
         // GET: PlatformLobbies
@@ -48,16 +53,20 @@ namespace PatteDoie.Controllers.Platform
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,gameId,password,started")] PlatformLobby platformLobby)
+        public async Task<IActionResult> Create(CreatePlatformLobbyCommand command, string creator, string password)
         {
-            if (ModelState.IsValid)
+            Guid creatorId;
+            try
             {
-                platformLobby.Id = Guid.NewGuid();
-                _context.Add(platformLobby);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                creatorId = Guid.Parse(creator);
             }
-            return View(platformLobby);
+            catch (Exception ex)
+            {
+                throw new Exception("Invalid format of Guid");
+            }
+            var platformLobby_created = await _service.CreateLobby(command, creatorId, password);
+
+            return CreatedAtAction("GetLobby", new { id = platformLobby_created.Id }, platformLobby_created);
         }
 
         // GET: PlatformLobbies/Edit/5

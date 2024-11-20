@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.Platform;
+using PatteDoie.Queries.Platform;
+using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Controllers.Platform
 {
@@ -8,9 +10,12 @@ namespace PatteDoie.Controllers.Platform
     {
         private readonly PatteDoieContext _context;
 
-        public PlatformUsersController(PatteDoieContext context)
+        private readonly IPlatformService _service;
+
+        public PlatformUsersController(PatteDoieContext context, IPlatformService platformService)
         {
             _context = context;
+            _service = platformService;
         }
 
         // GET: PlatformUsers
@@ -48,16 +53,11 @@ namespace PatteDoie.Controllers.Platform
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nickname")] PlatformUser platformUser)
+        public async Task<IActionResult> Create(CreatePlatformUserCommand command, string nickname)
         {
-            if (ModelState.IsValid)
-            {
-                platformUser.Id = Guid.NewGuid();
-                _context.Add(platformUser);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(platformUser);
+            var platformUser_created = await _service.CreateUser(command, nickname);
+
+            return CreatedAtAction("GetUser", new { id = platformUser_created.Id }, platformUser_created);
         }
 
         // GET: PlatformUsers/Edit/5
