@@ -6,38 +6,29 @@ using PatteDoie.Rows.Platform;
 
 namespace PatteDoie.Services.Platform
 {
-    public class PlatformService : IPlatformService
+    public class PlatformService(PatteDoieContext context, IMapper mapper) : IPlatformService
     {
+        private readonly PatteDoieContext _context = context;
+        private readonly IMapper _mapper = mapper;
 
-        private readonly PatteDoieContext _context;
 
-        private readonly IMapper _mapper;
-
-        public PlatformService(PatteDoieContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
-
-        public async Task<PlatformLobbyRow> CreateLobby(CreatePlatformLobbyCommand command, Guid creatorId, string password)
+        public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password)
         {
 
-            var creator = _context.PlatformUser.AsQueryable().Where(u => u.Id == creatorId).FirstOrDefault<PlatformUser>();
-
-            if (creator == null)
+            var creator = new PlatformUser
             {
-                throw new Exception("creator = null " + creatorId);
-            }
+                Id = creatorId,
+                Nickname = creatorName
+            };
 
             var PlatformLobby = new PlatformLobby
             {
-                users = [],
-                creator = creator,
-                password = password,
-                started = false
+                Creator = creator,
+                Password = password
             };
 
             _context.PlatformLobby.Add(PlatformLobby);
+            _context.PlatformUser.Add(creator);
 
             await _context.SaveChangesAsync();
 
