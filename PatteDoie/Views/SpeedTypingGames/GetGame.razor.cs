@@ -17,6 +17,8 @@ namespace PatteDoie.Views.SpeedTypingGames
 
         private string hasSpace = "No Space detected";
 
+        private bool result = false;
+
         private SpeedTypingGameRow? Row { get; set; } = null;
 
 
@@ -33,6 +35,15 @@ namespace PatteDoie.Views.SpeedTypingGames
             if (Text.Contains(' '))
             {
                 this.hasSpace = "Space detected";
+                if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row.Id, Guid.Parse("26D68432-14A9-4E12-9564-DAD5F9EDF644"), Text.TrimEnd())).Result)
+                {
+                    this.result = true;
+                }
+                else
+                {
+                    this.result = false;
+                }
+
             }
             else
             {
