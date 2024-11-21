@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.Platform;
+using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
 using PatteDoie.Rows.Platform;
 
@@ -14,25 +16,31 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password)
         {
-
             var creator = new PlatformUser
             {
                 Id = creatorId,
                 Nickname = creatorName
             };
 
-            var PlatformLobby = new PlatformLobby
+            var platformLobby = new PlatformLobby
             {
                 Creator = creator,
-                Password = password
+                Password = null
             };
 
-            _context.PlatformLobby.Add(PlatformLobby);
+            if (password != null)
+            {
+                PasswordHasher<PlatformUser> passwordHasher = new();
+
+                platformLobby.Password = passwordHasher.HashPassword(creator, password);
+            }
+
+            _context.PlatformLobby.Add(platformLobby);
             _context.PlatformUser.Add(creator);
 
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<PlatformLobbyRow>(PlatformLobby);
+            return _mapper.Map<PlatformLobbyRow>(platformLobby);
         }
 
         public async Task<IEnumerable<PlatformLobbyRow>> GetAllLobbies()
@@ -61,24 +69,30 @@ namespace PatteDoie.Services.Platform
             throw new NotImplementedException();
         }
 
-        async Task<PlatformUserRow> IPlatformService.CreateUser(CreatePlatformUserCommand command, string nickname)
+        public async Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID)
         {
-            var PlatformUser = new PlatformUser
+
+            var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
+            var platformUser = new PlatformUser
             {
                 Nickname = nickname,
+                UserUUID = userUUID
             };
+            _ = lobby.Users.Append(platformUser);
 
-            _context.PlatformUser.Add(PlatformUser);
+            _context.PlatformUser.Add(platformUser);
+            _context.PlatformLobby.Update(lobby);
 
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<PlatformUserRow>(PlatformUser);
+            return _mapper.Map<PlatformUserRow>(platformUser);
         }
 
         public async Task<PlatformUserRow> GetUser(Guid userId)
         {
-            var creator = (await _context.PlatformUser.AsQueryable().Where(u => u.Id == userId).ToListAsync())[0];
+            var creator = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == userId).FirstOrDefaultAsync();
             return _mapper.Map<PlatformUserRow>(creator);
         }
+
     }
 }
