@@ -23,12 +23,17 @@ namespace PatteDoie.Services.Platform
                 password = passwordHasher.HashPassword(password, password);
             }
 
+            var creator = _context.PlatformUser.AsQueryable().Where(u => u.Id == creatorId).FirstOrDefault();
 
-            var creator = new PlatformUser
+            if (creator == null)
             {
-                Id = creatorId,
-                Nickname = creatorName
-            };
+                creator = new PlatformUser
+                {
+                    Id = creatorId,
+                    Nickname = creatorName
+                };
+                _context.PlatformUser.Add(creator);
+            }
 
             var PlatformLobby = new PlatformLobby
             {
@@ -37,7 +42,6 @@ namespace PatteDoie.Services.Platform
             };
 
             _context.PlatformLobby.Add(PlatformLobby);
-            _context.PlatformUser.Add(creator);
 
             await _context.SaveChangesAsync();
 
