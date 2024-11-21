@@ -7,7 +7,7 @@ namespace PatteDoie.Rows.Platform
 
         public Guid Id { get; set; }
 
-        public PlatformUser[] Users { get; set; } = [];
+        public List<PlatformUser> Users { get; set; } = [];
 
         public required PlatformUser Creator { get; set; }
 
