@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using P;
 using PatteDoie.Models.Platform;
 using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
