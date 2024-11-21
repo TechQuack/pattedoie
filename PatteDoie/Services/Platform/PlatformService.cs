@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using P;
 using PatteDoie.Models.Platform;
+using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
 using PatteDoie.Rows.Platform;
 
@@ -68,18 +70,23 @@ namespace PatteDoie.Services.Platform
             throw new NotImplementedException();
         }
 
-        async Task<PlatformUserRow> IPlatformService.CreateUser(CreatePlatformUserCommand command, string nickname)
+        public async Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID)
         {
-            var PlatformUser = new PlatformUser
+
+            var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
+            var platformUser = new PlatformUser
             {
                 Nickname = nickname,
+                UserUUID = userUUID
             };
+            _ = lobby.Users.Append(platformUser);
 
-            _context.PlatformUser.Add(PlatformUser);
+            _context.PlatformUser.Add(platformUser);
+            _context.PlatformLobby.Update(lobby);
 
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<PlatformUserRow>(PlatformUser);
+            return _mapper.Map<PlatformUserRow>(platformUser);
         }
 
         public async Task<PlatformUserRow> GetUser(Guid userId)
