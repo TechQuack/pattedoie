@@ -8,7 +8,7 @@ namespace PatteDoie.Services.Platform
 
         public Task<IEnumerable<PlatformLobbyRow>> GetAllLobbies();
 
-        public Task<IEnumerable<PlatformLobbyRow>> GetLobby(Guid lobbyId);
+        public Task<PlatformLobbyRow> GetLobby(Guid lobbyId);
 
         public Task<IEnumerable<PlatformLobbyRow>> GetLobbiesByGame(Guid gameId);
 
