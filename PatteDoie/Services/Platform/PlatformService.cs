@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.Platform;
 using PatteDoie.Queries.Platform;
@@ -14,6 +15,14 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password)
         {
+
+            if (password != null)
+            {
+                PasswordHasher<string> passwordHasher = new PasswordHasher<string>();
+
+                password = passwordHasher.HashPassword(password, password);
+            }
+
 
             var creator = new PlatformUser
             {
@@ -80,5 +89,6 @@ namespace PatteDoie.Services.Platform
             var creator = (await _context.PlatformUser.AsQueryable().Where(u => u.Id == userId).ToListAsync())[0];
             return _mapper.Map<PlatformUserRow>(creator);
         }
+
     }
 }
