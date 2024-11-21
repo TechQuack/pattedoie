@@ -15,37 +15,31 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password)
         {
+            var creator = new PlatformUser
+            {
+                Id = creatorId,
+                Nickname = creatorName
+            };
+
+            var platformLobby = new PlatformLobby
+            {
+                Creator = creator,
+                Password = null
+            };
 
             if (password != null)
             {
-                PasswordHasher<string> passwordHasher = new PasswordHasher<string>();
+                PasswordHasher<PlatformUser> passwordHasher = new();
 
-                password = passwordHasher.HashPassword(password, password);
+                platformLobby.Password = passwordHasher.HashPassword(creator, password);
             }
 
-            var creator = _context.PlatformUser.AsQueryable().Where(u => u.Id == creatorId).FirstOrDefault();
-
-            if (creator == null)
-            {
-                creator = new PlatformUser
-                {
-                    Id = creatorId,
-                    Nickname = creatorName
-                };
-                _context.PlatformUser.Add(creator);
-            }
-
-            var PlatformLobby = new PlatformLobby
-            {
-                Creator = creator,
-                Password = password
-            };
-
-            _context.PlatformLobby.Add(PlatformLobby);
+            _context.PlatformLobby.Add(platformLobby);
+            _context.PlatformUser.Add(creator);
 
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<PlatformLobbyRow>(PlatformLobby);
+            return _mapper.Map<PlatformLobbyRow>(platformLobby);
         }
 
         public async Task<IEnumerable<PlatformLobbyRow>> GetAllLobbies()
