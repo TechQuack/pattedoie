@@ -91,7 +91,7 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformUserRow> GetUser(Guid userId)
         {
-            var creator = (await _context.PlatformUser.AsQueryable().Where(u => u.Id == userId).ToListAsync())[0];
+            var creator = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == userId).FirstOrDefaultAsync();
             return _mapper.Map<PlatformUserRow>(creator);
         }
 
