@@ -12,6 +12,8 @@ namespace PatteDoie.Services.Platform
 
         public Task<IEnumerable<PlatformLobbyRow>> GetLobbiesByGame(Guid gameId);
 
+        public Task<IEnumerable<PlatformLobbyRow>> GetPublicLobbies();
+
         public Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(CreatePlatformLobbyCommand command);
 
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command);

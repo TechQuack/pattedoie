@@ -13,7 +13,7 @@ public partial class LobbiesList : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        Items = await PlatformService.GetAllLobbies();
+        Items = await PlatformService.GetPublicLobbies();
     }
 
 }
