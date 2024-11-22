@@ -21,5 +21,7 @@ namespace PatteDoie.Services.Platform
         public Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID);
 
         public Task<PlatformUserRow> GetUser(Guid userId);
+
+        public Task<IEnumerable<PlatformHighScoreRow>> GetHighestScoreFromGame(Guid gameId);
     }
 }

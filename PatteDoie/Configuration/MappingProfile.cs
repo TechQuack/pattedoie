@@ -13,6 +13,7 @@ namespace PatteDoie.Configuration
             CreateMap<SpeedTypingGame, SpeedTypingGameRow>();
             CreateMap<PlatformUser, PlatformUserRow>();
             CreateMap<PlatformLobby, PlatformLobbyRow>();
+            CreateMap<PlatformHighScore, PlatformHighScoreRow>();
         }
     }
 }
