@@ -7,6 +7,12 @@
 <p>
     <a href="/lobby/create">Create New</a>
 </p>
+<InputSelect @bind-Value="Type" @bind-Value:after="SearchLobbies">
+    @foreach (var type in Types)
+    {
+        <option value="@type">@GetLobbyTypeDescription(@type)</option>
+    }
+</InputSelect>
 <table class="table">
     <thead>
         <tr>

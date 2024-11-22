@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
+using PatteDoie.Enums;
+using PatteDoie.Extensions;
 using PatteDoie.Rows.Platform;
 using PatteDoie.Services.Platform;
 
@@ -11,9 +13,27 @@ public partial class LobbiesList : ComponentBase
     [Inject]
     private IPlatformService PlatformService { get; set; } = default!;
 
+    private LobbyType Type = LobbyType.Public;
+
+    private readonly List<LobbyType> Types =
+    [
+        LobbyType.Public,
+        LobbyType.Private,
+        LobbyType.All
+    ];
+
     protected override async Task OnInitializedAsync()
     {
-        Items = await PlatformService.GetPublicLobbies();
+        await SearchLobbies();
     }
 
+    private static string GetLobbyTypeDescription(LobbyType type)
+    {
+        return type.GetDescription();
+    }
+
+    private async Task SearchLobbies()
+    {
+        Items = await PlatformService.SearchLobbies(Type);
+    }
 }
