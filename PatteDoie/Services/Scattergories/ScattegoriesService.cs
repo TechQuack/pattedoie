@@ -63,7 +63,7 @@ namespace PatteDoie.Services.Scattergories
             var categories = new List<ScattergoriesCategory>(); /*TODO*/
 
             var game = new ScattergoriesGame
-            {
+        {
                 Players = [.. players],
                 MaxRound = roundNumber,
                 CurrentRound = 1,
