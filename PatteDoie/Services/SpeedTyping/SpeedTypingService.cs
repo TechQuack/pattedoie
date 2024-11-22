@@ -19,10 +19,10 @@ namespace PatteDoie.Services.SpeedTyping
             _mapper = mapper;
         }
 
-        public async Task<SpeedTypingGameRow> CreateGame(CreateSpeedTypingGameCommand command, List<PlatformUser> platformUsers)
+        public async Task<SpeedTypingGameRow> CreateGame(CreateSpeedTypingGameCommand command, List<User> platformUsers)
         {
             List<SpeedTypingPlayer> players = [];
-            foreach (PlatformUser platformUser in platformUsers)
+            foreach (User platformUser in platformUsers)
             {
                 var speedTypingPlayer = new SpeedTypingPlayer
                 {

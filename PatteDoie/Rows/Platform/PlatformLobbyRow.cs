@@ -7,9 +7,9 @@ namespace PatteDoie.Rows.Platform
 
         public Guid Id { get; set; }
 
-        public List<PlatformUser> Users { get; set; } = [];
+        public User[] Users { get; set; } = [];
 
-        public required PlatformUser Creator { get; set; }
+        public required User Creator { get; set; }
 
         public Guid GameId { get; set; }
 

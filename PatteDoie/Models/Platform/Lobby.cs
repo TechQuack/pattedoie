@@ -1,13 +1,13 @@
 ﻿namespace PatteDoie.Models.Platform
 {
-    public class PlatformLobby
+    public class Lobby
     {
 
         public Guid Id { get; set; }
 
-        public List<PlatformUser> Users { get; set; } = [];
+        public List<User> Users { get; set; } = [];
 
-        public required PlatformUser Creator { get; set; }
+        public required User Creator { get; set; }
 
         public Guid GameId { get; set; }
 
