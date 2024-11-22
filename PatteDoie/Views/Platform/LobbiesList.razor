@@ -24,7 +24,6 @@
     </thead>
     <tbody>
     @foreach (var item in Items) {
-        @if (item.Password is null) {
                 <tr>
                     <td>
                         @item.Id
@@ -41,7 +40,6 @@
                         <a href="/lobby/delete">Delete</a>
                     </td>
                 </tr>
-        }   
     }
     </tbody>
 </table>

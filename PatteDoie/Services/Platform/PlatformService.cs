@@ -54,6 +54,12 @@ namespace PatteDoie.Services.Platform
             throw new NotImplementedException();
         }
 
+        public async Task<IEnumerable<PlatformLobbyRow>> GetPublicLobbies()
+        {
+            var lobbies = await _context.PlatformLobby.AsQueryable().Where(p => p.Password == null).ToListAsync();
+            return _mapper.Map<List<PlatformLobbyRow>>(lobbies);
+        }
+
         public async Task<PlatformLobbyRow> GetLobby(Guid lobbyId)
         {
             var lobby = await _context.PlatformLobby.AsQueryable().Include(l => l.Creator).Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
