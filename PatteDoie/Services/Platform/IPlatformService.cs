@@ -18,7 +18,7 @@ namespace PatteDoie.Services.Platform
 
         public Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password);
 
-        public Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID);
+        public Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID, string? password);
 
         public Task<PlatformUserRow> GetUser(Guid userId);
     }
