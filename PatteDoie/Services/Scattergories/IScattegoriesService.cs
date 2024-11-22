@@ -9,7 +9,7 @@ namespace PatteDoie.Services.Scattergories
         public Task<ScattegoriesGameRow> GetGame(Guid gameId);
         public Task<IEnumerable<ScattegoriesGameRow>> SearchGames(/*TODO*/);
         public Task UpdateGame(Guid gameId /*, TODO*/);
-        public Task<ScattegoriesGameRow> CreateGame(/*TODO, */PlatformUser[] platformUsers);
+        public Task<ScattegoriesGameRow> CreateGame(int roundNumber, List<PlatformUser> platformUsers);
         public Task DeleteGame(Guid gameId);
     }
 }

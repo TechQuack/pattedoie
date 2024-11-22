@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.Platform;
+using PatteDoie.Models.Scattergories;
 using PatteDoie.Rows.Scattegories;
 
 namespace PatteDoie.Services.Scattergories
@@ -42,9 +43,38 @@ namespace PatteDoie.Services.Scattergories
             throw new NotImplementedException();
         }
 
-        public Task<ScattegoriesGameRow> CreateGame(PlatformUser[] platformUsers)
+        public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<PlatformUser> platformUsers)
         {
-            throw new NotImplementedException();
+            var players = new List<ScattergoriesPlayer>();
+            foreach (var platformUser in platformUsers)
+            {
+                var ScattegoriesPlayer = new ScattergoriesPlayer
+                {
+                    Score = 0,
+                    User = platformUser
+                };
+                players.Add(ScattegoriesPlayer);
+                _context.ScattergoriesPlayer.Add(ScattegoriesPlayer);
+            }
+
+            var rand = new Random();
+            char letter = (char)rand.Next(65, 90);
+
+            var categories = new List<ScattergoriesCategory>(); /*TODO*/
+
+            var game = new ScattergoriesGame
+            {
+                Players = [.. players],
+                MaxRound = roundNumber,
+                CurrentRound = 1,
+                CurrentLetter = letter,
+                Categories = [.. categories]
+            };
+            _context.ScattergoriesGame.Add(game);
+
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
         public Task DeleteGame(Guid gameId)
