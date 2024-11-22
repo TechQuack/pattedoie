@@ -24,22 +24,23 @@
     </thead>
     <tbody>
     @foreach (var item in Items) {
-                <tr>
-                    <td>
-                        @item.Id
-                    </td>
-                    <td>
-                        @item.Password
-                    </td>
-                    <td>
-                        @item.Started
-                    </td>
-                    <td>
-                        <a href="/lobby/edit">Edit</a> |
-                        <a href="/lobby/@item.Id">Details</a> |
-                        <a href="/lobby/delete">Delete</a>
-                    </td>
-                </tr>
+        <tr>
+            <td>
+                @item.Id
+            </td>
+            <td>
+                @item.Password
+            </td>
+            <td>
+                @item.Started
+            </td>
+            <td>
+                <a href="/lobby/edit">Edit</a> |
+                <a href="/lobby/@item.Id">Details</a> |
+                <a href="/lobby/delete">Delete</a> |
+                <a href="/lobby/join/@item.Id">Rejoindre le lobby</a>
+            </td>
+        </tr>
     }
     </tbody>
 </table>

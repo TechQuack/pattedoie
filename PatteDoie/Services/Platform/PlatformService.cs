@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Models.Platform;
 using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
@@ -25,14 +26,15 @@ namespace PatteDoie.Services.Platform
             var platformLobby = new PlatformLobby
             {
                 Creator = creator,
-                Password = null
+                Password = null,
+                Users = new List<PlatformUser>()
             };
 
-            if (password != null)
+            if (!password.IsNullOrEmpty())
             {
-                PasswordHasher<PlatformUser> passwordHasher = new();
+                PasswordHasher<PlatformLobby> passwordHasher = new();
 
-                platformLobby.Password = passwordHasher.HashPassword(creator, password);
+                platformLobby.Password = passwordHasher.HashPassword(platformLobby, password);
             }
 
             _context.PlatformLobby.Add(platformLobby);
@@ -76,18 +78,43 @@ namespace PatteDoie.Services.Platform
             throw new NotImplementedException();
         }
 
-        public async Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID)
+        public async Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID, string? password)
         {
 
             var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
+
+            if (password.IsNullOrEmpty())
+            {
+                if (!lobby.Password.IsNullOrEmpty())
+                {
+                    throw new PasswordNotValidException("Lobby password is not valid");
+                }
+            }
+            else
+            {
+                PasswordHasher<PlatformLobby> passwordHasher = new();
+                var result = passwordHasher.VerifyHashedPassword(lobby, lobby.Password, password);
+                if (result != PasswordVerificationResult.Success)
+                {
+                    throw new PasswordNotValidException("Password is not valid");
+                }
+            }
+
             var platformUser = new PlatformUser
             {
                 Nickname = nickname,
                 UserUUID = userUUID
             };
-            _ = lobby.Users.Append(platformUser);
 
             _context.PlatformUser.Add(platformUser);
+
+            lobby.Users.Add(platformUser);
+
+            if (lobby.Users.IsNullOrEmpty())
+            {
+                throw new Exception("User not added");
+            }
+
             _context.PlatformLobby.Update(lobby);
 
             await _context.SaveChangesAsync();
