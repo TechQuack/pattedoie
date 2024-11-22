@@ -14,7 +14,7 @@ namespace PatteDoie.Services.SpeedTyping
 
         public Task UpdateGame(Guid id, CreateSpeedTypingGameCommand game);
 
-        public Task<SpeedTypingGameRow> CreateGame(CreateSpeedTypingGameCommand command, List<PlatformUser> platformUsers);
+        public Task<SpeedTypingGameRow> CreateGame(CreateSpeedTypingGameCommand command, List<User> platformUsers);
             
         public Task DeleteGame(Guid id);
     }

@@ -18,13 +18,13 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password)
         {
-            var creator = new PlatformUser
+            var creator = new User
             {
                 Id = creatorId,
                 Nickname = creatorName
             };
 
-            var platformLobby = new PlatformLobby
+            var platformLobby = new Lobby
             {
                 Creator = creator,
                 Password = null,
@@ -33,7 +33,7 @@ namespace PatteDoie.Services.Platform
 
             if (!password.IsNullOrEmpty())
             {
-                PasswordHasher<PlatformLobby> passwordHasher = new();
+                PasswordHasher<Lobby> passwordHasher = new();
 
                 platformLobby.Password = passwordHasher.HashPassword(platformLobby, password);
             }
@@ -99,7 +99,7 @@ namespace PatteDoie.Services.Platform
             }
             else
             {
-                PasswordHasher<PlatformLobby> passwordHasher = new();
+                PasswordHasher<Lobby> passwordHasher = new();
                 var result = passwordHasher.VerifyHashedPassword(lobby, lobby.Password, password);
                 if (result != PasswordVerificationResult.Success)
                 {
@@ -107,7 +107,7 @@ namespace PatteDoie.Services.Platform
                 }
             }
 
-            var platformUser = new PlatformUser
+            var platformUser = new User
             {
                 Nickname = nickname,
                 UserUUID = userUUID
