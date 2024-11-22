@@ -1,4 +1,5 @@
-﻿using PatteDoie.Queries.Platform;
+﻿using PatteDoie.Enums;
+using PatteDoie.Queries.Platform;
 using PatteDoie.Rows.Platform;
 
 namespace PatteDoie.Services.Platform
@@ -12,9 +13,7 @@ namespace PatteDoie.Services.Platform
 
         public Task<IEnumerable<PlatformLobbyRow>> GetLobbiesByGame(Guid gameId);
 
-        public Task<IEnumerable<PlatformLobbyRow>> GetPublicLobbies();
-
-        public Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(CreatePlatformLobbyCommand command);
+        public Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(LobbyType type);
 
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command);
 

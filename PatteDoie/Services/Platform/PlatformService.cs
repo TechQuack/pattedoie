@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PatteDoie.Enums;
 using PatteDoie.Models.Platform;
 using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
@@ -27,7 +28,7 @@ namespace PatteDoie.Services.Platform
             {
                 Creator = creator,
                 Password = null,
-                Users = new List<PlatformUser>()
+                Users = []
             };
 
             if (!password.IsNullOrEmpty())
@@ -56,21 +57,27 @@ namespace PatteDoie.Services.Platform
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<PlatformLobbyRow>> GetPublicLobbies()
-        {
-            var lobbies = await _context.PlatformLobby.AsQueryable().Where(p => p.Password == null).ToListAsync();
-            return _mapper.Map<List<PlatformLobbyRow>>(lobbies);
-        }
-
         public async Task<PlatformLobbyRow> GetLobby(Guid lobbyId)
         {
             var lobby = await _context.PlatformLobby.AsQueryable().Include(l => l.Creator).Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
             return _mapper.Map<PlatformLobbyRow>(lobby);
         }
 
-        public Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(CreatePlatformLobbyCommand command)
+        public async Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(LobbyType type)
         {
-            throw new NotImplementedException();
+            var query = _context.PlatformLobby.AsQueryable();
+            switch(type)
+            {
+                case LobbyType.Public:
+                    query = query.Where(p => p.Password == null || p.Password == "");
+                    break;
+                case LobbyType.Private:
+                    query = query.Where(p => p.Password != null && p.Password != "");
+                    break;
+                default:
+                    break;
+            }
+            return _mapper.Map<List<PlatformLobbyRow>>(await query.ToListAsync());
         }
 
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command)
