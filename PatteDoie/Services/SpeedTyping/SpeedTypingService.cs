@@ -64,7 +64,7 @@ namespace PatteDoie.Services.SpeedTyping
 
         public async Task<SpeedTypingGameRow> GetGame(Guid gameId)
         {
-            var game = (await _context.SpeedTypingGame.AsQueryable().Where(g => g.Id == gameId).ToListAsync())[0];
+            var game = await _context.SpeedTypingGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefaultAsync();
             return _mapper.Map<SpeedTypingGameRow>(game);
         }
 
