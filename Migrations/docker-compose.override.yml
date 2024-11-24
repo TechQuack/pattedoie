@@ -1,0 +1,13 @@
+services:
+    pattedoie-sqlserver:
+        user: root
+        volumes:
+            - backup_pattedoie:/var/opt/mssql/backups
+            - data_pattedoie:/var/opt/mssql/data
+            - log_pattedoie:/var/opt/mssql/log
+        healthcheck:
+          test: timeout 1 bash -c 'cat < /dev/null > /dev/tcp/127.0.0.1/1433'
+          interval: 10s
+          retries: 10
+          start_period: 10s
+          timeout: 3s    

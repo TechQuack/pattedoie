@@ -1,8 +1,8 @@
 ﻿using PatteDoie.Models.Platform;
 
-namespace PatteDoie.Models.Scattergories
+namespace PatteDoie.Models.SpeedTyping
 {
-    public class ScattergoriesPlayer
+    public class SpeedTypingPlayer
     {
         public Guid Id { get; set; }
         public int Score { get; set; }

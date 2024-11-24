@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PatteDoie;
 
@@ -11,9 +12,11 @@ using PatteDoie;
 namespace PatteDoie.Migrations
 {
     [DbContext(typeof(PatteDoieContext))]
-    partial class PatteDoieContextModelSnapshot : ModelSnapshot
+    [Migration("20241121175308_AddLinkPlayerUser")]
+    partial class AddLinkPlayerUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,16 +25,16 @@ namespace PatteDoie.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("PatteDoie.Models.Platform.Game", b =>
+            modelBuilder.Entity("PatteDoie.Models.Platform.PlatformGame", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("MaxPlayers")
+                    b.Property<int>("Max_players")
                         .HasColumnType("int");
 
-                    b.Property<int>("MinPlayers")
+                    b.Property<int>("Min_players")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -43,30 +46,30 @@ namespace PatteDoie.Migrations
                     b.ToTable("PlatformGame");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Platform.HighScore", b =>
+            modelBuilder.Entity("PatteDoie.Models.Platform.PlatformHighScore", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("GameId")
+                    b.Property<int>("Name")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("PlatformGameId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("PlayerName")
+                    b.Property<string>("Player")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("GameId");
+                    b.HasIndex("PlatformGameId");
 
                     b.ToTable("PlatformHighScore");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Platform.Lobby", b =>
+            modelBuilder.Entity("PatteDoie.Models.Platform.PlatformLobby", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -91,25 +94,25 @@ namespace PatteDoie.Migrations
                     b.ToTable("PlatformLobby");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Platform.User", b =>
+            modelBuilder.Entity("PatteDoie.Models.Platform.PlatformUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("LobbyId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Nickname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("PlatformLobbyId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("UserUUID")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LobbyId");
+                    b.HasIndex("PlatformLobbyId");
 
                     b.ToTable("PlatformUser");
                 });
@@ -243,16 +246,16 @@ namespace PatteDoie.Migrations
                     b.ToTable("SpeedTypingTimeProgress");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Platform.HighScore", b =>
+            modelBuilder.Entity("PatteDoie.Models.Platform.PlatformHighScore", b =>
                 {
-                    b.HasOne("PatteDoie.Models.Platform.Game", null)
+                    b.HasOne("PatteDoie.Models.Platform.PlatformGame", null)
                         .WithMany("HighScores")
-                        .HasForeignKey("GameId");
+                        .HasForeignKey("PlatformGameId");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Platform.Lobby", b =>
+            modelBuilder.Entity("PatteDoie.Models.Platform.PlatformLobby", b =>
                 {
-                    b.HasOne("PatteDoie.Models.Platform.User", "Creator")
+                    b.HasOne("PatteDoie.Models.Platform.PlatformUser", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -261,11 +264,11 @@ namespace PatteDoie.Migrations
                     b.Navigation("Creator");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Platform.User", b =>
+            modelBuilder.Entity("PatteDoie.Models.Platform.PlatformUser", b =>
                 {
-                    b.HasOne("PatteDoie.Models.Platform.Lobby", null)
+                    b.HasOne("PatteDoie.Models.Platform.PlatformLobby", null)
                         .WithMany("Users")
-                        .HasForeignKey("LobbyId");
+                        .HasForeignKey("PlatformLobbyId");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesCategory", b =>
@@ -281,7 +284,7 @@ namespace PatteDoie.Migrations
                         .WithMany("Players")
                         .HasForeignKey("ScattergoriesGameId");
 
-                    b.HasOne("PatteDoie.Models.Platform.User", "User")
+                    b.HasOne("PatteDoie.Models.Platform.PlatformUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -296,7 +299,7 @@ namespace PatteDoie.Migrations
                         .WithMany("Players")
                         .HasForeignKey("SpeedTypingGameId");
 
-                    b.HasOne("PatteDoie.Models.Platform.User", "User")
+                    b.HasOne("PatteDoie.Models.Platform.PlatformUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -312,12 +315,12 @@ namespace PatteDoie.Migrations
                         .HasForeignKey("SpeedTypingGameId");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Platform.Game", b =>
+            modelBuilder.Entity("PatteDoie.Models.Platform.PlatformGame", b =>
                 {
                     b.Navigation("HighScores");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Platform.Lobby", b =>
+            modelBuilder.Entity("PatteDoie.Models.Platform.PlatformLobby", b =>
                 {
                     b.Navigation("Users");
                 });

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PatteDoie;
 using PatteDoie.Configuration;
+using PatteDoie.Services.Platform;
 using PatteDoie.Services.SpeedTyping;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,9 @@ builder.Services.AddDbContext<PatteDoieContext>(options =>
     options.UseSqlServer(string.Format(builder.Configuration.GetConnectionString("PatteDoieContext") ?? "", Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD"))));
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ISpeedTypingService, SpeedTypingService>();
+builder.Services.AddScoped<IPlatformService, PlatformService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+builder.Services.AddServerSideBlazor();
 
 var app = builder.Build();
 
@@ -22,6 +25,9 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.MapBlazorHub();
+app.MapFallbackToController("Blazor", "Home");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

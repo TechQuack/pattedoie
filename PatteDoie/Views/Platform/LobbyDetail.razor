@@ -1,0 +1,25 @@
+﻿@page "/lobby/{Id}"
+
+<PageTitle>Detail du lobby</PageTitle>
+
+<div>
+    @if (@Lobby != null) {
+        <div>
+            <h1>@Lobby.Id</h1>
+            <p>Started : @Lobby.Started</p>
+            <p>Hash Password: @Lobby.Password</p>
+            <p>Creator : @Lobby.Creator.Nickname</p>
+        </div>
+        <div>
+            <h2>Participants</h2>
+            <ul>
+                @foreach (var user in Lobby.Users)
+                {
+                    <li>@user.Nickname</li>
+                }
+            </ul>
+        </div>
+    } else {
+        <p>Loading...</p>
+    }
+</div>
