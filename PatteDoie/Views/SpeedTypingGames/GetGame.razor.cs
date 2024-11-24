@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Mvc;
 using PatteDoie.Rows.SpeedTypingGame;
 using PatteDoie.Services.SpeedTyping;
@@ -15,11 +16,13 @@ namespace PatteDoie.Views.SpeedTypingGames
         private Timer _timer = null!;
         private int _secondsToRun = 60;
 
-        private string hasSpace = "No Space detected";
+        private string HasSpace = "No Space detected";
 
-        private bool result = false;
+        private bool Result = false;
 
         private SpeedTypingGameRow? Row { get; set; } = null;
+        [Inject]
+        private ProtectedLocalStorage ProtectedLocalStorage { get; set; } = default!;
 
 
         [Inject]
@@ -30,24 +33,26 @@ namespace PatteDoie.Views.SpeedTypingGames
             this.Row = await SpeedTypingService.GetGame(new Guid(this.Id));
         }
 
-        public void CheckTextSpace(string Text)
+        public async void CheckTextSpace(string Text)
         {
             if (Text.Contains(' '))
             {
-                this.hasSpace = "Space detected";
-                if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row.Id, Guid.Parse("26D68432-14A9-4E12-9564-DAD5F9EDF644"), Text.TrimEnd())).Result)
+                this.HasSpace = "Space detected";
+                var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
+
+                if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row.Id, new Guid(uuid.Value ?? ""), Text.TrimEnd())).Result)
                 {
-                    this.result = true;
+                    this.Result = true;
                 }
                 else
                 {
-                    this.result = false;
+                    this.Result = false;
                 }
 
             }
             else
             {
-                this.hasSpace = "No Space detected";
+                this.HasSpace = "No Space detected";
             }
         }
 

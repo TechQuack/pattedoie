@@ -78,13 +78,18 @@ namespace PatteDoie.Services.SpeedTyping
             throw new NotImplementedException();
         }
 
-        public async Task<bool> CheckWord(Guid gameId, Guid playerId, string word)
+        public async Task<bool> CheckWord(Guid gameId, Guid uuid, string word)
         {
             var game = _context.SpeedTypingGame.AsQueryable()
                 .Where(g => g.Id == gameId)
                 .FirstOrDefault<SpeedTypingGame>();
-            var player = _context.SpeedTypingScore.Single(p => p.UserId == playerId);
+            var platformUser = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == uuid).FirstOrDefaultAsync();
+            var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync();
             var wordIndexToCheck = player.Score;
+            if (wordIndexToCheck > game.Words.Count)
+            {
+                return false;
+            }
             var wordToCheck = game.Words[wordIndexToCheck];
             if (wordToCheck == word)
             {
