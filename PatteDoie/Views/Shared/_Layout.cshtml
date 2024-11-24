@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using PatteDoie.Views.Shared
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -12,11 +14,13 @@
                render-mode="ServerPrerendered" />
 </head>
 <body>
+    <component type="typeof(Navbar)" render-mode="ServerPrerendered" />
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
+    <component type="typeof(Footer)" render-mode="ServerPrerendered" />
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
