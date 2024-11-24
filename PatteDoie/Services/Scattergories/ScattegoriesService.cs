@@ -43,24 +43,27 @@ namespace PatteDoie.Services.Scattergories
             throw new NotImplementedException();
         }
 
-        public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<PlatformUser> platformUsers)
+        public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<PlatformUser> platformUsers, PlatformUser host)
         {
+            var rand = new Random();
+
+            var potentialsCategories = (await _context.ScattergoriesCategory.AsQueryable().ToListAsync());
+            List<ScattergoriesCategory> categories = potentialsCategories.OrderBy(x => rand.Next()).Take(numberCategories).ToList();
+
             var players = new List<ScattergoriesPlayer>();
             foreach (var platformUser in platformUsers)
             {
-                var ScattegoriesPlayer = new ScattergoriesPlayer
-                {
-                    Score = 0,
-                    User = platformUser
-                };
-                players.Add(ScattegoriesPlayer);
-                _context.ScattergoriesPlayer.Add(ScattegoriesPlayer);
+                var playerAnswers = CreateEmptyAnswers(categories);
+                var player = CreatePlayer(platformUser, [.. playerAnswers], false);
+                players.Add(player);
+                _context.ScattergoriesPlayer.Add(player);
             }
+            var hostAnswers = CreateEmptyAnswers(categories);
+            var hostPlayer = CreatePlayer(host, [..hostAnswers], true);
+            players.Add(hostPlayer);
+            _context.ScattergoriesPlayer.Add(hostPlayer);
 
-            var rand = new Random();
-            char letter = (char)rand.Next(65, 90);
-
-            var categories = new List<ScattergoriesCategory>(); /*TODO*/
+            char letter = (char) rand.Next(65, 90);
 
             var game = new ScattergoriesGame
         {
@@ -80,6 +83,35 @@ namespace PatteDoie.Services.Scattergories
         public Task DeleteGame(Guid gameId)
         {
             throw new NotImplementedException();
+        }
+
+        //TOOLS
+
+        private ScattergoriesPlayer CreatePlayer(PlatformUser player, ScattegoriesAnswer[] answers, bool isHost)
+        {
+            return new ScattergoriesPlayer
+            {
+                Score = 0,
+                User = player,
+                Answers = answers,
+                IsHost = isHost
+            };
+        }
+
+        private List<ScattegoriesAnswer> CreateEmptyAnswers(List<ScattergoriesCategory> categories)
+        {
+            var answers = new List<ScattegoriesAnswer>();
+            foreach (var category in categories)
+            {
+                var answer = new ScattegoriesAnswer
+                {
+                    Text = "",
+                    Category = category
+                };
+                answers.Add(answer);
+                _context.ScattegoriesAnswer.Add(answer);
+            }
+            return answers;
         }
     }
 }
