@@ -1,10 +1,15 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
+
 namespace PatteDoie.Views.Home;
 
 public partial class Authenticator : ComponentBase
 {
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
     [Inject]
     private ProtectedLocalStorage ProtectedLocalStorage { get; set; } = default!;
 
@@ -15,6 +20,7 @@ public partial class Authenticator : ComponentBase
     {
         await ProtectedLocalStorage.SetAsync("name", Name);
         await GenerateUUID();
+        NavigationManager.NavigateTo("/lobby");
     }
 
     private async Task GenerateUUID()
