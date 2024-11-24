@@ -40,4 +40,6 @@ public partial class PatteDoieContext : DbContext
     public DbSet<PatteDoie.Models.Platform.PlatformGame> PlatformGame { get; set; } = default!;
 
     public DbSet<PatteDoie.Models.Scattergories.ScattergoriesGame> ScattergoriesGame { get; set; } = default!;
+    
+    public DbSet<PatteDoie.Models.Scattergories.ScattegoriesAnswer> ScattegoriesAnswer { get; set; } = default!;
 }
