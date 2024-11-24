@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using PatteDoie.Rows.SpeedTypingGame;
 using PatteDoie.Services.SpeedTyping;
-
+using System.Timers;
+using Timer = System.Timers.Timer;
 namespace PatteDoie.Views.SpeedTypingGames
 {
     public partial class GetGame : ComponentBase
@@ -10,6 +11,9 @@ namespace PatteDoie.Views.SpeedTypingGames
         [BindProperty(SupportsGet = true)]
         [Parameter]
         public required string Id { get; set; }
+
+        private Timer _timer = null!;
+        private int _secondsToRun = 60;
 
         private string hasSpace = "No Space detected";
 
@@ -34,6 +38,21 @@ namespace PatteDoie.Views.SpeedTypingGames
             {
                 this.hasSpace = "No Space detected";
             }
+        }
+
+        override
+        protected void OnInitialized()
+        {
+            _timer = new Timer(1000);
+            _timer.Elapsed += OnTimedEvent;
+            _timer.AutoReset = true;
+            _timer.Enabled = true;
+        }
+
+        private async void OnTimedEvent(object? sender, ElapsedEventArgs e)
+        {
+            _secondsToRun = _secondsToRun > 0 ? _secondsToRun - 1 : _secondsToRun;
+            await InvokeAsync(StateHasChanged);
         }
     }
 }
