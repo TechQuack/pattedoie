@@ -71,7 +71,7 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformLobbyRow> GetLobby(Guid lobbyId)
         {
-            var lobby = await _context.PlatformLobby.AsQueryable().Include(l => l.Creator).Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
+            var lobby = await _context.PlatformLobby.AsQueryable().Include(l => l.Creator).Include(l => l.Game).Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
             return _mapper.Map<PlatformLobbyRow>(lobby);
         }
 

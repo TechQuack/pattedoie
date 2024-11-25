@@ -19,6 +19,11 @@
                 }
             </ul>
         </div>
+        <div>
+            @if (Lobby.Game != null) {
+                <p>@Lobby.Game.Name</p>
+            }
+        </div>
     } else {
         <p>Loading...</p>
     }

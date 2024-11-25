@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PatteDoie.Enums;
+using PatteDoie.Extensions;
 using PatteDoie.Models.Platform;
 
 namespace PatteDoie;
@@ -20,8 +22,8 @@ public partial class PatteDoieContext : DbContext
         OnModelCreatingPartial(modelBuilder);
 
         modelBuilder.Entity<Game>().HasData(
-            new Game { Id = Guid.NewGuid(), Name = "Scattergories", MinPlayers = 2, MaxPlayers = 8 },
-            new Game { Id = Guid.NewGuid(), Name = "SpeedTyping", MinPlayers = 1, MaxPlayers = 5 }
+            new Game { Id = Guid.NewGuid(), Name = GameType.Scattergories.GetDescription(), MinPlayers = 2, MaxPlayers = 8 },
+            new Game { Id = Guid.NewGuid(), Name = GameType.SpeedTyping.GetDescription(), MinPlayers = 1, MaxPlayers = 5 }
         );
     }
 

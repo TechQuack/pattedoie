@@ -14,6 +14,7 @@ namespace PatteDoie.Configuration
             CreateMap<HighScore, PlatformHighScoreRow>();
             CreateMap<User, PlatformUserRow>();
             CreateMap<Lobby, PlatformLobbyRow>();
+            CreateMap<Game, GameRow>();
         }
     }
 }
