@@ -1,6 +1,6 @@
 ﻿namespace PatteDoie.Models.Platform
 {
-    public class PlatformUser
+    public class User
     {
 
         public Guid Id { get; set; }

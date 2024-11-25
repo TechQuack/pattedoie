@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using PatteDoie.Enums;
 using PatteDoie.Models.Platform;
 using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
@@ -16,23 +18,24 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password)
         {
-            var creator = new PlatformUser
+            var creator = new User
             {
                 Id = creatorId,
                 Nickname = creatorName
             };
 
-            var platformLobby = new PlatformLobby
+            var platformLobby = new Lobby
             {
                 Creator = creator,
-                Password = null
+                Password = null,
+                Users = []
             };
 
-            if (password != null)
+            if (!password.IsNullOrEmpty())
             {
-                PasswordHasher<PlatformUser> passwordHasher = new();
+                PasswordHasher<Lobby> passwordHasher = new();
 
-                platformLobby.Password = passwordHasher.HashPassword(creator, password);
+                platformLobby.Password = passwordHasher.HashPassword(platformLobby, password);
             }
 
             _context.PlatformLobby.Add(platformLobby);
@@ -60,9 +63,21 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<PlatformLobbyRow>(lobby);
         }
 
-        public Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(CreatePlatformLobbyCommand command)
+        public async Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(LobbyType type)
         {
-            throw new NotImplementedException();
+            var query = _context.PlatformLobby.AsQueryable();
+            switch(type)
+            {
+                case LobbyType.Public:
+                    query = query.Where(p => p.Password == null || p.Password == "");
+                    break;
+                case LobbyType.Private:
+                    query = query.Where(p => p.Password != null && p.Password != "");
+                    break;
+                default:
+                    break;
+            }
+            return _mapper.Map<List<PlatformLobbyRow>>(await query.ToListAsync());
         }
 
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command)
@@ -70,18 +85,43 @@ namespace PatteDoie.Services.Platform
             throw new NotImplementedException();
         }
 
-        public async Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID)
+        public async Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID, string? password)
         {
 
             var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
-            var platformUser = new PlatformUser
+
+            if (password.IsNullOrEmpty())
+            {
+                if (!lobby.Password.IsNullOrEmpty())
+                {
+                    throw new PasswordNotValidException("Lobby password is not valid");
+                }
+            }
+            else
+            {
+                PasswordHasher<Lobby> passwordHasher = new();
+                var result = passwordHasher.VerifyHashedPassword(lobby, lobby.Password, password);
+                if (result != PasswordVerificationResult.Success)
+                {
+                    throw new PasswordNotValidException("Password is not valid");
+                }
+            }
+
+            var platformUser = new User
             {
                 Nickname = nickname,
                 UserUUID = userUUID
             };
-            _ = lobby.Users.Append(platformUser);
 
             _context.PlatformUser.Add(platformUser);
+
+            lobby.Users.Add(platformUser);
+
+            if (lobby.Users.IsNullOrEmpty())
+            {
+                throw new Exception("User not added");
+            }
+
             _context.PlatformLobby.Update(lobby);
 
             await _context.SaveChangesAsync();
