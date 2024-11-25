@@ -6,6 +6,6 @@ namespace PatteDoie.Models.SpeedTyping
     {
         public Guid Id { get; set; }
         public int Score { get; set; }
-        public required PlatformUser User { get; set; }
+        public required User User { get; set; }
     }
 }

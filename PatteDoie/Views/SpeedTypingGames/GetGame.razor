@@ -13,6 +13,9 @@
     
 
     <div>
+        <div class="clock">
+            <h1>@_secondsToRun</h1>
+        </div>
         <input type="text" id="inputText" name="inputText" @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")'/>
         <script>
             function hasSpace() {
@@ -27,7 +30,8 @@
         {
             <span>@Word </span>
         }
-        <p>@hasSpace</p>
+        <p>@HasSpace</p>
+        <p>@Result</p>
      </div>
 </div>
 <div>

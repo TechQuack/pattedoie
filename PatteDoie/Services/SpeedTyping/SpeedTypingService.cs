@@ -19,10 +19,10 @@ namespace PatteDoie.Services.SpeedTyping
             _mapper = mapper;
         }
 
-        public async Task<SpeedTypingGameRow> CreateGame(CreateSpeedTypingGameCommand command, List<PlatformUser> platformUsers)
+        public async Task<SpeedTypingGameRow> CreateGame(CreateSpeedTypingGameCommand command, List<User> platformUsers)
         {
             List<SpeedTypingPlayer> players = [];
-            foreach (PlatformUser platformUser in platformUsers)
+            foreach (User platformUser in platformUsers)
             {
                 var speedTypingPlayer = new SpeedTypingPlayer
                 {
@@ -64,7 +64,7 @@ namespace PatteDoie.Services.SpeedTyping
 
         public async Task<SpeedTypingGameRow> GetGame(Guid gameId)
         {
-            var game = (await _context.SpeedTypingGame.AsQueryable().Where(g => g.Id == gameId).ToListAsync())[0];
+            var game = await _context.SpeedTypingGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefaultAsync();
             return _mapper.Map<SpeedTypingGameRow>(game);
         }
 
@@ -76,6 +76,34 @@ namespace PatteDoie.Services.SpeedTyping
         public Task UpdateGame(Guid id, CreateSpeedTypingGameCommand game)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> CheckWord(Guid gameId, Guid uuid, string word)
+        {
+            var game = _context.SpeedTypingGame.AsQueryable()
+                .Where(g => g.Id == gameId)
+                .FirstOrDefault<SpeedTypingGame>();
+            var platformUser = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == uuid).FirstOrDefaultAsync();
+            var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync();
+            var wordIndexToCheck = player.Score;
+            if (wordIndexToCheck > game.Words.Count)
+            {
+                return false;
+            }
+            var wordToCheck = game.Words[wordIndexToCheck];
+            if (wordToCheck == word)
+            {
+                player.Score += 1;
+                await _context.SaveChangesAsync();
+
+                // check si le joueur a fini, si oui, mettre fin à la partie et remplir SpeedTypingTimeProgress
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
         }
     }
 }
