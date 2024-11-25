@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.SpeedTyping;
+using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.SpeedTyping;
 using PatteDoie.Rows.SpeedTypingGame;
 
@@ -73,9 +74,24 @@ namespace PatteDoie.Services.SpeedTyping
             throw new NotImplementedException();
         }
 
-        public Task UpdateGame(Guid id, CreateSpeedTypingGameCommand game)
+        public async Task SetTimeProgress(SpeedTypingGame game, SpeedTypingPlayer player, DateTime timeProgress)
         {
-            throw new NotImplementedException();
+            if (player is null)
+            {
+                throw new PlayerNotValidException("Speed typing player cannot be null");
+            }
+            if (game is null)
+            {
+                throw new GameNotValidException("Speed typing game cannot be null");
+            }
+            SpeedTypingTimeProgress playerProgress = new()
+            {
+                Player = player,
+                TimeProgress = timeProgress
+            };
+            game.TimeProgresses.Add(playerProgress);
+            await _context.SaveChangesAsync();
+
         }
 
         public async Task<bool> CheckWord(Guid gameId, Guid uuid, string word)
