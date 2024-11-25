@@ -140,5 +140,12 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<PlatformUserRow>(creator);
         }
 
+        public async Task<IEnumerable<PlatformHighScoreRow>> GetHighestScoreFromGame(Guid gameId)
+        {
+            var highScores = await _context.PlatformHighScore.AsQueryable().Where(g => g.Id == gameId).OrderDescending().Take(5).ToListAsync() ??
+                throw new HighScoreNotFoundException("HighScores not found");
+            return _mapper.Map<List<PlatformHighScoreRow>>(highScores);
+        }
+
     }
 }

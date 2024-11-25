@@ -11,6 +11,7 @@ namespace PatteDoie.Configuration
         public MappingProfile()
         {
             CreateMap<SpeedTypingGame, SpeedTypingGameRow>();
+            CreateMap<HighScore, PlatformHighScoreRow>();
             CreateMap<User, PlatformUserRow>();
             CreateMap<Lobby, PlatformLobbyRow>();
         }
