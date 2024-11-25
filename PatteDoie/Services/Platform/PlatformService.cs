@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Enums;
+using PatteDoie.Extensions;
 using PatteDoie.Models.Platform;
 using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
@@ -16,8 +17,11 @@ namespace PatteDoie.Services.Platform
         private readonly IMapper _mapper = mapper;
 
 
-        public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password)
+        public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type)
         {
+            var gameName = type.GetDescription();
+            var game = await _context.PlatformGame.AsQueryable().Where(g => g.Name == gameName).FirstOrDefaultAsync() ?? throw new GameNotFoundException("Game not found");
+
             var creator = new User
             {
                 Id = creatorId,
@@ -28,10 +32,11 @@ namespace PatteDoie.Services.Platform
             {
                 Creator = creator,
                 Password = null,
-                Users = []
+                Users = [],
+                Game = game,
             };
 
-            if (!password.IsNullOrEmpty())
+            if (!String.IsNullOrEmpty(password))
             {
                 PasswordHasher<Lobby> passwordHasher = new();
 
@@ -47,6 +52,8 @@ namespace PatteDoie.Services.Platform
 
                 await transaction.CommitAsync();
             }
+
+            //TODO : Create game
 
             return _mapper.Map<PlatformLobbyRow>(platformLobby);
         }
@@ -64,7 +71,7 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformLobbyRow> GetLobby(Guid lobbyId)
         {
-            var lobby = await _context.PlatformLobby.AsQueryable().Include(l => l.Creator).Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
+            var lobby = await _context.PlatformLobby.AsQueryable().Include(l => l.Creator).Include(l => l.Game).Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
             return _mapper.Map<PlatformLobbyRow>(lobby);
         }
 
@@ -95,9 +102,9 @@ namespace PatteDoie.Services.Platform
 
             var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
 
-            if (password.IsNullOrEmpty())
+            if (String.IsNullOrEmpty(password))
             {
-                if (!lobby.Password.IsNullOrEmpty())
+                if (!String.IsNullOrEmpty(lobby.Password))
                 {
                     throw new PasswordNotValidException("Lobby password is not valid");
                 }

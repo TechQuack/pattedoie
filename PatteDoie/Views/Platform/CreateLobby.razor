@@ -1,4 +1,7 @@
-﻿@page "/lobby/create"
+﻿@using PatteDoie.Enums;
+@using PatteDoie.Extensions;
+
+@page "/lobby/create"
 
 <PageTitle>Create a lobby</PageTitle>
 
@@ -13,6 +16,15 @@
             <div class="form-group">
                 <label class="control-label">Password</label>
                 <InputText @bind-Value="Password" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">GameType</label>
+                <InputSelect @bind-Value="GameType">
+                    @foreach (Enum type in Enum.GetValues(typeof(GameType)))
+                    {
+                        <option value="@type">@type.GetDescription()</option>
+                    }
+                </InputSelect>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
