@@ -43,7 +43,7 @@ namespace PatteDoie.Services.Scattergories
             throw new NotImplementedException();
         }
 
-        public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<PlatformUser> platformUsers, PlatformUser host)
+        public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<User> users, User host)
         {
             var rand = new Random();
 
@@ -51,10 +51,10 @@ namespace PatteDoie.Services.Scattergories
             List<ScattergoriesCategory> categories = potentialsCategories.OrderBy(x => rand.Next()).Take(numberCategories).ToList();
 
             var players = new List<ScattergoriesPlayer>();
-            foreach (var platformUser in platformUsers)
+            foreach (var user in users)
             {
                 var playerAnswers = CreateEmptyAnswers(categories);
-                var player = CreatePlayer(platformUser, [.. playerAnswers], false);
+                var player = CreatePlayer(user, [.. playerAnswers], false);
                 players.Add(player);
                 _context.ScattergoriesPlayer.Add(player);
             }
@@ -87,7 +87,7 @@ namespace PatteDoie.Services.Scattergories
 
         //TOOLS
 
-        private ScattergoriesPlayer CreatePlayer(PlatformUser player, ScattegoriesAnswer[] answers, bool isHost)
+        private ScattergoriesPlayer CreatePlayer(User player, ScattegoriesAnswer[] answers, bool isHost)
         {
             return new ScattergoriesPlayer
             {
