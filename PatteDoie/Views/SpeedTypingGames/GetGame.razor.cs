@@ -20,6 +20,8 @@ namespace PatteDoie.Views.SpeedTypingGames
 
         private bool Result = false;
 
+        private int WordIndexToDisplay = 0;
+
         private SpeedTypingGameRow? Row { get; set; } = null;
         [Inject]
         private ProtectedLocalStorage ProtectedLocalStorage { get; set; } = default!;
@@ -42,6 +44,7 @@ namespace PatteDoie.Views.SpeedTypingGames
 
                 if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row.Id, new Guid(uuid.Value ?? ""), Text.TrimEnd())).Result)
                 {
+                    this.WordIndexToDisplay += 1;
                     this.Result = true;
                 }
                 else
