@@ -38,10 +38,15 @@ namespace PatteDoie.Services.Platform
                 platformLobby.Password = passwordHasher.HashPassword(platformLobby, password);
             }
 
-            _context.PlatformLobby.Add(platformLobby);
-            _context.PlatformUser.Add(creator);
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                await _context.PlatformLobby.AddAsync(platformLobby);
+                await _context.PlatformUser.AddAsync(creator);
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
 
             return _mapper.Map<PlatformLobbyRow>(platformLobby);
         }
@@ -66,7 +71,7 @@ namespace PatteDoie.Services.Platform
         public async Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(LobbyType type)
         {
             var query = _context.PlatformLobby.AsQueryable();
-            switch(type)
+            switch (type)
             {
                 case LobbyType.Public:
                     query = query.Where(p => p.Password == null || p.Password == "");

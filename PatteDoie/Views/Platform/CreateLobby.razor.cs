@@ -14,7 +14,7 @@ public partial class CreateLobby : ComponentBase
     [Inject]
     private IPlatformService PlatformService { get; set; } = default!;
 
-    private async void Submit()
+    private async Task Submit()
     {
         var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
         var name = await ProtectedLocalStorage.GetAsync<string>("name");
