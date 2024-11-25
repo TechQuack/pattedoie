@@ -1,0 +1,17 @@
+﻿@page "/Scattegories"
+
+<PageTitle>Scattegories</PageTitle>
+
+<div>
+    <h3>CreateGame</h3>
+    <input type="button" @oninput="() => NewGame()"/>
+    <div>
+        <p>Catégories</p>
+        @foreach (var cat in Row?.Categories ?? [])
+        {
+            <p>@cat.Name</p><br />
+        }
+        <p>Lettre</p>
+        <p>@Row?.CurrentLetter</p>
+    </div>
+</div>
