@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using PatteDoie.Attributes;
 
 namespace PatteDoie.Extensions;
 
