@@ -36,7 +36,7 @@ namespace PatteDoie.Services.Platform
                 Game = game,
             };
 
-            if (!password.IsNullOrEmpty())
+            if (!String.IsNullOrEmpty(password))
             {
                 PasswordHasher<Lobby> passwordHasher = new();
 
