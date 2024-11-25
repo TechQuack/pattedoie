@@ -102,9 +102,9 @@ namespace PatteDoie.Services.Platform
 
             var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
 
-            if (password.IsNullOrEmpty())
+            if (String.IsNullOrEmpty(password))
             {
-                if (!lobby.Password.IsNullOrEmpty())
+                if (!String.IsNullOrEmpty(lobby.Password))
                 {
                     throw new PasswordNotValidException("Lobby password is not valid");
                 }
