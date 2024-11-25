@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using PatteDoie.Models.Platform;
 
 namespace PatteDoie;
 
@@ -17,6 +17,11 @@ public partial class PatteDoieContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         OnModelCreatingPartial(modelBuilder);
+
+        modelBuilder.Entity<Game>().HasData(
+            new Game { Id = Guid.NewGuid(), Name = "Scattergories", MinPlayers = 2, MaxPlayers = 8 },
+            new Game { Id = Guid.NewGuid(), Name = "SpeedTyping", MinPlayers = 1, MaxPlayers = 5 }
+        );
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
