@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Enums;
+using PatteDoie.Extensions;
 using PatteDoie.Models.Platform;
 using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
@@ -16,8 +17,11 @@ namespace PatteDoie.Services.Platform
         private readonly IMapper _mapper = mapper;
 
 
-        public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password)
+        public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type)
         {
+            var gameName = type.GetDescription();
+            var game = await _context.PlatformGame.AsQueryable().Where(g => g.Name == gameName).FirstOrDefaultAsync() ?? throw new GameNotFoundException("Game not found");
+
             var creator = new User
             {
                 Id = creatorId,
@@ -28,7 +32,8 @@ namespace PatteDoie.Services.Platform
             {
                 Creator = creator,
                 Password = null,
-                Users = []
+                Users = [],
+                Game = game,
             };
 
             if (!password.IsNullOrEmpty())
@@ -47,6 +52,8 @@ namespace PatteDoie.Services.Platform
 
                 await transaction.CommitAsync();
             }
+
+            //TODO : Create game
 
             return _mapper.Map<PlatformLobbyRow>(platformLobby);
         }

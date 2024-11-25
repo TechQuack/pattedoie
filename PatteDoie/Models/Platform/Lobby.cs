@@ -9,7 +9,7 @@
 
         public required User Creator { get; set; }
 
-        public Guid GameId { get; set; }
+        public required Game Game { get; set; }
 
         public string? Password { get; set; }
 

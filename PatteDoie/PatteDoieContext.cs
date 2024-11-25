@@ -1,4 +1,5 @@
-﻿using PatteDoie.Models.Platform;
+﻿using Microsoft.EntityFrameworkCore;
+using PatteDoie.Models.Platform;
 
 namespace PatteDoie;
 
