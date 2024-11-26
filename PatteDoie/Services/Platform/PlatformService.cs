@@ -56,6 +56,19 @@ namespace PatteDoie.Services.Platform
                 await transaction.CommitAsync();
             }
 
+            platformLobby.Users.Add(creator);
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                _context.PlatformLobby.Update(platformLobby);
+
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+
+            //TODO : Create game
+            
             return _mapper.Map<PlatformLobbyRow>(platformLobby);
         }
 
