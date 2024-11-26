@@ -56,8 +56,6 @@ namespace PatteDoie.Services.Platform
                 await transaction.CommitAsync();
             }
 
-            await CreateGame(type, platformLobby.Users);
-
             return _mapper.Map<PlatformLobbyRow>(platformLobby);
         }
 
@@ -155,6 +153,16 @@ namespace PatteDoie.Services.Platform
             var highScores = await _context.PlatformHighScore.AsQueryable().Where(g => g.Id == gameId).OrderDescending().Take(5).ToListAsync() ??
                 throw new HighScoreNotFoundException("HighScores not found");
             return _mapper.Map<List<PlatformHighScoreRow>>(highScores);
+        }
+
+        public async Task<bool> StartGame(Guid lobbyId)
+        {
+            var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
+            lobby.Started = true;
+            _context.PlatformLobby.Update(lobby);
+            await _context.SaveChangesAsync();
+            await CreateGame(GameTypeHelper.GetGameTypeFromString(lobby.Game.Name), lobby.Users);
+            return true;
         }
 
         private async Task CreateGame(GameType type, List<User> users)
