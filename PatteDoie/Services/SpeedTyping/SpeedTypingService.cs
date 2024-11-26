@@ -74,6 +74,23 @@ namespace PatteDoie.Services.SpeedTyping
             throw new NotImplementedException();
         }
 
+        public async Task ManageEndOfGame(Guid gameId)
+        {
+            var game = _context.SpeedTypingGame.AsQueryable()
+               .Where(g => g.Id == gameId)
+               .FirstOrDefault<SpeedTypingGame>();
+            if (game is null)
+            {
+                throw new GameNotValidException("Speed typing game cannot be null");
+            }
+            foreach (SpeedTypingPlayer player in game.Players)
+            {
+                if (!IsSetTimeProgress(game.TimeProgresses, player))
+                {
+                    await SetTimeProgress(game, player, new DateTime());
+                }
+            }
+        }
         public async Task SetTimeProgress(SpeedTypingGame game, SpeedTypingPlayer player, DateTime timeProgress)
         {
             if (player is null)
@@ -120,6 +137,11 @@ namespace PatteDoie.Services.SpeedTyping
                 return false;
             }
 
+        }
+
+        private bool IsSetTimeProgress(List<SpeedTypingTimeProgress> timeProgresses, SpeedTypingPlayer player)
+        {
+            return timeProgresses.Any(timeProgress => timeProgress.Player == player);
         }
     }
 }
