@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.SpeedTyping;
@@ -10,14 +11,19 @@ namespace PatteDoie.Services.SpeedTyping
 {
     public class SpeedTypingService : ISpeedTypingService
     {
+        public static int TIME_BEFORE_DELETION = 60000;
+
         private readonly PatteDoieContext _context;
 
         private readonly IMapper _mapper;
 
-        public SpeedTypingService(PatteDoieContext context, IMapper mapper)
+        private NavigationManager NavigationManager;
+
+        public SpeedTypingService(PatteDoieContext context, IMapper mapper, NavigationManager navigationManager)
         {
             _context = context;
             _mapper = mapper;
+            NavigationManager = navigationManager;
         }
 
         public async Task<SpeedTypingGameRow> CreateGame(CreateSpeedTypingGameCommand command, List<User> platformUsers)
@@ -53,9 +59,15 @@ namespace PatteDoie.Services.SpeedTyping
             return _mapper.Map<SpeedTypingGameRow>(speedTypingGame);
         }
 
-        public Task DeleteGame(Guid id)
+        public async Task DeleteGame(Guid id)
         {
-            throw new NotImplementedException();
+            var game = _context.SpeedTypingGame.AsQueryable()
+               .Where(g => g.Id == id)
+               .FirstOrDefault<SpeedTypingGame>() ?? throw new GameNotValidException("Speed typing game cannot be null");
+            _context.SpeedTypingPlayer.RemoveRange(game.Players);
+            _context.SpeedTypingTimeProgress.RemoveRange(game.TimeProgresses);
+            _context.SpeedTypingGame.Remove(game);
+            await _context.SaveChangesAsync();
         }
 
         public Task<IEnumerable<SpeedTypingGameRow>> GetAllGames()
@@ -90,6 +102,7 @@ namespace PatteDoie.Services.SpeedTyping
                     await SetTimeProgress(game, player, new DateTime());
                 }
             }
+            Task deleteGame = this.DelayedDeletion(game);
         }
         public async Task SetTimeProgress(SpeedTypingGame game, SpeedTypingPlayer player, DateTime timeProgress)
         {
@@ -108,7 +121,6 @@ namespace PatteDoie.Services.SpeedTyping
             };
             game.TimeProgresses.Add(playerProgress);
             await _context.SaveChangesAsync();
-
         }
 
         public async Task<bool> CheckWord(Guid gameId, Guid uuid, string word)
@@ -142,6 +154,13 @@ namespace PatteDoie.Services.SpeedTyping
         private bool IsSetTimeProgress(List<SpeedTypingTimeProgress> timeProgresses, SpeedTypingPlayer player)
         {
             return timeProgresses.Any(timeProgress => timeProgress.Player == player);
+        }
+
+        private async Task DelayedDeletion(SpeedTypingGame game)
+        {
+            await Task.Delay(TIME_BEFORE_DELETION);
+            await DeleteGame(game.Id);
+            NavigationManager.NavigateTo("/home");
         }
     }
 }
