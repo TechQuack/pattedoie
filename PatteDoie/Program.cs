@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie;
 using PatteDoie.Configuration;
+using PatteDoie.Hubs;
 using PatteDoie.Services.Platform;
 using PatteDoie.Services.SpeedTyping;
 
@@ -16,7 +18,17 @@ builder.Services.AddScoped<IPlatformService, PlatformService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddServerSideBlazor();
 
+builder.Services.AddSignalR();
+
+builder.Services.AddResponseCompression(opts =>
+{
+    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+        ["application/octet-stream"]);
+});
+
 var app = builder.Build();
+
+app.UseResponseCompression();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -39,5 +51,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<SpeedTypingHub>("/hub/speedtyping");
 
 app.Run();
