@@ -3,8 +3,8 @@
 <PageTitle>Scattegories</PageTitle>
 
 <div>
-    <h3>CreateGame</h3>
-    <input type="button" @oninput="() => NewGame()"/>
+    <h3>CreateGame</h3
+    <button type="button" @onclick="()=> NewGame()">créer partie</button>
     <div>
         <p>Catégories</p>
         @foreach (var cat in Row?.Categories ?? [])
