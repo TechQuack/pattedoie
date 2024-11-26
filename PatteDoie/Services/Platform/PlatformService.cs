@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -8,13 +9,15 @@ using PatteDoie.Models.Platform;
 using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
 using PatteDoie.Rows.Platform;
+using PatteDoie.Services.SpeedTyping;
 
 namespace PatteDoie.Services.Platform
 {
-    public class PlatformService(PatteDoieContext context, IMapper mapper) : IPlatformService
+    public class PlatformService(PatteDoieContext context, IMapper mapper, ISpeedTypingService speedTypingService) : IPlatformService
     {
         private readonly PatteDoieContext _context = context;
         private readonly IMapper _mapper = mapper;
+        private readonly ISpeedTypingService _speedTypingService = speedTypingService;
 
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type)
@@ -53,7 +56,7 @@ namespace PatteDoie.Services.Platform
                 await transaction.CommitAsync();
             }
 
-            //TODO : Create game
+            await CreateGame(type, platformLobby.Users);
 
             return _mapper.Map<PlatformLobbyRow>(platformLobby);
         }
@@ -154,5 +157,18 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<List<PlatformHighScoreRow>>(highScores);
         }
 
+        private async Task CreateGame(GameType type, List<User> users)
+        {
+            switch(type)
+            {
+                case GameType.Scattergories:
+                    //TODO : Create game
+                    break;
+                case GameType.SpeedTyping:
+                    // Verify number of users
+                    await _speedTypingService.CreateGame(users);
+                    break;
+            }
+        }
     }
 }
