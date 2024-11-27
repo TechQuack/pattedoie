@@ -49,12 +49,12 @@ namespace PatteDoie.Services.Scattergories
             foreach (var user in users)
             {
                 var playerAnswers = CreateEmptyAnswers(categories);
-                var player = CreatePlayer(user, [.. playerAnswers], false);
+                var player = CreatePlayer(user, playerAnswers, false);
                 players.Add(player);
                 _context.ScattergoriesPlayer.Add(player);
             }
             var hostAnswers = CreateEmptyAnswers(categories);
-            var hostPlayer = CreatePlayer(host, [.. hostAnswers], true);
+            var hostPlayer = CreatePlayer(host, hostAnswers, true);
             players.Add(hostPlayer);
             _context.ScattergoriesPlayer.Add(hostPlayer);
 
@@ -62,11 +62,11 @@ namespace PatteDoie.Services.Scattergories
 
             var game = new ScattergoriesGame
             {
-                Players = [.. players],
+                Players = players,
                 MaxRound = roundNumber,
                 CurrentRound = 1,
                 CurrentLetter = letter,
-                Categories = [.. categories]
+                Categories = categories
             };
             _context.ScattergoriesGame.Add(game);
 
@@ -82,7 +82,7 @@ namespace PatteDoie.Services.Scattergories
 
         //TOOLS
 
-        private ScattergoriesPlayer CreatePlayer(User player, ScattegoriesAnswer[] answers, bool isHost)
+        private ScattergoriesPlayer CreatePlayer(User player, List<ScattegoriesAnswer> answers, bool isHost)
         {
             return new ScattergoriesPlayer
             {
