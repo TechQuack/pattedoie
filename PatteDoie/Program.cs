@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using PatteDoie;
 using PatteDoie.Configuration;
 using PatteDoie.Hubs;
-using PatteDoie.Services.Scattergories;
 using PatteDoie.Services.Platform;
+using PatteDoie.Services.Scattergories;
 using PatteDoie.Services.SpeedTyping;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,9 +18,12 @@ builder.Services.AddScoped<ISpeedTypingService, SpeedTypingService>();
 builder.Services.AddScoped<IPlatformService, PlatformService>();
 builder.Services.AddScoped<IScattegoriesService, ScattegoriesService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
-builder.Services.AddServerSideBlazor();
 
-builder.Services.AddSignalR();
+builder.Services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
+builder.Services.AddSignalR(o =>
+{
+    o.EnableDetailedErrors = true;
+});
 
 builder.Services.AddResponseCompression(opts =>
 {
