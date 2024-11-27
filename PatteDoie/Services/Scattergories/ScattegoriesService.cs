@@ -108,5 +108,10 @@ namespace PatteDoie.Services.Scattergories
             }
             return answers;
         }
+
+        private bool HasCompletedCategories(ScattergoriesPlayer player)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
