@@ -19,13 +19,8 @@ namespace PatteDoie.Services.Scattergories
 
         public async Task<IEnumerable<ScattegoriesGameRow>> GetAllGames()
         {
-            var games = (await _context.ScattergoriesGame.AsQueryable().ToListAsync());
-            var result = new List<ScattegoriesGameRow>();
-            foreach (var game in games)
-            {
-                result.Add(_mapper.Map<ScattegoriesGameRow>(game));
-            }
-            return result;
+            var games = await _context.ScattergoriesGame.AsQueryable().ToListAsync();
+            return _mapper.Map<List<ScattegoriesGameRow>>(games);
         }
 
         public async Task<ScattegoriesGameRow> GetGame(Guid gameId)
@@ -59,14 +54,14 @@ namespace PatteDoie.Services.Scattergories
                 _context.ScattergoriesPlayer.Add(player);
             }
             var hostAnswers = CreateEmptyAnswers(categories);
-            var hostPlayer = CreatePlayer(host, [..hostAnswers], true);
+            var hostPlayer = CreatePlayer(host, [.. hostAnswers], true);
             players.Add(hostPlayer);
             _context.ScattergoriesPlayer.Add(hostPlayer);
 
-            char letter = (char) rand.Next(65, 90);
+            char letter = (char)rand.Next(65, 90);
 
             var game = new ScattergoriesGame
-        {
+            {
                 Players = [.. players],
                 MaxRound = roundNumber,
                 CurrentRound = 1,
