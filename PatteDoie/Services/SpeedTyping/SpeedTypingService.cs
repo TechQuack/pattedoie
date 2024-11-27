@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Hubs;
 using PatteDoie.Models.Platform;
@@ -15,9 +16,9 @@ namespace PatteDoie.Services.SpeedTyping
         private readonly PatteDoieContext _context;
 
         private readonly IMapper _mapper;
-        private SpeedTypingHub _hub;
+        private IHubContext<SpeedTypingHub> _hub;
 
-        public SpeedTypingService(PatteDoieContext context, IMapper mapper, SpeedTypingHub hub)
+        public SpeedTypingService(PatteDoieContext context, IMapper mapper, IHubContext<SpeedTypingHub> hub)
         {
             _context = context;
             _mapper = mapper;
@@ -116,7 +117,7 @@ namespace PatteDoie.Services.SpeedTyping
             {
                 player.Score += 1;
                 await _context.SaveChangesAsync();
-                await _hub.SendProgression(gameId, _mapper.Map<SpeedTypingPlayerRow>(player));
+                await _hub.Clients.All.SendAsync("SendProgression", gameId, _mapper.Map<SpeedTypingPlayerRow>(player));
 
                 // check si le joueur a fini, si oui, mettre fin à la partie et remplir SpeedTypingTimeProgress
                 return true;
