@@ -24,7 +24,7 @@ namespace PatteDoie.Services.Platform
 
             var creator = new User
             {
-                Id = creatorId,
+                UserUUID = creatorId,
                 Nickname = creatorName
             };
 
