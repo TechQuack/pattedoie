@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Hubs;
 using PatteDoie.Models.Platform;
@@ -23,8 +23,7 @@ namespace PatteDoie.Services.SpeedTyping
 
         private NavigationManager NavigationManager;
 
-        public SpeedTypingService(PatteDoieContext context, IMapper mapper, NavigationManager navigationManager)
-        public SpeedTypingService(PatteDoieContext context, IMapper mapper, IHubContext<SpeedTypingHub> hub)
+        public SpeedTypingService(PatteDoieContext context, IMapper mapper, IHubContext<SpeedTypingHub> hub, NavigationManager navigationManager)
         {
             _context = context;
             _mapper = mapper;
