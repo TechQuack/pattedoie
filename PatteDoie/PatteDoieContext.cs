@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PatteDoie.Enums;
+using PatteDoie.Extensions;
+using PatteDoie.Models.Platform;
 
 namespace PatteDoie;
 
@@ -17,6 +20,11 @@ public partial class PatteDoieContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         OnModelCreatingPartial(modelBuilder);
+
+        modelBuilder.Entity<Game>().HasData(
+            new Game { Id = Guid.NewGuid(), Name = GameType.Scattergories.GetDescription(), MinPlayers = 2, MaxPlayers = 8 },
+            new Game { Id = Guid.NewGuid(), Name = GameType.SpeedTyping.GetDescription(), MinPlayers = 1, MaxPlayers = 5 }
+        );
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
@@ -40,6 +48,6 @@ public partial class PatteDoieContext : DbContext
     public DbSet<PatteDoie.Models.Platform.Game> PlatformGame { get; set; } = default!;
 
     public DbSet<PatteDoie.Models.Scattergories.ScattergoriesGame> ScattergoriesGame { get; set; } = default!;
-    
+
     public DbSet<PatteDoie.Models.Scattergories.ScattegoriesAnswer> ScattegoriesAnswer { get; set; } = default!;
 }

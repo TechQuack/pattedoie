@@ -1,4 +1,5 @@
 ﻿using PatteDoie.Models.Platform;
+using PatteDoie.Models.SpeedTyping;
 using PatteDoie.Queries.SpeedTyping;
 using PatteDoie.Rows.SpeedTypingGame;
 
@@ -12,9 +13,9 @@ namespace PatteDoie.Services.SpeedTyping
 
         public Task<IEnumerable<SpeedTypingGameRow>> SearchGames(CreateSpeedTypingGameCommand query);
 
-        public Task UpdateGame(Guid id, CreateSpeedTypingGameCommand game);
+        public Task SetTimeProgress(SpeedTypingGame game, SpeedTypingPlayer player, DateTime timeProgress);
 
-        public Task<SpeedTypingGameRow> CreateGame(CreateSpeedTypingGameCommand command, List<User> platformUsers);
+        public Task<SpeedTypingGameRow> CreateGame(List<User> platformUsers);
             
         public Task DeleteGame(Guid id);
 

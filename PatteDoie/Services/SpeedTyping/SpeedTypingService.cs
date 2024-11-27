@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using PatteDoie.Hubs;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.SpeedTyping;
+using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.SpeedTyping;
+using PatteDoie.Rows.SpeedTyping;
 using PatteDoie.Rows.SpeedTypingGame;
 
 namespace PatteDoie.Services.SpeedTyping
@@ -12,14 +15,16 @@ namespace PatteDoie.Services.SpeedTyping
         private readonly PatteDoieContext _context;
 
         private readonly IMapper _mapper;
+        private SpeedTypingHub _hub;
 
-        public SpeedTypingService(PatteDoieContext context, IMapper mapper)
+        public SpeedTypingService(PatteDoieContext context, IMapper mapper, SpeedTypingHub hub)
         {
             _context = context;
             _mapper = mapper;
+            _hub = hub;
         }
 
-        public async Task<SpeedTypingGameRow> CreateGame(CreateSpeedTypingGameCommand command, List<User> platformUsers)
+        public async Task<SpeedTypingGameRow> CreateGame(List<User> platformUsers)
         {
             List<SpeedTypingPlayer> players = [];
             foreach (User platformUser in platformUsers)
@@ -73,18 +78,34 @@ namespace PatteDoie.Services.SpeedTyping
             throw new NotImplementedException();
         }
 
-        public Task UpdateGame(Guid id, CreateSpeedTypingGameCommand game)
+        public async Task SetTimeProgress(SpeedTypingGame game, SpeedTypingPlayer player, DateTime timeProgress)
         {
-            throw new NotImplementedException();
+            if (player is null)
+            {
+                throw new PlayerNotValidException("Speed typing player cannot be null");
+            }
+            if (game is null)
+            {
+                throw new GameNotValidException("Speed typing game cannot be null");
+            }
+            SpeedTypingTimeProgress playerProgress = new()
+            {
+                Player = player,
+                TimeProgress = timeProgress
+            };
+            game.TimeProgresses.Add(playerProgress);
+            await _context.SaveChangesAsync();
+
         }
 
         public async Task<bool> CheckWord(Guid gameId, Guid uuid, string word)
         {
             var game = _context.SpeedTypingGame.AsQueryable()
                 .Where(g => g.Id == gameId)
-                .FirstOrDefault<SpeedTypingGame>();
+                .FirstOrDefault<SpeedTypingGame>() ?? throw new GameNotValidException("Game not found");
             var platformUser = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == uuid).FirstOrDefaultAsync();
-            var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync();
+            var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync()
+                ?? throw new PlayerNotValidException("Player not found");
             var wordIndexToCheck = player.Score;
             if (wordIndexToCheck > game.Words.Count)
             {
@@ -95,6 +116,7 @@ namespace PatteDoie.Services.SpeedTyping
             {
                 player.Score += 1;
                 await _context.SaveChangesAsync();
+                await _hub.SendProgression(gameId, _mapper.Map<SpeedTypingPlayerRow>(player));
 
                 // check si le joueur a fini, si oui, mettre fin à la partie et remplir SpeedTypingTimeProgress
                 return true;

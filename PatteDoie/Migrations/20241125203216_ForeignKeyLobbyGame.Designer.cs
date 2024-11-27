@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PatteDoie;
 
@@ -11,9 +12,11 @@ using PatteDoie;
 namespace PatteDoie.Migrations
 {
     [DbContext(typeof(PatteDoieContext))]
-    partial class PatteDoieContextModelSnapshot : ModelSnapshot
+    [Migration("20241125203216_ForeignKeyLobbyGame")]
+    partial class ForeignKeyLobbyGame
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,18 +248,16 @@ namespace PatteDoie.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("PlayerId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("SpeedTypingGameId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("TimeProgress")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("TimeProgress")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PlayerId");
 
                     b.HasIndex("SpeedTypingGameId");
 
@@ -335,17 +336,9 @@ namespace PatteDoie.Migrations
 
             modelBuilder.Entity("PatteDoie.Models.SpeedTyping.SpeedTypingTimeProgress", b =>
                 {
-                    b.HasOne("PatteDoie.Models.SpeedTyping.SpeedTypingPlayer", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("PatteDoie.Models.SpeedTyping.SpeedTypingGame", null)
                         .WithMany("TimeProgresses")
                         .HasForeignKey("SpeedTypingGameId");
-
-                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Platform.Game", b =>

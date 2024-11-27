@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR.Client;
+using PatteDoie.Rows.SpeedTyping;
 using PatteDoie.Rows.SpeedTypingGame;
 using PatteDoie.Services.SpeedTyping;
 using System.Timers;
@@ -15,15 +17,21 @@ namespace PatteDoie.Views.SpeedTypingGames
 
         private Timer _timer = null!;
         private int _secondsToRun = 60;
+        private HubConnection? hubConnection;
 
         private string HasSpace = "No Space detected";
 
         private bool Result = false;
 
+        private int WordIndexToDisplay = 0;
+
         private SpeedTypingGameRow? Row { get; set; } = null;
+
         [Inject]
         private ProtectedLocalStorage ProtectedLocalStorage { get; set; } = default!;
 
+        [Inject]
+        private NavigationManager Navigation { get; set; } = default!;
 
         [Inject]
         protected ISpeedTypingService SpeedTypingService { get; set; } = default!;
@@ -31,6 +39,19 @@ namespace PatteDoie.Views.SpeedTypingGames
         protected override async Task OnInitializedAsync()
         {
             this.Row = await SpeedTypingService.GetGame(new Guid(this.Id));
+            hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/hub/speedtyping"))
+            .Build();
+
+            await hubConnection.SendAsync("JoinGame", this.Id);
+
+            hubConnection.On<SpeedTypingPlayerRow>("ReceiveProgress", (player) =>
+            {
+                //TODO : update front
+                InvokeAsync(StateHasChanged);
+            });
+
+            await hubConnection.StartAsync();
         }
 
         public async void CheckTextSpace(string Text)
@@ -42,6 +63,7 @@ namespace PatteDoie.Views.SpeedTypingGames
 
                 if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row.Id, new Guid(uuid.Value ?? ""), Text.TrimEnd())).Result)
                 {
+                    this.WordIndexToDisplay += 1;
                     this.Result = true;
                 }
                 else

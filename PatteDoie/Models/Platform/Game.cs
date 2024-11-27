@@ -13,5 +13,7 @@
 
         public int MaxPlayers { get; set; }
 
+        public List<Lobby> Lobbys { get; set; } = [];
+
     }
 }

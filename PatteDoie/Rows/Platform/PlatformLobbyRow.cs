@@ -7,11 +7,11 @@ namespace PatteDoie.Rows.Platform
 
         public Guid Id { get; set; }
 
-        public User[] Users { get; set; } = [];
+        public List<User> Users { get; set; } = [];
 
         public required User Creator { get; set; }
 
-        public Guid GameId { get; set; }
+        public GameRow? Game { get; set; }
 
         public string? Password { get; set; }
 

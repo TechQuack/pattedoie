@@ -28,7 +28,11 @@
         <hr />
         @foreach (string Word in Row?.Words ?? [])
         {
-            <span>@Word </span>
+            @if (Array.IndexOf(Row.Words, Word) == WordIndexToDisplay) {
+                <span id="wordToDisplay"> @Word &nbsp;</span>
+            } else {
+                <span> @Word &nbsp;</span>
+            }
         }
         <p>@HasSpace</p>
         <p>@Result</p>

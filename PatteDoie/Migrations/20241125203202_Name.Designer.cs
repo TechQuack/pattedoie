@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PatteDoie;
 
@@ -11,9 +12,11 @@ using PatteDoie;
 namespace PatteDoie.Migrations
 {
     [DbContext(typeof(PatteDoieContext))]
-    partial class PatteDoieContextModelSnapshot : ModelSnapshot
+    [Migration("20241125203202_Name")]
+    partial class Name
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,22 +44,6 @@ namespace PatteDoie.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PlatformGame");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("7de9aafd-9e6f-452c-af02-39bc938137f6"),
-                            MaxPlayers = 8,
-                            MinPlayers = 2,
-                            Name = "Scattergories"
-                        },
-                        new
-                        {
-                            Id = new Guid("2a13453e-2832-493c-9b69-82dc0f41890b"),
-                            MaxPlayers = 5,
-                            MinPlayers = 1,
-                            Name = "SpeedTyping"
-                        });
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Platform.HighScore", b =>
@@ -103,8 +90,6 @@ namespace PatteDoie.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
-
-                    b.HasIndex("GameId");
 
                     b.ToTable("PlatformLobby");
                 });
@@ -278,15 +263,7 @@ namespace PatteDoie.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PatteDoie.Models.Platform.Game", "Game")
-                        .WithMany("Lobbys")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Creator");
-
-                    b.Navigation("Game");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Platform.User", b =>
@@ -351,8 +328,6 @@ namespace PatteDoie.Migrations
             modelBuilder.Entity("PatteDoie.Models.Platform.Game", b =>
                 {
                     b.Navigation("HighScores");
-
-                    b.Navigation("Lobbys");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Platform.Lobby", b =>
