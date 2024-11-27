@@ -1,0 +1,36 @@
+﻿@page "/Scattergories/games"
+
+<h3>GameList</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Current Letter
+            </th>
+            <th>
+                Current Round
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Items)
+        {
+            <tr>
+                <td>
+                    @item.Id
+                </td>
+                <td>
+                    @item.CurrentLetter
+                </td>
+                <td>
+                    @item.CurrentRound
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

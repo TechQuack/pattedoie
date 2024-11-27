@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using PatteDoie.Models.Platform;
+using PatteDoie.Models.Scattergories;
 using PatteDoie.Models.SpeedTyping;
 using PatteDoie.Rows.Platform;
 using PatteDoie.Rows.SpeedTyping;
+using PatteDoie.Rows.Scattegories;
 using PatteDoie.Rows.SpeedTypingGame;
 
 namespace PatteDoie.Configuration
@@ -15,6 +17,7 @@ namespace PatteDoie.Configuration
             CreateMap<SpeedTypingPlayer, SpeedTypingPlayerRow>();
             CreateMap<SpeedTypingTimeProgress, SpeedTypingTimeProgressRow>();
             CreateMap<HighScore, PlatformHighScoreRow>();
+            CreateMap<ScattergoriesGame, ScattegoriesGameRow>();
             CreateMap<User, PlatformUserRow>();
             CreateMap<Lobby, PlatformLobbyRow>();
             CreateMap<Game, GameRow>();
