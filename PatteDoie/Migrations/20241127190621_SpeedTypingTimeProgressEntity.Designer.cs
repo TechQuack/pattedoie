@@ -12,8 +12,8 @@ using PatteDoie;
 namespace PatteDoie.Migrations
 {
     [DbContext(typeof(PatteDoieContext))]
-    [Migration("20241125203202_Name")]
-    partial class Name
+    [Migration("20241127190621_SpeedTypingTimeProgressEntity")]
+    partial class SpeedTypingTimeProgressEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,6 +44,22 @@ namespace PatteDoie.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PlatformGame");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("d110dad8-2625-42cc-9412-44393c5c9658"),
+                            MaxPlayers = 8,
+                            MinPlayers = 2,
+                            Name = "Scattergories"
+                        },
+                        new
+                        {
+                            Id = new Guid("e4d96495-5e08-489b-9fc3-6541ab07140d"),
+                            MaxPlayers = 5,
+                            MinPlayers = 1,
+                            Name = "SpeedTyping"
+                        });
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Platform.HighScore", b =>
@@ -91,6 +107,8 @@ namespace PatteDoie.Migrations
 
                     b.HasIndex("CreatorId");
 
+                    b.HasIndex("GameId");
+
                     b.ToTable("PlatformLobby");
                 });
 
@@ -115,6 +133,31 @@ namespace PatteDoie.Migrations
                     b.HasIndex("LobbyId");
 
                     b.ToTable("PlatformUser");
+                });
+
+            modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattegoriesAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ScattergoriesPlayerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("ScattergoriesPlayerId");
+
+                    b.ToTable("ScattegoriesAnswer");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesCategory", b =>
@@ -163,6 +206,9 @@ namespace PatteDoie.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsHost")
+                        .HasColumnType("bit");
 
                     b.Property<Guid?>("ScattergoriesGameId")
                         .HasColumnType("uniqueidentifier");
@@ -263,7 +309,15 @@ namespace PatteDoie.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PatteDoie.Models.Platform.Game", "Game")
+                        .WithMany("Lobbys")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Creator");
+
+                    b.Navigation("Game");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Platform.User", b =>
@@ -271,6 +325,21 @@ namespace PatteDoie.Migrations
                     b.HasOne("PatteDoie.Models.Platform.Lobby", null)
                         .WithMany("Users")
                         .HasForeignKey("LobbyId");
+                });
+
+            modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattegoriesAnswer", b =>
+                {
+                    b.HasOne("PatteDoie.Models.Scattergories.ScattergoriesCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PatteDoie.Models.Scattergories.ScattergoriesPlayer", null)
+                        .WithMany("Answers")
+                        .HasForeignKey("ScattergoriesPlayerId");
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesCategory", b =>
@@ -328,6 +397,8 @@ namespace PatteDoie.Migrations
             modelBuilder.Entity("PatteDoie.Models.Platform.Game", b =>
                 {
                     b.Navigation("HighScores");
+
+                    b.Navigation("Lobbys");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Platform.Lobby", b =>
@@ -340,6 +411,11 @@ namespace PatteDoie.Migrations
                     b.Navigation("Categories");
 
                     b.Navigation("Players");
+                });
+
+            modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesPlayer", b =>
+                {
+                    b.Navigation("Answers");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.SpeedTyping.SpeedTypingGame", b =>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PatteDoie;
 
@@ -11,9 +12,11 @@ using PatteDoie;
 namespace PatteDoie.Migrations
 {
     [DbContext(typeof(PatteDoieContext))]
-    partial class PatteDoieContextModelSnapshot : ModelSnapshot
+    [Migration("20241127185008_Name")]
+    partial class Name
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,14 +48,14 @@ namespace PatteDoie.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d110dad8-2625-42cc-9412-44393c5c9658"),
+                            Id = new Guid("a138ec75-3bb1-4544-9db4-915e6c560c90"),
                             MaxPlayers = 8,
                             MinPlayers = 2,
                             Name = "Scattergories"
                         },
                         new
                         {
-                            Id = new Guid("e4d96495-5e08-489b-9fc3-6541ab07140d"),
+                            Id = new Guid("7d635c33-abec-48c8-9bf2-d2d5940aa889"),
                             MaxPlayers = 5,
                             MinPlayers = 1,
                             Name = "SpeedTyping"
