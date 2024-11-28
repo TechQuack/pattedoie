@@ -19,6 +19,5 @@ namespace PatteDoie.Hubs
         {
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId.ToString());
         }
-
     }
 }
