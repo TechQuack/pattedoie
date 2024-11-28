@@ -64,11 +64,6 @@ namespace PatteDoie.Views.SpeedTypingGames
 
         }
 
-        public async void EndGame()
-        {
-            await this.SpeedTypingService.ManageEndOfGame(this.Row.Id);
-        }
-
         public async void CheckTextSpace(string Text)
         {
             if (Text.Contains(' '))

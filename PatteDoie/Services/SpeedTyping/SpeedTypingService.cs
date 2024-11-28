@@ -68,9 +68,11 @@ namespace PatteDoie.Services.SpeedTyping
 
         public async Task DeleteGame(Guid id)
         {
-            var game = _context.SpeedTypingGame.AsQueryable()
-               .Where(g => g.Id == id)
-               .FirstOrDefault<SpeedTypingGame>() ?? throw new GameNotValidException("Speed typing game cannot be null");
+            var game = _context.SpeedTypingGame
+                .Include(g => g.Players)
+                .Include(g => g.TimeProgresses)
+                .FirstOrDefault(g => g.Id == id)
+                ?? throw new GameNotValidException("Speed typing game cannot be null");
             _context.SpeedTypingPlayer.RemoveRange(game.Players);
             _context.SpeedTypingTimeProgress.RemoveRange(game.TimeProgresses);
             _context.SpeedTypingGame.Remove(game);
