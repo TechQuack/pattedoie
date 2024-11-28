@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
 using PatteDoie.Rows.Scattegories;
@@ -36,6 +37,42 @@ namespace PatteDoie.Services.Scattergories
         public Task UpdateGame(Guid gameId)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> AddPlayerWord(ScattergoriesGame game, ScattergoriesPlayer player, string word, ScattergoriesCategory category)
+        {
+            if (game == null)
+            {
+                throw new ArgumentNullException(nameof(game));
+            }
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+            if (category == null)
+            {
+                throw new ArgumentNullException(nameof(category));
+            }
+            if (word.Trim().IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(nameof(word));
+            }
+            char letter = game.CurrentLetter;
+            if (word.Trim().First().Equals(letter))
+            {
+                return false;
+            }
+            ScattegoriesAnswer answer = new ScattegoriesAnswer
+            {
+                Category = category,
+                Text = word
+            };
+            player.Answers.Add(answer);
+            /*
+             * TODO: check if user completed categories: if yes call checking by host player
+             */
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<User> users, User host)

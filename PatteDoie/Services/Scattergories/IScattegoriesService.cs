@@ -1,4 +1,5 @@
 ﻿using PatteDoie.Models.Platform;
+using PatteDoie.Models.Scattergories;
 using PatteDoie.Rows.Scattegories;
 
 namespace PatteDoie.Services.Scattergories
@@ -9,6 +10,7 @@ namespace PatteDoie.Services.Scattergories
         public Task<ScattegoriesGameRow> GetGame(Guid gameId);
         public Task<IEnumerable<ScattegoriesGameRow>> SearchGames(/*TODO*/);
         public Task UpdateGame(Guid gameId /*, TODO*/);
+        public Task<bool> AddPlayerWord(Guid gameId, Guid playerId, string word, ScattergoriesCategory category);
         public Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<User> users, User host);
         public Task DeleteGame(Guid gameId);
     }
