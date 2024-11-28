@@ -109,9 +109,16 @@ namespace PatteDoie.Services.Scattergories
             return answers;
         }
 
-        private bool HasCompletedCategories(ScattergoriesPlayer player)
+        private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
         {
-            throw new NotImplementedException();
+            List<ScattergoriesCategory> categories = game.Categories;
+            List<ScattegoriesAnswer> answers = player.Answers;
+            List<ScattergoriesCategory> categoriesAnswered = new List<ScattergoriesCategory>();
+            foreach (var answer in answers)
+            {
+                categoriesAnswered.Add(answer.Category);
+            }
+            return Enumerable.SequenceEqual(categories.OrderBy(x => x), categoriesAnswered.OrderBy(x => x));
         }
     }
 }
