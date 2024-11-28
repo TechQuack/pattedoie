@@ -40,10 +40,18 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             this.Row = await SpeedTypingService.GetGame(new Guid(this.Id));
             hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/hub/speedtyping"))
-            .Build();
-
-            await hubConnection.SendAsync("JoinGame", this.Id);
+             .WithUrl(Navigation.ToAbsoluteUri("/hub/speedtyping"), (opts) =>
+             {
+                 opts.HttpMessageHandlerFactory = (message) =>
+                 {
+                     if (message is HttpClientHandler clientHandler)
+                         // always verify the SSL certificate
+                         clientHandler.ServerCertificateCustomValidationCallback +=
+                             (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                     return message;
+                 };
+             })
+             .Build();
 
             hubConnection.On<SpeedTypingPlayerRow>("ReceiveProgress", (player) =>
             {
@@ -52,6 +60,8 @@ namespace PatteDoie.Views.SpeedTypingGames
             });
 
             await hubConnection.StartAsync();
+            await hubConnection.SendAsync("JoinGame", this.Id);
+
         }
 
         public async void EndGame()
