@@ -6,16 +6,10 @@ using PatteDoie.Rows.Scattegories;
 
 namespace PatteDoie.Services.Scattergories
 {
-    public class ScattegoriesService : IScattegoriesService
+    public class ScattegoriesService(PatteDoieContext context, IMapper mapper) : IScattegoriesService
     {
-        private readonly PatteDoieContext _context;
-        private readonly IMapper _mapper;
-
-        public ScattegoriesService(PatteDoieContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
+        private readonly PatteDoieContext _context = context;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<IEnumerable<ScattegoriesGameRow>> GetAllGames()
         {
@@ -107,6 +101,38 @@ namespace PatteDoie.Services.Scattergories
                 _context.ScattegoriesAnswer.Add(answer);
             }
             return answers;
+        }
+
+        public async Task<ScattergoriesPlayerRow> EndScattergoriesGame(Guid gameId)
+        {
+            var game = _context.ScattergoriesGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefault<ScattergoriesGame>()
+                    ?? throw new Exception("Scattergories game is null");
+            Console.WriteLine("après requete");
+            if (!IsGameEnded(game))
+            {
+                Console.WriteLine("game not ended");
+                throw new Exception("Scattergories game is not ended");
+            }
+            var players = game.Players;
+            ScattergoriesPlayer bestPlayer = players.First();
+            foreach (var player in players)
+            {
+                if (player.Score > bestPlayer.Score)
+                {
+                    bestPlayer = player;
+                }
+            }
+            return _mapper.Map<ScattergoriesPlayerRow>(bestPlayer);
+        }
+
+        private static bool IsGameEnded(ScattergoriesGame game)
+        {
+            Console.WriteLine("Je suis passe par IsGameEnded");
+            if (game.CurrentRound == game.MaxRound)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
