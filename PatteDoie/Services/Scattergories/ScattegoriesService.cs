@@ -112,10 +112,8 @@ namespace PatteDoie.Services.Scattergories
 
         private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
         {
-            List<ScattergoriesCategory> categories = game.Categories;
-            List<ScattegoriesAnswer> answers = player.Answers;
             List<ScattergoriesCategory> categoriesAnswered = new List<ScattergoriesCategory>();
-            foreach (var answer in answers)
+            foreach (var answer in player.Answers)
             {
                 if (answer.Text.Trim().IsNullOrEmpty())
                 {
@@ -123,7 +121,7 @@ namespace PatteDoie.Services.Scattergories
                 }
                 categoriesAnswered.Add(answer.Category);
             }
-            return Enumerable.SequenceEqual(categories.OrderBy(x => x), categoriesAnswered.OrderBy(x => x));
+            return Enumerable.SequenceEqual(game.Categories.OrderBy(x => x), categoriesAnswered.OrderBy(x => x));
         }
     }
 }
