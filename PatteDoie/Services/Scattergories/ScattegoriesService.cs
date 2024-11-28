@@ -1,15 +1,21 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
+using PatteDoie.PatteDoieException;
+using PatteDoie.Rows.Platform;
 using PatteDoie.Rows.Scattegories;
 
 namespace PatteDoie.Services.Scattergories
 {
     public class ScattegoriesService(PatteDoieContext context, IMapper mapper) : IScattegoriesService
     {
+        public static int TIME_BEFORE_DELETION = 60000;
+
         private readonly PatteDoieContext _context = context;
         private readonly IMapper _mapper = mapper;
+        private readonly NavigationManager NavigationManager = default!;
 
         public async Task<IEnumerable<ScattegoriesGameRow>> GetAllGames()
         {
@@ -69,9 +75,15 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
-        public Task DeleteGame(Guid gameId)
+        public async Task DeleteGame(Guid gameId)
         {
-            throw new NotImplementedException();
+            var game = _context.ScattergoriesGame.AsQueryable()
+               .Where(g => g.Id == gameId)
+               .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Scattergories game cannot be null");
+            _context.ScattergoriesPlayer.RemoveRange(game.Players);
+            _context.ScattergoriesCategory.RemoveRange(game.Categories);
+            _context.ScattergoriesGame.Remove(game);
+            await _context.SaveChangesAsync();
         }
 
         //TOOLS
@@ -103,7 +115,7 @@ namespace PatteDoie.Services.Scattergories
             return answers;
         }
 
-        public async Task<ScattergoriesPlayerRow> EndScattergoriesGame(Guid gameId)
+        public async Task<PlatformUserRow> EndScattergoriesGame(Guid gameId)
         {
             var game = _context.ScattergoriesGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefault<ScattergoriesGame>()
                     ?? throw new Exception("Scattergories game is null");
@@ -120,7 +132,11 @@ namespace PatteDoie.Services.Scattergories
                     bestPlayer = player;
                 }
             }
-            return _mapper.Map<ScattergoriesPlayerRow>(bestPlayer);
+            var bestUser = bestPlayer.User;
+
+            Task deleteGame = this.DelayedDeletion(game);
+
+            return _mapper.Map<PlatformUserRow>(bestUser);
         }
 
         private static bool IsGameEnded(ScattergoriesGame game)
@@ -130,6 +146,13 @@ namespace PatteDoie.Services.Scattergories
                 return true;
             }
             return false;
+        }
+
+        private async Task DelayedDeletion(ScattergoriesGame game)
+        {
+            await Task.Delay(TIME_BEFORE_DELETION);
+            await DeleteGame(game.Id);
+            NavigationManager.NavigateTo("/home");
         }
     }
 }
