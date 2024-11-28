@@ -49,12 +49,12 @@ namespace PatteDoie.Services.Scattergories
             var players = new List<ScattergoriesPlayer>();
             foreach (var user in users)
             {
-                var playerAnswers = CreateEmptyAnswers(categories);
+                var playerAnswers = new List<ScattegoriesAnswer>();
                 var player = CreatePlayer(user, playerAnswers, false);
                 players.Add(player);
                 _context.ScattergoriesPlayer.Add(player);
             }
-            var hostAnswers = CreateEmptyAnswers(categories);
+            var hostAnswers = new List<ScattegoriesAnswer>();
             var hostPlayer = CreatePlayer(host, hostAnswers, true);
             players.Add(hostPlayer);
             _context.ScattergoriesPlayer.Add(hostPlayer);
@@ -122,22 +122,6 @@ namespace PatteDoie.Services.Scattergories
                 Answers = answers,
                 IsHost = isHost
             };
-        }
-
-        private List<ScattegoriesAnswer> CreateEmptyAnswers(List<ScattergoriesCategory> categories)
-        {
-            var answers = new List<ScattegoriesAnswer>();
-            foreach (var category in categories)
-            {
-                var answer = new ScattegoriesAnswer
-                {
-                    Text = "",
-                    Category = category
-                };
-                answers.Add(answer);
-                _context.ScattegoriesAnswer.Add(answer);
-            }
-            return answers;
         }
 
         private static bool IsGameEnded(ScattergoriesGame game)
