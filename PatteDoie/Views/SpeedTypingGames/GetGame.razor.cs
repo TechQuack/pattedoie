@@ -61,7 +61,6 @@ namespace PatteDoie.Views.SpeedTypingGames
 
             await hubConnection.StartAsync();
             await hubConnection.SendAsync("JoinGame", this.Id);
-
         }
 
         public async void CheckTextSpace(string Text)

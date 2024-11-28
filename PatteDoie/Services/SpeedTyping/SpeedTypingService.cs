@@ -10,7 +10,6 @@ using PatteDoie.Queries.SpeedTyping;
 using PatteDoie.Rows.SpeedTyping;
 using PatteDoie.Rows.SpeedTypingGame;
 
-
 namespace PatteDoie.Services.SpeedTyping
 {
     public class SpeedTypingService : ISpeedTypingService
