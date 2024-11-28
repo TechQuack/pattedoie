@@ -111,7 +111,7 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<PlatformUserRow>(bestUser);
         }
 
-        public async Task HostVerifyWord(Guid gameId, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision)
+        public async Task HostVerifyWord(ScattergoriesGame game, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision)
         {
             if (decision)
             {
@@ -121,8 +121,6 @@ namespace PatteDoie.Services.Scattergories
             _context.ScattergoriesPlayer.Update(player);
             await _context.SaveChangesAsync();
 
-            var game = _context.ScattergoriesGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefault<ScattergoriesGame>()
-                    ?? throw new Exception("Scattergories game is null");
             if (IsAllWordChecked(game))
             {
                 // TODO : CALL NEXT ROUND METHOD
@@ -154,7 +152,7 @@ namespace PatteDoie.Services.Scattergories
                     IsChecked = false,
                 };
                 answers.Add(answer);
-                _context.ScattegoriesAnswer.Add(answer);
+                _context.ScattergoriesAnswer.Add(answer);
             }
             return answers;
         }

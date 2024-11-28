@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
-
-#nullable disable
+﻿#nullable disable
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PatteDoie.Migrations
 {
@@ -25,7 +24,7 @@ namespace PatteDoie.Migrations
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsChecked",
-                table: "ScattegoriesAnswer",
+                table: "ScattergoriesAnswer",
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
@@ -55,7 +54,7 @@ namespace PatteDoie.Migrations
 
             migrationBuilder.DropColumn(
                 name: "IsChecked",
-                table: "ScattegoriesAnswer");
+                table: "ScattergoriesAnswer");
 
             migrationBuilder.InsertData(
                 table: "PlatformGame",

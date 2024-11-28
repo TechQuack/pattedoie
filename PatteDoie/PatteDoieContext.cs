@@ -49,5 +49,5 @@ public partial class PatteDoieContext : DbContext
 
     public DbSet<PatteDoie.Models.Scattergories.ScattergoriesGame> ScattergoriesGame { get; set; } = default!;
 
-    public DbSet<PatteDoie.Models.Scattergories.ScattergoriesAnswer> ScattegoriesAnswer { get; set; } = default!;
+    public DbSet<PatteDoie.Models.Scattergories.ScattergoriesAnswer> ScattergoriesAnswer { get; set; } = default!;
 }

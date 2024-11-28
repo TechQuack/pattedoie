@@ -14,6 +14,6 @@ namespace PatteDoie.Services.Scattergories
         public Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<User> users, User host);
         public Task DeleteGame(Guid gameId);
         public Task<PlatformUserRow> EndScattergoriesGame(Guid gameId);
-        public Task HostVerifyWord(Guid gameId, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision);
+        public Task HostVerifyWord(ScattergoriesGame game, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision);
     }
 }
