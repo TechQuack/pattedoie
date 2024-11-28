@@ -86,7 +86,7 @@ namespace PatteDoie.Services.Scattergories
             _context.ScattergoriesGame.Remove(game);
             await _context.SaveChangesAsync();
         }
-        
+
         public async Task<PlatformUserRow> EndScattergoriesGame(Guid gameId)
         {
             var game = _context.ScattergoriesGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefault<ScattergoriesGame>()
@@ -111,6 +111,24 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<PlatformUserRow>(bestUser);
         }
 
+        public async Task HostVerifyWord(Guid gameId, ScattergoriesPlayer player, ScattegoriesAnswer answer, bool decision)
+        {
+            if (decision)
+            {
+                player.Score += 1;
+            }
+            answer.IsChecked = true;
+            _context.ScattergoriesPlayer.Update(player);
+            await _context.SaveChangesAsync();
+
+            var game = _context.ScattergoriesGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefault<ScattergoriesGame>()
+                    ?? throw new Exception("Scattergories game is null");
+            if (IsAllWordChecked(game))
+            {
+                // TODO : CALL NEXT ROUND METHOD
+            }
+        }
+
         //TOOLS
 
         private ScattergoriesPlayer CreatePlayer(User player, List<ScattegoriesAnswer> answers, bool isHost)
@@ -132,7 +150,8 @@ namespace PatteDoie.Services.Scattergories
                 var answer = new ScattegoriesAnswer
                 {
                     Text = "",
-                    Category = category
+                    Category = category,
+                    IsChecked = false,
                 };
                 answers.Add(answer);
                 _context.ScattegoriesAnswer.Add(answer);
@@ -154,6 +173,24 @@ namespace PatteDoie.Services.Scattergories
             await Task.Delay(TIME_BEFORE_DELETION);
             await DeleteGame(game.Id);
             NavigationManager.NavigateTo("/home");
+        }
+
+        private static bool IsAllWordChecked(ScattergoriesGame game)
+        {
+            var players = game.Players;
+            foreach (var player in players)
+            {
+                var awnsers = player.Answers;
+                foreach (var answer in awnsers)
+                {
+                    if (!answer.IsChecked)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
 
         private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
         {
