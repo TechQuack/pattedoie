@@ -57,9 +57,7 @@ namespace PatteDoie.Views.ScattergoriesGames
 
 
 
-            Console.WriteLine("Game Id : " + game.Id);
             Winner = ScattegoriesService.EndScattergoriesGame(game.Id).Result;
-            Console.WriteLine(Winner.ToString());
         }
 
     }

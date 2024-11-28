@@ -107,10 +107,8 @@ namespace PatteDoie.Services.Scattergories
         {
             var game = _context.ScattergoriesGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefault<ScattergoriesGame>()
                     ?? throw new Exception("Scattergories game is null");
-            Console.WriteLine("après requete");
             if (!IsGameEnded(game))
             {
-                Console.WriteLine("game not ended");
                 throw new Exception("Scattergories game is not ended");
             }
             var players = game.Players;
@@ -127,7 +125,6 @@ namespace PatteDoie.Services.Scattergories
 
         private static bool IsGameEnded(ScattergoriesGame game)
         {
-            Console.WriteLine("Je suis passe par IsGameEnded");
             if (game.CurrentRound == game.MaxRound)
             {
                 return true;
