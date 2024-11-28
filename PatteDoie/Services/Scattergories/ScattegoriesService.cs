@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
 using PatteDoie.Rows.Scattegories;
@@ -107,6 +108,20 @@ namespace PatteDoie.Services.Scattergories
                 _context.ScattegoriesAnswer.Add(answer);
             }
             return answers;
+        }
+
+        private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
+        {
+            List<ScattergoriesCategory> categoriesAnswered = new List<ScattergoriesCategory>();
+            foreach (var answer in player.Answers)
+            {
+                if (answer.Text.Trim().IsNullOrEmpty())
+                {
+                    return false;
+                }
+                categoriesAnswered.Add(answer.Category);
+            }
+            return Enumerable.SequenceEqual(game.Categories.OrderBy(x => x), categoriesAnswered.OrderBy(x => x));
         }
     }
 }
