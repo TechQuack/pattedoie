@@ -20,5 +20,7 @@ namespace PatteDoie.Services.SpeedTyping
         public Task DeleteGame(Guid id);
 
         public Task<bool> CheckWord(Guid gameId, Guid playerId, string word);
+
+        public Task ManageEndOfGame(Guid gameId);
     }
 }

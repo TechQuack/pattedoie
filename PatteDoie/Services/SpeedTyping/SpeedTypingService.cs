@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Hubs;
@@ -13,16 +14,21 @@ namespace PatteDoie.Services.SpeedTyping
 {
     public class SpeedTypingService : ISpeedTypingService
     {
+        public static int TIME_BEFORE_DELETION = 60000;
+
         private readonly PatteDoieContext _context;
 
         private readonly IMapper _mapper;
         private IHubContext<SpeedTypingHub> _hub;
 
-        public SpeedTypingService(PatteDoieContext context, IMapper mapper, IHubContext<SpeedTypingHub> hub)
+        private NavigationManager NavigationManager;
+
+        public SpeedTypingService(PatteDoieContext context, IMapper mapper, IHubContext<SpeedTypingHub> hub, NavigationManager navigationManager)
         {
             _context = context;
             _mapper = mapper;
             _hub = hub;
+            NavigationManager = navigationManager;
         }
 
         public async Task<SpeedTypingGameRow> CreateGame(List<User> platformUsers)
@@ -39,7 +45,8 @@ namespace PatteDoie.Services.SpeedTyping
                 _context.SpeedTypingPlayer.Add(speedTypingPlayer);
             }
             String ApiUrl = "https://random-word-api.herokuapp.com/word?lang=fr&number=10";
-            String result = ApiCall.GetAsync(ApiUrl).Result.Remove(0, 1);
+            String result = await ApiCall.GetAsync(ApiUrl);
+            result = result.Remove(0, 1);
             result = result.Remove(result.Length - 1);
             String[] words = result.Replace("\"", "").Split(',');
 
@@ -58,9 +65,17 @@ namespace PatteDoie.Services.SpeedTyping
             return _mapper.Map<SpeedTypingGameRow>(speedTypingGame);
         }
 
-        public Task DeleteGame(Guid id)
+        public async Task DeleteGame(Guid id)
         {
-            throw new NotImplementedException();
+            var game = _context.SpeedTypingGame
+                .Include(g => g.Players)
+                .Include(g => g.TimeProgresses)
+                .FirstOrDefault(g => g.Id == id)
+                ?? throw new GameNotValidException("Speed typing game cannot be null");
+            _context.SpeedTypingPlayer.RemoveRange(game.Players);
+            _context.SpeedTypingTimeProgress.RemoveRange(game.TimeProgresses);
+            _context.SpeedTypingGame.Remove(game);
+            await _context.SaveChangesAsync();
         }
 
         public Task<IEnumerable<SpeedTypingGameRow>> GetAllGames()
@@ -79,6 +94,24 @@ namespace PatteDoie.Services.SpeedTyping
             throw new NotImplementedException();
         }
 
+        public async Task ManageEndOfGame(Guid gameId)
+        {
+            var game = _context.SpeedTypingGame.AsQueryable()
+               .Where(g => g.Id == gameId)
+               .FirstOrDefault<SpeedTypingGame>();
+            if (game is null)
+            {
+                throw new GameNotValidException("Speed typing game cannot be null");
+            }
+            foreach (SpeedTypingPlayer player in game.Players)
+            {
+                if (!IsSetTimeProgress(game.TimeProgresses, player))
+                {
+                    await SetTimeProgress(game, player, new DateTime());
+                }
+            }
+            Task deleteGame = this.DelayedDeletion(game);
+        }
         public async Task SetTimeProgress(SpeedTypingGame game, SpeedTypingPlayer player, DateTime timeProgress)
         {
             if (player is null)
@@ -96,7 +129,6 @@ namespace PatteDoie.Services.SpeedTyping
             };
             game.TimeProgresses.Add(playerProgress);
             await _context.SaveChangesAsync();
-
         }
 
         public async Task<bool> CheckWord(Guid gameId, Guid uuid, string word)
@@ -127,6 +159,18 @@ namespace PatteDoie.Services.SpeedTyping
                 return false;
             }
 
+        }
+
+        private bool IsSetTimeProgress(List<SpeedTypingTimeProgress> timeProgresses, SpeedTypingPlayer player)
+        {
+            return timeProgresses.Any(timeProgress => timeProgress.Player == player);
+        }
+
+        private async Task DelayedDeletion(SpeedTypingGame game)
+        {
+            await Task.Delay(TIME_BEFORE_DELETION);
+            await DeleteGame(game.Id);
+            NavigationManager.NavigateTo("/home");
         }
     }
 }
