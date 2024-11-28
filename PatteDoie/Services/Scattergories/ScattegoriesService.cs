@@ -138,7 +138,8 @@ namespace PatteDoie.Services.Scattergories
             await Task.Delay(TIME_BEFORE_DELETION);
             await DeleteGame(game.Id);
             NavigationManager.NavigateTo("/home");
-
+        }
+      
         private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
         {
             List<ScattergoriesCategory> categoriesAnswered = new List<ScattergoriesCategory>();
