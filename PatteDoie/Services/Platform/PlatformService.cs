@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -68,7 +67,7 @@ namespace PatteDoie.Services.Platform
             }
 
             //TODO : Create game
-            
+
             return _mapper.Map<PlatformLobbyRow>(platformLobby);
         }
 
@@ -85,7 +84,11 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformLobbyRow> GetLobby(Guid lobbyId)
         {
-            var lobby = await _context.PlatformLobby.AsQueryable().Include(l => l.Creator).Include(l => l.Game).Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
+            var lobby = await _context.PlatformLobby.AsQueryable()
+                .Include(l => l.Creator)
+                .Include(l => l.Game)
+                .Include(l => l.Users)
+                .FirstOrDefaultAsync(l => l.Id == lobbyId) ?? throw new LobbyNotFoundException("Lobby not found");
             return _mapper.Map<PlatformLobbyRow>(lobby);
         }
 
@@ -180,7 +183,7 @@ namespace PatteDoie.Services.Platform
 
         private async Task CreateGame(GameType type, List<User> users)
         {
-            switch(type)
+            switch (type)
             {
                 case GameType.Scattergories:
                     //TODO : Create game
