@@ -1,22 +1,22 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
+using PatteDoie.PatteDoieException;
+using PatteDoie.Rows.Platform;
 using PatteDoie.Rows.Scattegories;
 
 namespace PatteDoie.Services.Scattergories
 {
-    public class ScattegoriesService : IScattegoriesService
+    public class ScattegoriesService(PatteDoieContext context, IMapper mapper) : IScattegoriesService
     {
-        private readonly PatteDoieContext _context;
-        private readonly IMapper _mapper;
+        public static int TIME_BEFORE_DELETION = 60000;
 
-        public ScattegoriesService(PatteDoieContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
+        private readonly PatteDoieContext _context = context;
+        private readonly IMapper _mapper = mapper;
+        private readonly NavigationManager NavigationManager = default!;
 
         public async Task<IEnumerable<ScattegoriesGameRow>> GetAllGames()
         {
@@ -76,9 +76,39 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
-        public Task DeleteGame(Guid gameId)
+        public async Task DeleteGame(Guid gameId)
         {
-            throw new NotImplementedException();
+            var game = _context.ScattergoriesGame.AsQueryable()
+               .Where(g => g.Id == gameId)
+               .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Scattergories game cannot be null");
+            _context.ScattergoriesPlayer.RemoveRange(game.Players);
+            _context.ScattergoriesCategory.RemoveRange(game.Categories);
+            _context.ScattergoriesGame.Remove(game);
+            await _context.SaveChangesAsync();
+        }
+        
+        public async Task<PlatformUserRow> EndScattergoriesGame(Guid gameId)
+        {
+            var game = _context.ScattergoriesGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefault<ScattergoriesGame>()
+                    ?? throw new Exception("Scattergories game is null");
+            if (!IsGameEnded(game))
+            {
+                throw new Exception("Scattergories game is not ended");
+            }
+            var players = game.Players;
+            ScattergoriesPlayer bestPlayer = players.First();
+            foreach (var player in players)
+            {
+                if (player.Score > bestPlayer.Score)
+                {
+                    bestPlayer = player;
+                }
+            }
+            var bestUser = bestPlayer.User;
+
+            Task deleteGame = this.DelayedDeletion(game);
+
+            return _mapper.Map<PlatformUserRow>(bestUser);
         }
 
         //TOOLS
@@ -109,6 +139,21 @@ namespace PatteDoie.Services.Scattergories
             }
             return answers;
         }
+
+        private static bool IsGameEnded(ScattergoriesGame game)
+        {
+            if (game.CurrentRound == game.MaxRound)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private async Task DelayedDeletion(ScattergoriesGame game)
+        {
+            await Task.Delay(TIME_BEFORE_DELETION);
+            await DeleteGame(game.Id);
+            NavigationManager.NavigateTo("/home");
 
         private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
         {
