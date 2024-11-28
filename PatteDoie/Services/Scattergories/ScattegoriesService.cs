@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
 using PatteDoie.Rows.Scattegories;
@@ -116,6 +117,10 @@ namespace PatteDoie.Services.Scattergories
             List<ScattergoriesCategory> categoriesAnswered = new List<ScattergoriesCategory>();
             foreach (var answer in answers)
             {
+                if (answer.Text.Trim().IsNullOrEmpty())
+                {
+                    return false;
+                }
                 categoriesAnswered.Add(answer.Category);
             }
             return Enumerable.SequenceEqual(categories.OrderBy(x => x), categoriesAnswered.OrderBy(x => x));
