@@ -173,7 +173,9 @@ namespace PatteDoie.Services.Platform
 
         public async Task<bool> StartGame(Guid lobbyId)
         {
-            var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
+            var lobby = await _context.PlatformLobby.AsQueryable()
+                .Include(l => l.Game)
+                .FirstOrDefaultAsync(l => l.Id == lobbyId) ?? throw new LobbyNotFoundException("Lobby not found");
             lobby.Started = true;
             _context.PlatformLobby.Update(lobby);
             await _context.SaveChangesAsync();

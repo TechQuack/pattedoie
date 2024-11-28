@@ -46,7 +46,8 @@ namespace PatteDoie.Services.SpeedTyping
                 _context.SpeedTypingPlayer.Add(speedTypingPlayer);
             }
             String ApiUrl = "https://random-word-api.herokuapp.com/word?lang=fr&number=10";
-            String result = ApiCall.GetAsync(ApiUrl).Result.Remove(0, 1);
+            String result = await ApiCall.GetAsync(ApiUrl);
+            result = result.Remove(0, 1);
             result = result.Remove(result.Length - 1);
             String[] words = result.Replace("\"", "").Split(',');
 
