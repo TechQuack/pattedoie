@@ -25,7 +25,7 @@
                 <p>@Lobby.Game.Name</p>
             }
         </div>
-        <input type="button" @onclick="(e) => PlatformService.StartGame(Lobby.Id)" value="Start" />
+        <input type="button" @onclick="StartGame" value="Start" />
     } else {
         <p>Loading...</p>
     }

@@ -25,6 +25,6 @@ namespace PatteDoie.Services.Platform
 
         public Task<IEnumerable<PlatformHighScoreRow>> GetHighestScoreFromGame(Guid gameId);
 
-        public Task<bool> StartGame(Guid lobbyId);
+        public Task<Guid?> StartGame(Guid lobbyId);
     }
 }

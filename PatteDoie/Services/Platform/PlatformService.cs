@@ -185,7 +185,7 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<List<PlatformHighScoreRow>>(highScores);
         }
 
-        public async Task<bool> StartGame(Guid lobbyId)
+        public async Task<Guid?> StartGame(Guid lobbyId)
         {
             var lobby = await _context.PlatformLobby.AsQueryable()
                 .Include(l => l.Game)
@@ -193,11 +193,11 @@ namespace PatteDoie.Services.Platform
             lobby.Started = true;
             _context.PlatformLobby.Update(lobby);
             await _context.SaveChangesAsync();
-            await CreateGame(GameTypeHelper.GetGameTypeFromString(lobby.Game.Name), lobby);
-            return true;
+            var id = await CreateGame(GameTypeHelper.GetGameTypeFromString(lobby.Game.Name), lobby);
+            return id;
         }
 
-        private async Task CreateGame(GameType type, Lobby lobby)
+        private async Task<Guid?> CreateGame(GameType type, Lobby lobby)
         {
             var users = lobby.Users;
             switch (type)
@@ -206,13 +206,14 @@ namespace PatteDoie.Services.Platform
                     // Verify number of users
                     var numCat = 5;
                     var numRound = 5;
-                    await _scattergoriesService.CreateGame(numCat, numRound, users, lobby.Creator);
-                    break;
+                    var gameScattergories = await _scattergoriesService.CreateGame(numCat, numRound, users, lobby.Creator);
+                    return gameScattergories.Id;
                 case GameType.SpeedTyping:
                     // Verify number of users
-                    await _speedTypingService.CreateGame(users);
-                    break;
+                    var gameSpeedTyping = await _speedTypingService.CreateGame(users);
+                    return gameSpeedTyping.Id;
             }
+            return null;
         }
     }
 }

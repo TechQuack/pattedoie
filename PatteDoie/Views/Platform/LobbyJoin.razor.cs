@@ -20,6 +20,8 @@ namespace PatteDoie.Views.Platform
             var name = await GetName();
 
             await PlatformService.JoinLobby(new Guid(Id ?? ""), name, new Guid(uuid), Password);
+
+            NavigationManager.NavigateTo($"/lobby/{Id}");
         }
 
     }

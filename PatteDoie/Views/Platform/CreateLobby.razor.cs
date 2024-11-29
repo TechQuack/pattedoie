@@ -28,6 +28,8 @@ public partial class CreateLobby : AuthenticatedPage
             return; 
         }
 
-        await PlatformService.CreateLobby(new Guid(uuid), name, Password, gameType);
+        var lobbyRow = await PlatformService.CreateLobby(new Guid(uuid), name, Password, gameType);
+
+        NavigationManager.NavigateTo($"/lobby/{lobbyRow.Id}");
     }
 }
