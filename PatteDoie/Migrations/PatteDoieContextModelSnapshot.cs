@@ -45,14 +45,14 @@ namespace PatteDoie.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d110dad8-2625-42cc-9412-44393c5c9658"),
+                            Id = new Guid("f750be83-efe7-41f5-bcd0-8f16f3a7b793"),
                             MaxPlayers = 8,
                             MinPlayers = 2,
                             Name = "Scattergories"
                         },
                         new
                         {
-                            Id = new Guid("e4d96495-5e08-489b-9fc3-6541ab07140d"),
+                            Id = new Guid("acc87108-7333-4152-a762-ac7f5c7fa750"),
                             MaxPlayers = 5,
                             MinPlayers = 1,
                             Name = "SpeedTyping"
@@ -132,7 +132,7 @@ namespace PatteDoie.Migrations
                     b.ToTable("PlatformUser");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattegoriesAnswer", b =>
+            modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesAnswer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -324,7 +324,7 @@ namespace PatteDoie.Migrations
                         .HasForeignKey("LobbyId");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattegoriesAnswer", b =>
+            modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesAnswer", b =>
                 {
                     b.HasOne("PatteDoie.Models.Scattergories.ScattergoriesCategory", "Category")
                         .WithMany()

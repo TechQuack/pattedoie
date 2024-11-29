@@ -1,6 +1,6 @@
 ﻿namespace PatteDoie.Models.Scattergories
 {
-    public class ScattegoriesAnswer
+    public class ScattergoriesAnswer
     {
         public Guid Id { get; set; }
         public required string Text { get; set; }
