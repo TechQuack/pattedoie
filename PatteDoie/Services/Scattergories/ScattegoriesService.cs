@@ -115,7 +115,7 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
-        public async Task HostVerifyWord(ScattergoriesGame game, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision)
+        public async Task<ScattegoriesGameRow> HostVerifyWord(ScattergoriesGame game, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision)
         {
             if (decision)
             {
@@ -127,8 +127,9 @@ namespace PatteDoie.Services.Scattergories
 
             if (AreAllWordsChecked(game))
             {
-                // TODO : CALL NEXT ROUND METHOD
+                return NextRound(game).Result;
             }
+            return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
         //TOOLS
