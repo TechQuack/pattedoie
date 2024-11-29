@@ -26,7 +26,9 @@ namespace PatteDoie.Services.Scattergories
 
         public async Task<ScattegoriesGameRow> GetGame(Guid gameId)
         {
-            var game = (await _context.ScattergoriesGame.AsQueryable().Where(game => game.Id == gameId).ToListAsync()).FirstOrDefault();
+            var game = _context.ScattergoriesGame.AsQueryable()
+               .Where(g => g.Id == gameId)
+               .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Scattergories game cannot be null");
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
         public Task<IEnumerable<ScattegoriesGameRow>> SearchGames()
@@ -86,7 +88,7 @@ namespace PatteDoie.Services.Scattergories
             _context.ScattergoriesGame.Remove(game);
             await _context.SaveChangesAsync();
         }
-        
+
         public async Task<PlatformUserRow> EndScattergoriesGame(Guid gameId)
         {
             var game = _context.ScattergoriesGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefault<ScattergoriesGame>()
@@ -139,7 +141,7 @@ namespace PatteDoie.Services.Scattergories
             await DeleteGame(game.Id);
             NavigationManager.NavigateTo("/home");
         }
-      
+
         private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
         {
             List<ScattergoriesCategory> categoriesAnswered = new List<ScattergoriesCategory>();
