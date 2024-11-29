@@ -65,7 +65,8 @@ namespace PatteDoie.Services.Scattergories
             ScattergoriesAnswer answer = new ScattergoriesAnswer
             {
                 Category = category,
-                Text = word
+                Text = word,
+                IsChecked = false
             };
             player.Answers.Add(answer);
             /*
