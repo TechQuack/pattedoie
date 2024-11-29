@@ -62,7 +62,7 @@ namespace PatteDoie.Services.Scattergories
             {
                 return false;
             }
-            ScattegoriesAnswer answer = new ScattegoriesAnswer
+            ScattergoriesAnswer answer = new ScattergoriesAnswer
             {
                 Category = category,
                 Text = word
@@ -122,7 +122,7 @@ namespace PatteDoie.Services.Scattergories
             _context.ScattergoriesGame.Remove(game);
             await _context.SaveChangesAsync();
         }
-        
+
         public async Task<PlatformUserRow> EndScattergoriesGame(Guid gameId)
         {
             var game = _context.ScattergoriesGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefault<ScattergoriesGame>()
@@ -175,7 +175,7 @@ namespace PatteDoie.Services.Scattergories
             await DeleteGame(game.Id);
             NavigationManager.NavigateTo("/home");
         }
-      
+
         private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
         {
             List<ScattergoriesCategory> categoriesAnswered = new List<ScattergoriesCategory>();
