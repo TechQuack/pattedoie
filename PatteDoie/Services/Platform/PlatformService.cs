@@ -8,15 +8,17 @@ using PatteDoie.Models.Platform;
 using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
 using PatteDoie.Rows.Platform;
+using PatteDoie.Services.Scattergories;
 using PatteDoie.Services.SpeedTyping;
 
 namespace PatteDoie.Services.Platform
 {
-    public class PlatformService(PatteDoieContext context, IMapper mapper, ISpeedTypingService speedTypingService) : IPlatformService
+    public class PlatformService(PatteDoieContext context, IMapper mapper, ISpeedTypingService speedTypingService, IScattegoriesService scattergoriesService) : IPlatformService
     {
         private readonly PatteDoieContext _context = context;
         private readonly IMapper _mapper = mapper;
         private readonly ISpeedTypingService _speedTypingService = speedTypingService;
+        private readonly IScattegoriesService _scattergoriesService = scattergoriesService;
 
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type)
@@ -179,16 +181,20 @@ namespace PatteDoie.Services.Platform
             lobby.Started = true;
             _context.PlatformLobby.Update(lobby);
             await _context.SaveChangesAsync();
-            await CreateGame(GameTypeHelper.GetGameTypeFromString(lobby.Game.Name), lobby.Users);
+            await CreateGame(GameTypeHelper.GetGameTypeFromString(lobby.Game.Name), lobby);
             return true;
         }
 
-        private async Task CreateGame(GameType type, List<User> users)
+        private async Task CreateGame(GameType type, Lobby lobby)
         {
+            var users = lobby.Users;
             switch (type)
             {
                 case GameType.Scattergories:
-                    //TODO : Create game
+                    // Verify number of users
+                    var numCat = 5;
+                    var numRound = 5;
+                    await _scattergoriesService.CreateGame(numCat, numRound, users, lobby.Creator);
                     break;
                 case GameType.SpeedTyping:
                     // Verify number of users

@@ -59,4 +59,6 @@ app.MapControllerRoute(
 
 app.MapHub<SpeedTypingHub>("/hub/speedtyping");
 
+app.MapHub<ScattergoriesHub>("/hub/scattergories");
+
 app.Run();
