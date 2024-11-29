@@ -6,14 +6,16 @@ using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Views.Platform;
 
-public partial class LobbiesList : ComponentBase
+public partial class LobbiesList : AuthenticatedPage
 {
     public IEnumerable<PlatformLobbyRow> Items = [];
 
     [Inject]
     private IPlatformService PlatformService { get; set; } = default!;
 
-    private LobbyType Type = LobbyType.Public;
+    private LobbyType Type = LobbyType.All;
+
+    private FilterGameType GameTypeValue = FilterGameType.All;
 
     private readonly List<LobbyType> Types =
     [
@@ -34,6 +36,6 @@ public partial class LobbiesList : ComponentBase
 
     private async Task SearchLobbies()
     {
-        Items = await PlatformService.SearchLobbies(Type);
+        Items = await PlatformService.SearchLobbies(Type, GameTypeValue);
     }
 }
