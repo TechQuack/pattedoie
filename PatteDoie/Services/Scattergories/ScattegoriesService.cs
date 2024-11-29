@@ -140,23 +140,6 @@ namespace PatteDoie.Services.Scattergories
             };
         }
 
-        private List<ScattergoriesAnswer> CreateEmptyAnswers(List<ScattergoriesCategory> categories)
-        {
-            var answers = new List<ScattergoriesAnswer>();
-            foreach (var category in categories)
-            {
-                var answer = new ScattergoriesAnswer
-                {
-                    Text = "",
-                    Category = category,
-                    IsChecked = false,
-                };
-                answers.Add(answer);
-                _context.ScattergoriesAnswer.Add(answer);
-            }
-            return answers;
-        }
-
         private static bool IsGameEnded(ScattergoriesGame game)
         {
             if (game.CurrentRound == game.MaxRound)
