@@ -13,7 +13,7 @@ public partial class LobbiesList : AuthenticatedPage
     [Inject]
     private IPlatformService PlatformService { get; set; } = default!;
 
-    private LobbyType Type = LobbyType.Public;
+    private LobbyType Type = LobbyType.All;
 
     private FilterGameType GameType = FilterGameType.All;
 
