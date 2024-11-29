@@ -120,7 +120,7 @@ namespace PatteDoie.Services.Platform
                     break;
             }
 
-            return _mapper.Map<List<PlatformLobbyRow>>(await query.ToListAsync());
+            return _mapper.Map<List<PlatformLobbyRow>>(await query.Include(l => l.Game).ToListAsync());
         }
 
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command)

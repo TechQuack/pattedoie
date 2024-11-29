@@ -1,24 +1,33 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using PatteDoie.Enums;
 using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Views.Platform;
 
-public partial class CreateLobby : BasePage
+public partial class CreateLobby : AuthenticatedPage
 {
-    private string? Password { get; set; }
+    [Parameter, SupplyParameterFromQuery]
+    public string? GameName { get; set; }
 
-    private GameType GameType { get; set; }
+    private string? Password { get; set; }
 
     [Inject]
     private IPlatformService PlatformService { get; set; } = default!;
 
     private async Task Submit()
     {
-        var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
-        var name = await ProtectedLocalStorage.GetAsync<string>("name");
+        var uuid = await GetUUID();
+        var name = await GetName();
 
-        await PlatformService.CreateLobby(new Guid(uuid.Value ?? ""), name.Value ?? "", Password, GameType);
+        GameType gameType;
+        try { 
+            gameType = GameTypeHelper.GetGameTypeFromString(GameName ?? ""); 
+        }
+        catch { 
+            //TODO: Notify error invalid game
+            return; 
+        }
+
+        await PlatformService.CreateLobby(new Guid(uuid), name, Password, gameType);
     }
 }

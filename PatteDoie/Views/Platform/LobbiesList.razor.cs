@@ -15,7 +15,7 @@ public partial class LobbiesList : AuthenticatedPage
 
     private LobbyType Type = LobbyType.All;
 
-    private FilterGameType GameType = FilterGameType.All;
+    private FilterGameType GameTypeValue = FilterGameType.All;
 
     private readonly List<LobbyType> Types =
     [
@@ -36,6 +36,6 @@ public partial class LobbiesList : AuthenticatedPage
 
     private async Task SearchLobbies()
     {
-        Items = await PlatformService.SearchLobbies(Type, GameType);
+        Items = await PlatformService.SearchLobbies(Type, GameTypeValue);
     }
 }

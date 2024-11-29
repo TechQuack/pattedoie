@@ -7,16 +7,19 @@
 
 <h1>Index</h1>
 
-<p>
-    <a href="/lobby/create">Create New</a>
-</p>
+<div>
+    <a href="/lobby/create?GameName=@GameType.SpeedTyping.GetDescription()">Create new Speedtyping game</a>
+</div>
+<div>
+    <a href="/lobby/create?GameName=@GameType.Scattergories.GetDescription()">Create new Scattergories game</a>
+</div>
 <InputSelect @bind-Value="Type" @bind-Value:after="SearchLobbies">
     @foreach (var type in Types)
     {
         <option value="@type">@GetLobbyTypeDescription(@type)</option>
     }
 </InputSelect>
-<InputSelect @bind-Value="GameType" @bind-Value:after="SearchLobbies">
+<InputSelect @bind-Value="GameTypeValue" @bind-Value:after="SearchLobbies">
     @foreach (Enum type in Enum.GetValues(typeof(FilterGameType)))
     {
         <option value="@type">@type.GetDescription()</option>
@@ -30,6 +33,9 @@
             </th>
             <th>
                 Password
+            </th>
+            <th>
+                Game
             </th>
             <th>
                 Started
