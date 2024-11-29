@@ -121,7 +121,7 @@ namespace PatteDoie.Services.Scattergories
             _context.ScattergoriesPlayer.Update(player);
             await _context.SaveChangesAsync();
 
-            if (IsAllWordChecked(game))
+            if (AreAllWordsChecked(game))
             {
                 // TODO : CALL NEXT ROUND METHOD
             }
@@ -173,13 +173,13 @@ namespace PatteDoie.Services.Scattergories
             NavigationManager.NavigateTo("/home");
         }
 
-        private static bool IsAllWordChecked(ScattergoriesGame game)
+        private static bool AreAllWordsChecked(ScattergoriesGame game)
         {
             var players = game.Players;
             foreach (var player in players)
             {
-                var awnsers = player.Answers;
-                foreach (var answer in awnsers)
+                var answers = player.Answers;
+                foreach (var answer in answers)
                 {
                     if (!answer.IsChecked)
                     {
