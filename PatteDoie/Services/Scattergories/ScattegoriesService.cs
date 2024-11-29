@@ -147,6 +147,22 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<PlatformUserRow>(bestUser);
         }
 
+        public async Task HostVerifyWord(ScattergoriesGame game, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision)
+        {
+            if (decision)
+            {
+                player.Score += 1;
+            }
+            answer.IsChecked = true;
+            _context.ScattergoriesPlayer.Update(player);
+            await _context.SaveChangesAsync();
+
+            if (AreAllWordsChecked(game))
+            {
+                // TODO : CALL NEXT ROUND METHOD
+            }
+        }
+
         //TOOLS
 
         private ScattergoriesPlayer CreatePlayer(User player, List<ScattergoriesAnswer> answers, bool isHost)
@@ -174,6 +190,23 @@ namespace PatteDoie.Services.Scattergories
             await Task.Delay(TIME_BEFORE_DELETION);
             await DeleteGame(game.Id);
             NavigationManager.NavigateTo("/home");
+        }
+
+        private static bool AreAllWordsChecked(ScattergoriesGame game)
+        {
+            var players = game.Players;
+            foreach (var player in players)
+            {
+                var answers = player.Answers;
+                foreach (var answer in answers)
+                {
+                    if (!answer.IsChecked)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
