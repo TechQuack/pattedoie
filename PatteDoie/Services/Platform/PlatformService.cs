@@ -94,7 +94,7 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<PlatformLobbyRow>(lobby);
         }
 
-        public async Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(LobbyType type)
+        public async Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(LobbyType type, FilterGameType gameType)
         {
             var query = _context.PlatformLobby.AsQueryable();
             switch (type)
@@ -108,6 +108,18 @@ namespace PatteDoie.Services.Platform
                 default:
                     break;
             }
+            switch(gameType)
+            {
+                case FilterGameType.Scattergories:
+                    query = query.Where(p => p.Game.Name == GameType.Scattergories.GetDescription());
+                    break;
+                case FilterGameType.SpeedTyping:
+                    query = query.Where(p => p.Game.Name == GameType.SpeedTyping.GetDescription());
+                    break;
+                default:
+                    break;
+            }
+
             return _mapper.Map<List<PlatformLobbyRow>>(await query.ToListAsync());
         }
 

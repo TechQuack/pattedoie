@@ -1,4 +1,6 @@
 ﻿@page "/lobby"
+@using PatteDoie.Enums;
+@using PatteDoie.Extensions;
 
 <PageTitle>Lobbies</PageTitle>
 
@@ -11,6 +13,12 @@
     @foreach (var type in Types)
     {
         <option value="@type">@GetLobbyTypeDescription(@type)</option>
+    }
+</InputSelect>
+<InputSelect @bind-Value="GameType" @bind-Value:after="SearchLobbies">
+    @foreach (Enum type in Enum.GetValues(typeof(FilterGameType)))
+    {
+        <option value="@type">@type.GetDescription()</option>
     }
 </InputSelect>
 <table class="table">

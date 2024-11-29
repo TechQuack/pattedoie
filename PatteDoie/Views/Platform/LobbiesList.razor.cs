@@ -15,6 +15,8 @@ public partial class LobbiesList : ComponentBase
 
     private LobbyType Type = LobbyType.Public;
 
+    private FilterGameType GameType = FilterGameType.All;
+
     private readonly List<LobbyType> Types =
     [
         LobbyType.Public,
@@ -34,6 +36,6 @@ public partial class LobbiesList : ComponentBase
 
     private async Task SearchLobbies()
     {
-        Items = await PlatformService.SearchLobbies(Type);
+        Items = await PlatformService.SearchLobbies(Type, GameType);
     }
 }
