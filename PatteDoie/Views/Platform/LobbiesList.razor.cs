@@ -6,7 +6,7 @@ using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Views.Platform;
 
-public partial class LobbiesList : ComponentBase
+public partial class LobbiesList : AuthenticatedPage
 {
     public IEnumerable<PlatformLobbyRow> Items = [];
 

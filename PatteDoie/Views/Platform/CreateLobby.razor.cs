@@ -5,14 +5,11 @@ using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Views.Platform;
 
-public partial class CreateLobby : ComponentBase
+public partial class CreateLobby : BasePage
 {
     private string? Password { get; set; }
 
     private GameType GameType { get; set; }
-
-    [Inject]
-    private ProtectedLocalStorage ProtectedLocalStorage { get; set; } = default!;
 
     [Inject]
     private IPlatformService PlatformService { get; set; } = default!;

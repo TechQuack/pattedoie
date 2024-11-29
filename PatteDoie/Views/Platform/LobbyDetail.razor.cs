@@ -4,7 +4,7 @@ using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Views.Platform;
 
-public partial class LobbyDetail : ComponentBase
+public partial class LobbyDetail : AuthenticatedPage
 {
     [Parameter]
     public string Id { get; set; } = string.Empty;
