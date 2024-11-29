@@ -24,7 +24,13 @@ namespace PatteDoie.Views.Platform
             var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
             var name = await ProtectedLocalStorage.GetAsync<string>("name");
 
-            await PlatformService.JoinLobby(new Guid(Id ?? ""), name.Value ?? "", new Guid(uuid.Value ?? ""), Password);
+            try
+            {
+                await PlatformService.JoinLobby(new Guid(Id ?? ""), name.Value ?? "", new Guid(uuid.Value ?? ""), Password);
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
     }

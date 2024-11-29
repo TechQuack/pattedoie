@@ -121,6 +121,11 @@ namespace PatteDoie.Services.Platform
 
             var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
 
+            if (IsLobbyContainingPlayer(userUUID, lobby))
+            {
+                throw new Exception("Lobby already contains this player");
+            }
+
             if (String.IsNullOrEmpty(password))
             {
                 if (!String.IsNullOrEmpty(lobby.Password))
@@ -201,6 +206,12 @@ namespace PatteDoie.Services.Platform
                     await _speedTypingService.CreateGame(users);
                     break;
             }
+        }
+
+        private bool IsLobbyContainingPlayer(Guid userUUID, Lobby lobby)
+        {
+            var player = _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == userUUID).FirstOrDefaultAsync();
+            return player != null;
         }
     }
 }
