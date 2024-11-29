@@ -129,8 +129,6 @@ namespace PatteDoie.Services.Scattergories
             {
                 // TODO : CALL NEXT ROUND METHOD
             }
-            return _mapper.Map<ScattegoriesGameRow>(game);
-            return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
         //TOOLS
