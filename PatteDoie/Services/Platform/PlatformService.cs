@@ -210,8 +210,12 @@ namespace PatteDoie.Services.Platform
 
         private bool IsLobbyContainingPlayer(Guid userUUID, Lobby lobby)
         {
-            var player = _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == userUUID).FirstOrDefaultAsync();
-            return player != null;
+            var players = lobby.Users;
+            foreach (var player in players)
+            {
+                if (player.UserUUID == userUUID) return true;
+            }
+            return false;
         }
     }
 }
