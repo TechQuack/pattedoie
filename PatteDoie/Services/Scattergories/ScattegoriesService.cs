@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
 using PatteDoie.PatteDoieException;
-using PatteDoie.Rows.Platform;
 using PatteDoie.Rows.Scattegories;
 
 namespace PatteDoie.Services.Scattergories
@@ -44,13 +43,14 @@ namespace PatteDoie.Services.Scattergories
             if (HasGameEnded(game))
             {
                 return EndScattergoriesGame(game).Result;
-            } else
+            }
+            else
             {
                 game.CurrentLetter = RandomLetter();
                 game.CurrentRound += 1;
-                foreach (var player in game.Players) 
+                foreach (var player in game.Players)
                 {
-                    player.Answers = new List<ScattegoriesAnswer>();
+                    player.Answers = new List<ScattergoriesAnswer>();
                 }
                 await _context.SaveChangesAsync();
                 return _mapper.Map<ScattegoriesGameRow>(game);
@@ -102,7 +102,7 @@ namespace PatteDoie.Services.Scattergories
             _context.ScattergoriesGame.Remove(game);
             await _context.SaveChangesAsync();
         }
-        
+
         public async Task<ScattegoriesGameRow> EndScattergoriesGame(ScattergoriesGame game)
         {
             if (!HasGameEnded(game))
@@ -139,7 +139,7 @@ namespace PatteDoie.Services.Scattergories
             await DeleteGame(game.Id);
             NavigationManager.NavigateTo("/home");
         }
-      
+
         private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
         {
             List<ScattergoriesCategory> categoriesAnswered = new List<ScattergoriesCategory>();
@@ -156,7 +156,7 @@ namespace PatteDoie.Services.Scattergories
 
         private static char RandomLetter()
         {
-            return (char) new Random().Next(65, 90);
+            return (char)new Random().Next(65, 90);
         }
     }
 }
