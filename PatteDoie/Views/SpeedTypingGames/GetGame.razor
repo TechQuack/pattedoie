@@ -36,6 +36,17 @@
             }
         }
      </div>
+
+     <div>
+         @foreach(var playerRow in _players)
+        {
+            <label for="@playerRow.User.Nickname">@playerRow.User.Nickname</label>
+            <progress id="@playerRow.User.Nickname" value="@playerRow.Score" max="10"> 
+                @(playerRow.Score / 10 * 100)
+            </progress>
+            <hr />
+        }
+    </div>
 </div>
 <div>
     <a asp-action="Index">Back to List</a>

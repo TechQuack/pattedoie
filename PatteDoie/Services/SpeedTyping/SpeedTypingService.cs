@@ -149,7 +149,8 @@ namespace PatteDoie.Services.SpeedTyping
             {
                 player.Score += 1;
                 await _context.SaveChangesAsync();
-                await _hub.Clients.All.SendAsync("SendProgression", gameId, _mapper.Map<SpeedTypingPlayerRow>(player));
+                await _hub.Clients.Group(gameId.ToString())
+                    .SendAsync("ReceiveProgression", _mapper.Map<SpeedTypingPlayerRow>(player));
 
                 // check si le joueur a fini, si oui, mettre fin à la partie et remplir SpeedTypingTimeProgress
                 return true;
@@ -159,6 +160,14 @@ namespace PatteDoie.Services.SpeedTyping
                 return false;
             }
 
+        }
+
+        public async Task<List<SpeedTypingPlayerRow>> GetRank(Guid gameId)
+        {
+            var game = await _context.SpeedTypingGame.AsQueryable()
+                .Include(g => g.Players).ThenInclude(p => p.User)
+                .FirstOrDefaultAsync<SpeedTypingGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+            return _mapper.Map<List<SpeedTypingPlayerRow>>(game.Players.OrderByDescending(player => player.Score));
         }
 
         private bool IsSetTimeProgress(List<SpeedTypingTimeProgress> timeProgresses, SpeedTypingPlayer player)

@@ -16,6 +16,8 @@ namespace PatteDoie.Views.SpeedTypingGames
         [Parameter]
         public required string Id { get; set; }
 
+        private List<SpeedTypingPlayerRow> _players = [];
+
         private Timer _timer = null!;
         private int _secondsToRun = 60;
         private HubConnection? hubConnection;
@@ -35,11 +37,12 @@ namespace PatteDoie.Views.SpeedTypingGames
         protected ISpeedTypingService SpeedTypingService { get; set; } = default!;
 
         [Inject]
-        private IJSRuntime JSRuntime { get; set; }
+        private IJSRuntime JSRuntime { get; set; } = default!;
 
         protected override async Task OnInitializedAsync()
         {
             this.Row = await SpeedTypingService.GetGame(new Guid(this.Id));
+            _players = await SpeedTypingService.GetRank(new Guid(this.Id));
             hubConnection = new HubConnectionBuilder()
              .WithUrl(Navigation.ToAbsoluteUri("/hub/speedtyping"), (opts) =>
              {
@@ -54,10 +57,10 @@ namespace PatteDoie.Views.SpeedTypingGames
              })
              .Build();
 
-            hubConnection.On<SpeedTypingPlayerRow>("ReceiveProgress", (player) =>
+            hubConnection.On<SpeedTypingPlayerRow>("ReceiveProgression", async (player) =>
             {
-                //TODO : update front
-                InvokeAsync(StateHasChanged);
+                _players = await SpeedTypingService.GetRank(new Guid(this.Id));
+                await InvokeAsync(StateHasChanged);
             });
 
             await hubConnection.StartAsync();
