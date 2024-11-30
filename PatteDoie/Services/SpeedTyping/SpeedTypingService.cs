@@ -96,6 +96,14 @@ namespace PatteDoie.Services.SpeedTyping
             throw new NotImplementedException();
         }
 
+        public async Task<int> GetScore(Guid playerUUID)
+        {
+            var platformUser = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == playerUUID).FirstOrDefaultAsync();
+            var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync()
+                ?? throw new PlayerNotValidException("Player not found");
+            return player.Score;
+        }
+
         public async Task ManageEndOfGame(Guid gameId)
         {
             var game = _context.SpeedTypingGame.AsQueryable()

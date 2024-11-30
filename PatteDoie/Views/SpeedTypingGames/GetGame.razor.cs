@@ -62,9 +62,19 @@ namespace PatteDoie.Views.SpeedTypingGames
 
             await hubConnection.StartAsync();
             await hubConnection.SendAsync("JoinGame", this.Id);
-            var elapsedTime = DateTime.UtcNow - Row.LaunchTime;
-            _secondsToRun = 60 - (int)elapsedTime.TotalSeconds;
+        }
 
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
+
+                var elapsedTime = DateTime.UtcNow - Row.LaunchTime;
+                _secondsToRun = 60 - (int)elapsedTime.TotalSeconds;
+
+                WordIndexToDisplay = await SpeedTypingService.GetScore(new Guid(uuid.Value ?? ""));
+            }
         }
 
         public async void CheckTextSpace(string Text)
@@ -94,7 +104,7 @@ namespace PatteDoie.Views.SpeedTypingGames
 
         private async void OnTimedEvent(object? sender, ElapsedEventArgs e)
         {
-            _secondsToRun = _secondsToRun > 0 ? _secondsToRun - 1 : _secondsToRun;
+            _secondsToRun = _secondsToRun > 0 ? _secondsToRun - 1 : 0;
             await InvokeAsync(StateHasChanged);
         }
     }
