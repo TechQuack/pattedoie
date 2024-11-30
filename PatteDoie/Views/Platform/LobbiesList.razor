@@ -1,16 +1,28 @@
 ﻿@page "/lobby"
+@inherits AuthenticatedPage
+@using PatteDoie.Enums;
+@using PatteDoie.Extensions;
 
 <PageTitle>Lobbies</PageTitle>
 
 <h1>Index</h1>
 
-<p>
-    <a href="/lobby/create">Create New</a>
-</p>
+<div>
+    <a href="/lobby/create?GameName=@GameType.SpeedTyping.GetDescription()">Create new Speedtyping game</a>
+</div>
+<div>
+    <a href="/lobby/create?GameName=@GameType.Scattergories.GetDescription()">Create new Scattergories game</a>
+</div>
 <InputSelect @bind-Value="Type" @bind-Value:after="SearchLobbies">
     @foreach (var type in Types)
     {
         <option value="@type">@GetLobbyTypeDescription(@type)</option>
+    }
+</InputSelect>
+<InputSelect @bind-Value="GameTypeValue" @bind-Value:after="SearchLobbies">
+    @foreach (Enum type in Enum.GetValues(typeof(FilterGameType)))
+    {
+        <option value="@type">@type.GetDescription()</option>
     }
 </InputSelect>
 <table class="table">
@@ -21,6 +33,9 @@
             </th>
             <th>
                 Password
+            </th>
+            <th>
+                Game
             </th>
             <th>
                 Started
@@ -36,6 +51,9 @@
             </td>
             <td>
                 @item.Password
+            </td>
+            <td>
+                @item.Game.Name
             </td>
             <td>
                 @item.Started

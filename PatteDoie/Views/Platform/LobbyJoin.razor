@@ -1,4 +1,5 @@
 ﻿@page "/lobby/join/{Id}"
+@inherits AuthenticatedPage
 
 <h3>LobbyJoin</h3>
 
@@ -24,5 +25,5 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a href="/lobby">Back to List</a>
 </div>
