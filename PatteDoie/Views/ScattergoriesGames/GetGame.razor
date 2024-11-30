@@ -9,7 +9,33 @@
 
     <div>
         <div>
-            <h1>@Row.CurrentLetter</h1>
+            <h1>Current Letter</h1>
+            <h2>@Row.CurrentLetter</h2>
+        </div>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            Category
+                        </th>
+                        <th>
+                            Your answers
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cattegories in @Row.Categories)
+                    {
+                        <tr>
+                            <td>@cattegories.Name</td>
+                        </tr>
+                        <tr>
+                            <td>Response</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 
