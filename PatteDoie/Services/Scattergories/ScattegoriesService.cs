@@ -50,7 +50,6 @@ namespace PatteDoie.Services.Scattergories
             {
                 game.CurrentLetter = RandomLetter();
                 game.CurrentRound += 1;
-                game.IsHostCheckingPhase = false;
                 foreach (var player in game.Players)
                 {
                     player.Answers = new List<ScattergoriesAnswer>();
@@ -86,8 +85,7 @@ namespace PatteDoie.Services.Scattergories
                 MaxRound = roundNumber,
                 CurrentRound = 1,
                 CurrentLetter = RandomLetter(),
-                Categories = categories,
-                IsHostCheckingPhase = false
+                Categories = categories
             };
             _context.ScattergoriesGame.Add(game);
 
