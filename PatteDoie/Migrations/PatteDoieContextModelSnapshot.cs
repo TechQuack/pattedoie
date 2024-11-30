@@ -45,14 +45,14 @@ namespace PatteDoie.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("f6f00e0a-3448-4507-88e6-68beb19bb18e"),
+                            Id = new Guid("73f91b38-f8d3-45a2-83dd-7320cff13bbb"),
                             MaxPlayers = 8,
                             MinPlayers = 2,
                             Name = "Scattergories"
                         },
                         new
                         {
-                            Id = new Guid("2bb6ac65-b80c-4cee-b53d-d1f8496c6c9e"),
+                            Id = new Guid("4992bb85-e995-4cb1-88a5-ccf0c6613f02"),
                             MaxPlayers = 5,
                             MinPlayers = 1,
                             Name = "SpeedTyping"
@@ -157,7 +157,7 @@ namespace PatteDoie.Migrations
 
                     b.HasIndex("ScattergoriesPlayerId");
 
-                    b.ToTable("ScattergoriesAnswer");
+                    b.ToTable("ScattegoriesAnswer");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesCategory", b =>
@@ -192,9 +192,6 @@ namespace PatteDoie.Migrations
 
                     b.Property<int>("CurrentRound")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsHostCheckingPhase")
-                        .HasColumnType("bit");
 
                     b.Property<int>("MaxRound")
                         .HasColumnType("int");
