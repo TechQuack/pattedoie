@@ -9,7 +9,15 @@
 
     <div>
         <div>
-            <h1>@Row.CurrentLetter</h1>
+            <h1>Current Letter</h1>
+            <h2>@Row.CurrentLetter</h2>
+        </div>
+        <div>
+            <ul>
+                @foreach (var cattegories in @Row.Categories) {
+                    <li>@cattegories.Name</li>
+                }
+            </ul>
         </div>
     </div>
 
