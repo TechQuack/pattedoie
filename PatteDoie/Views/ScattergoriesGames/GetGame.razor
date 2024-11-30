@@ -16,26 +16,24 @@
             <table>
                 <thead>
                     <tr>
-                        <th>
-                            Category
-                        </th>
-                        <th>
-                            Your answers
-                        </th>
+                        @foreach (var cattegories in @Row.Categories)
+                        {
+                            <th>@cattegories.Name</th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
+                    <tr>
                     @foreach (var cattegories in @Row.Categories)
                     {
-                        <tr>
-                            <td>@cattegories.Name</td>
-                        </tr>
-                        <tr>
-                            <td>Response</td>
-                        </tr>
+                        <td><input placeholder="Enter your word here"/></td>
                     }
+                    </tr>
                 </tbody>
             </table>
+            <div>
+                <button>Validate</button>
+            </div>
         </div>
     </div>
 

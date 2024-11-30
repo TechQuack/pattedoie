@@ -19,11 +19,10 @@ namespace PatteDoie.Views.Platform
             var uuid = await GetUUID();
             var name = await GetName();
 
-            await PlatformService.JoinLobby(new Guid(Id ?? ""), name, new Guid(uuid), Password);
 
             try
             {
-                await PlatformService.JoinLobby(new Guid(Id ?? ""), name.Value ?? "", new Guid(uuid.Value ?? ""), Password);
+                await PlatformService.JoinLobby(new Guid(Id ?? ""), name, new Guid(uuid), Password);
             }
             catch (Exception ex)
             {
