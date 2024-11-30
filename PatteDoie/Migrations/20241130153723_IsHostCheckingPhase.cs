@@ -13,150 +13,20 @@ namespace PatteDoie.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ScattegoriesAnswer_ScattergoriesCategory_CategoryId",
-                table: "ScattegoriesAnswer");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ScattegoriesAnswer_ScattergoriesPlayer_ScattergoriesPlayerId",
-                table: "ScattegoriesAnswer");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_ScattegoriesAnswer",
-                table: "ScattegoriesAnswer");
-
-            migrationBuilder.DeleteData(
-                table: "PlatformGame",
-                keyColumn: "Id",
-                keyValue: new Guid("4992bb85-e995-4cb1-88a5-ccf0c6613f02"));
-
-            migrationBuilder.DeleteData(
-                table: "PlatformGame",
-                keyColumn: "Id",
-                keyValue: new Guid("73f91b38-f8d3-45a2-83dd-7320cff13bbb"));
-
-            migrationBuilder.RenameTable(
-                name: "ScattegoriesAnswer",
-                newName: "ScattergoriesAnswer");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_ScattegoriesAnswer_ScattergoriesPlayerId",
-                table: "ScattergoriesAnswer",
-                newName: "IX_ScattergoriesAnswer_ScattergoriesPlayerId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_ScattegoriesAnswer_CategoryId",
-                table: "ScattergoriesAnswer",
-                newName: "IX_ScattergoriesAnswer_CategoryId");
-
             migrationBuilder.AddColumn<bool>(
                 name: "IsHostCheckingPhase",
                 table: "ScattergoriesGame",
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_ScattergoriesAnswer",
-                table: "ScattergoriesAnswer",
-                column: "Id");
-
-            migrationBuilder.InsertData(
-                table: "PlatformGame",
-                columns: new[] { "Id", "MaxPlayers", "MinPlayers", "Name" },
-                values: new object[,]
-                {
-                    { new Guid("240fbf2e-01d7-415e-be25-9023e7391aad"), 8, 2, "Scattergories" },
-                    { new Guid("964c9e7a-f29a-489d-86ee-ddc4ecb4df48"), 5, 1, "SpeedTyping" }
-                });
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ScattergoriesAnswer_ScattergoriesCategory_CategoryId",
-                table: "ScattergoriesAnswer",
-                column: "CategoryId",
-                principalTable: "ScattergoriesCategory",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ScattergoriesAnswer_ScattergoriesPlayer_ScattergoriesPlayerId",
-                table: "ScattergoriesAnswer",
-                column: "ScattergoriesPlayerId",
-                principalTable: "ScattergoriesPlayer",
-                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ScattergoriesAnswer_ScattergoriesCategory_CategoryId",
-                table: "ScattergoriesAnswer");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ScattergoriesAnswer_ScattergoriesPlayer_ScattergoriesPlayerId",
-                table: "ScattergoriesAnswer");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_ScattergoriesAnswer",
-                table: "ScattergoriesAnswer");
-
-            migrationBuilder.DeleteData(
-                table: "PlatformGame",
-                keyColumn: "Id",
-                keyValue: new Guid("240fbf2e-01d7-415e-be25-9023e7391aad"));
-
-            migrationBuilder.DeleteData(
-                table: "PlatformGame",
-                keyColumn: "Id",
-                keyValue: new Guid("964c9e7a-f29a-489d-86ee-ddc4ecb4df48"));
-
             migrationBuilder.DropColumn(
                 name: "IsHostCheckingPhase",
                 table: "ScattergoriesGame");
-
-            migrationBuilder.RenameTable(
-                name: "ScattergoriesAnswer",
-                newName: "ScattegoriesAnswer");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_ScattergoriesAnswer_ScattergoriesPlayerId",
-                table: "ScattegoriesAnswer",
-                newName: "IX_ScattegoriesAnswer_ScattergoriesPlayerId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_ScattergoriesAnswer_CategoryId",
-                table: "ScattegoriesAnswer",
-                newName: "IX_ScattegoriesAnswer_CategoryId");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_ScattegoriesAnswer",
-                table: "ScattegoriesAnswer",
-                column: "Id");
-
-            migrationBuilder.InsertData(
-                table: "PlatformGame",
-                columns: new[] { "Id", "MaxPlayers", "MinPlayers", "Name" },
-                values: new object[,]
-                {
-                    { new Guid("4992bb85-e995-4cb1-88a5-ccf0c6613f02"), 5, 1, "SpeedTyping" },
-                    { new Guid("73f91b38-f8d3-45a2-83dd-7320cff13bbb"), 8, 2, "Scattergories" }
-                });
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ScattegoriesAnswer_ScattergoriesCategory_CategoryId",
-                table: "ScattegoriesAnswer",
-                column: "CategoryId",
-                principalTable: "ScattergoriesCategory",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ScattegoriesAnswer_ScattergoriesPlayer_ScattergoriesPlayerId",
-                table: "ScattegoriesAnswer",
-                column: "ScattergoriesPlayerId",
-                principalTable: "ScattergoriesPlayer",
-                principalColumn: "Id");
         }
     }
 }
