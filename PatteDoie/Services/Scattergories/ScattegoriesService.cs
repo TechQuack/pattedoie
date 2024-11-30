@@ -39,29 +39,18 @@ namespace PatteDoie.Services.Scattergories
             throw new NotImplementedException();
         }
 
-        public async Task<bool> AddPlayerWord(ScattergoriesGame game, ScattergoriesPlayer player, string word, ScattergoriesCategory category)
+        public async Task<ScattegoriesGameRow> AddPlayerWord(ScattergoriesGame game, ScattergoriesPlayer player, string word, ScattergoriesCategory category)
         {
-            if (game == null)
-            {
-                throw new ArgumentNullException(nameof(game));
-            }
-            if (player == null)
-            {
-                throw new ArgumentNullException(nameof(player));
-            }
-            if (category == null)
-            {
-                throw new ArgumentNullException(nameof(category));
-            }
             if (word.Trim().IsNullOrEmpty())
             {
                 throw new ArgumentNullException(nameof(word));
             }
             char letter = game.CurrentLetter;
-            if (word.Trim().First().Equals(letter))
+            if (!word.Trim().First().Equals(letter))
             {
-                return false;
+                throw new Exception($"invalid word(wrong first letter)  - {word}");
             }
+
             ScattergoriesAnswer answer = new ScattergoriesAnswer
             {
                 Category = category,
@@ -69,11 +58,12 @@ namespace PatteDoie.Services.Scattergories
                 IsChecked = false
             };
             player.Answers.Add(answer);
-            /*
-             * TODO: check if user completed categories: if yes call checking by host player
-             */
+            if (HasCompletedCategories(player, game))
+            {
+                //TODO change phase in database
+            }
             await _context.SaveChangesAsync();
-            return true;
+            return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
         public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<User> users, User host)
