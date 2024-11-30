@@ -65,7 +65,7 @@ namespace PatteDoie.Services.Scattergories
 
             var potentialsCategories = (await _context.ScattergoriesCategory.AsQueryable().ToListAsync());
             List<ScattergoriesCategory> categories = potentialsCategories.OrderBy(x => rand.Next()).Take(numberCategories).ToList();
-
+            
             var players = new List<ScattergoriesPlayer>();
             foreach (var user in users)
             {
@@ -89,6 +89,11 @@ namespace PatteDoie.Services.Scattergories
             };
             _context.ScattergoriesGame.Add(game);
 
+            foreach (var category in categories)
+            {
+                category.Games.Add(game);
+            }
+
             await _context.SaveChangesAsync();
 
             return _mapper.Map<ScattegoriesGameRow>(game);
@@ -99,8 +104,11 @@ namespace PatteDoie.Services.Scattergories
             var game = _context.ScattergoriesGame.AsQueryable()
                .Where(g => g.Id == gameId)
                .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Scattergories game cannot be null");
+            foreach (var category in  game.Categories)
+            {
+                category.Games.Remove(game);
+            }
             _context.ScattergoriesPlayer.RemoveRange(game.Players);
-            _context.ScattergoriesCategory.RemoveRange(game.Categories);
             _context.ScattergoriesGame.Remove(game);
             await _context.SaveChangesAsync();
         }
