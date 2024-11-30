@@ -17,7 +17,7 @@ namespace PatteDoie.Views.SpeedTypingGames
         public required string Id { get; set; }
 
         private Timer _timer = null!;
-        private int _secondsToRun = 60;
+        private int _secondsToRun = 0;
         private HubConnection? hubConnection;
 
         private ElementReference InputTextRef;
@@ -62,6 +62,9 @@ namespace PatteDoie.Views.SpeedTypingGames
 
             await hubConnection.StartAsync();
             await hubConnection.SendAsync("JoinGame", this.Id);
+            var elapsedTime = DateTime.UtcNow - Row.LaunchTime;
+            _secondsToRun = 60 - (int)elapsedTime.TotalSeconds;
+
         }
 
         public async void CheckTextSpace(string Text)
