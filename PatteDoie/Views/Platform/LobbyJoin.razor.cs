@@ -30,6 +30,7 @@ namespace PatteDoie.Views.Platform
             }
             catch (Exception ex)
             {
+                // TODO : display an error to the user
             }
         }
 
