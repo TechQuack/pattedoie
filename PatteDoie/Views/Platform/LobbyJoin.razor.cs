@@ -1,28 +1,25 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Mvc;
 using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Views.Platform
 {
-    public partial class LobbyJoin : ComponentBase
+    public partial class LobbyJoin : AuthenticatedPage
     {
         [BindProperty(SupportsGet = true)]
         [Parameter]
         public required string Id { get; set; }
-
         private string? Password { get; set; }
-
-        [Inject]
-        private ProtectedLocalStorage ProtectedLocalStorage { get; set; } = default!;
 
         [Inject]
         private IPlatformService PlatformService { get; set; } = default!;
 
         private async void Submit()
         {
-            var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
-            var name = await ProtectedLocalStorage.GetAsync<string>("name");
+            var uuid = await GetUUID();
+            var name = await GetName();
+
+            await PlatformService.JoinLobby(new Guid(Id ?? ""), name, new Guid(uuid), Password);
 
             try
             {
@@ -32,6 +29,8 @@ namespace PatteDoie.Views.Platform
             {
                 // TODO : display an error to the user
             }
+
+            NavigationManager.NavigateTo($"/lobby/{Id}");
         }
 
     }

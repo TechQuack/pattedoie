@@ -11,7 +11,7 @@ namespace PatteDoie.Rows.Platform
 
         public required User Creator { get; set; }
 
-        public GameRow? Game { get; set; }
+        public required GameRow Game { get; set; }
 
         public string? Password { get; set; }
 

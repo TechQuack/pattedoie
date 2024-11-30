@@ -15,6 +15,7 @@ namespace PatteDoie.Services.SpeedTyping
     public class SpeedTypingService : ISpeedTypingService
     {
         public static int TIME_BEFORE_DELETION = 60000;
+        public static int TIME_BEFORE_ENDING = 60000;
 
         private readonly PatteDoieContext _context;
 
@@ -61,6 +62,7 @@ namespace PatteDoie.Services.SpeedTyping
             _context.SpeedTypingGame.Add(speedTypingGame);
 
             await _context.SaveChangesAsync();
+            Task endGame = this.DelayedEnding(speedTypingGame);
 
             return _mapper.Map<SpeedTypingGameRow>(speedTypingGame);
         }
@@ -94,6 +96,14 @@ namespace PatteDoie.Services.SpeedTyping
             throw new NotImplementedException();
         }
 
+        public async Task<int> GetScore(Guid playerUUID)
+        {
+            var platformUser = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == playerUUID).FirstOrDefaultAsync();
+            var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync()
+                ?? throw new PlayerNotValidException("Player not found");
+            return player.Score;
+        }
+
         public async Task ManageEndOfGame(Guid gameId)
         {
             var game = _context.SpeedTypingGame.AsQueryable()
@@ -107,7 +117,7 @@ namespace PatteDoie.Services.SpeedTyping
             {
                 if (!IsSetTimeProgress(game.TimeProgresses, player))
                 {
-                    await SetTimeProgress(game, player, new DateTime());
+                    await SetTimeProgress(game, player, DateTime.UtcNow);
                 }
             }
             Task deleteGame = this.DelayedDeletion(game);
@@ -140,7 +150,7 @@ namespace PatteDoie.Services.SpeedTyping
             var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync()
                 ?? throw new PlayerNotValidException("Player not found");
             var wordIndexToCheck = player.Score;
-            if (wordIndexToCheck > game.Words.Count)
+            if (wordIndexToCheck >= game.Words.Count)
             {
                 return false;
             }
@@ -150,8 +160,14 @@ namespace PatteDoie.Services.SpeedTyping
                 player.Score += 1;
                 await _context.SaveChangesAsync();
                 await _hub.Clients.All.SendAsync("SendProgression", gameId, _mapper.Map<SpeedTypingPlayerRow>(player));
-
-                // check si le joueur a fini, si oui, mettre fin à la partie et remplir SpeedTypingTimeProgress
+                if (player.Score == game.Words.Count)
+                {
+                    await SetTimeProgress(game, player, DateTime.UtcNow);
+                }
+                if (allPlayersHaveFinished(game))
+                {
+                    await ManageEndOfGame(gameId);
+                }
                 return true;
             }
             else
@@ -159,6 +175,11 @@ namespace PatteDoie.Services.SpeedTyping
                 return false;
             }
 
+        }
+
+        private bool allPlayersHaveFinished(SpeedTypingGame game)
+        {
+            return game.Players.All(p => p.Score == game.Words.Count);
         }
 
         private bool IsSetTimeProgress(List<SpeedTypingTimeProgress> timeProgresses, SpeedTypingPlayer player)
@@ -170,7 +191,13 @@ namespace PatteDoie.Services.SpeedTyping
         {
             await Task.Delay(TIME_BEFORE_DELETION);
             await DeleteGame(game.Id);
-            NavigationManager.NavigateTo("/home");
+            NavigationManager.NavigateTo("/lobby");
+        }
+
+        private async Task DelayedEnding(SpeedTypingGame game)
+        {
+            await Task.Delay(TIME_BEFORE_ENDING);
+            await ManageEndOfGame(game.Id);
         }
     }
 }

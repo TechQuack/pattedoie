@@ -1,11 +1,12 @@
-﻿@using PatteDoie.Enums;
+﻿@inherits AuthenticatedPage
+@using PatteDoie.Enums;
 @using PatteDoie.Extensions;
 
 @page "/lobby/create"
 
 <PageTitle>Create a lobby</PageTitle>
 
-<h1>Create</h1>
+<h1>Create a lobby for the game @GameName</h1>
 
 <h4>PlatformLobby</h4>
 <hr />
@@ -18,15 +19,6 @@
                 <InputText @bind-Value="Password" class="form-control" />
             </div>
             <div class="form-group">
-                <label class="control-label">GameType</label>
-                <InputSelect @bind-Value="GameType">
-                    @foreach (Enum type in Enum.GetValues(typeof(GameType)))
-                    {
-                        <option value="@type">@type.GetDescription()</option>
-                    }
-                </InputSelect>
-            </div>
-            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
@@ -34,7 +26,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a href="/lobby">Back to List</a>
 </div>
 
 
