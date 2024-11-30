@@ -21,6 +21,15 @@ namespace PatteDoie.Views.Platform
 
             await PlatformService.JoinLobby(new Guid(Id ?? ""), name, new Guid(uuid), Password);
 
+            try
+            {
+                await PlatformService.JoinLobby(new Guid(Id ?? ""), name.Value ?? "", new Guid(uuid.Value ?? ""), Password);
+            }
+            catch (Exception ex)
+            {
+                // TODO : display an error to the user
+            }
+
             NavigationManager.NavigateTo($"/lobby/{Id}");
         }
 
