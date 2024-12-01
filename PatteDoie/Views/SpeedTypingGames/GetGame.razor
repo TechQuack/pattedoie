@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web
 @page "/speedtyping/{Id}"
+@inherits GamePage
 
 
 <PageTitle>SpeedTyping</PageTitle>
@@ -16,10 +17,8 @@
         <div class="clock">
             <h1>@_secondsToRun</h1>
         </div>
-        
-        <input type="text" id="inputText" name="inputText" @ref="InputTextRef"
-                 @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")'/>
-        
+        <input type="text" id="inputText" name="inputText" @bind-value="@inputValue"
+            @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")'/>
         <script>
             function hasSpace() {
                 var text = document.getElementById("inputText")

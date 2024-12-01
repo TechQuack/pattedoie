@@ -9,14 +9,4 @@ public partial class AuthenticatedPage : BasePage
             NavigationManager.NavigateTo("/");
         }
     }
-
-    protected async Task<string> GetUUID()
-    {
-        return (await ProtectedLocalStorage.GetAsync<string>("uuid")).Value ?? "";
-    }
-
-    protected async Task<string> GetName()
-    {
-        return (await ProtectedLocalStorage.GetAsync<string>("name")).Value ?? "";
-    }
 }

@@ -11,7 +11,7 @@ namespace PatteDoie.Services.Scattergories
         public Task<IEnumerable<ScattegoriesGameRow>> SearchGames(/*TODO*/);
         public Task UpdateGame(Guid gameId /*, TODO*/);
         public Task<ScattegoriesGameRow> NextRound(ScattergoriesGame game);
-        public Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<User> users, User host);
+        public Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, Lobby lobby);
         public Task DeleteGame(Guid gameId);
         public Task<ScattegoriesGameRow> EndScattergoriesGame(ScattergoriesGame game);
         public Task<ScattegoriesGameRow> HostVerifyWord(ScattergoriesGame game, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision);

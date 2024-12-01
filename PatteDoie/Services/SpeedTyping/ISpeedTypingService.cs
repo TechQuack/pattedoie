@@ -16,7 +16,7 @@ namespace PatteDoie.Services.SpeedTyping
 
         public Task SetTimeProgress(SpeedTypingGame game, SpeedTypingPlayer player, DateTime timeProgress);
 
-        public Task<SpeedTypingGameRow> CreateGame(List<User> platformUsers);
+        public Task<SpeedTypingGameRow> CreateGame(Lobby lobby);
 
         public Task DeleteGame(Guid id);
 

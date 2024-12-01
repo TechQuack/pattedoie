@@ -1,6 +1,6 @@
 ﻿namespace PatteDoie.Models.SpeedTyping
 {
-    public class SpeedTypingGame
+    public class SpeedTypingGame : BaseGame
     {
         public Guid Id { get; set; }
         public List<SpeedTypingPlayer> Players { get; set; } = [];
