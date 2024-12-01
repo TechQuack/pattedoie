@@ -17,21 +17,17 @@ namespace PatteDoie.Views.SpeedTypingGames
 
         private List<SpeedTypingPlayerRow> _players = [];
         private Timer _timer = null!;
-        private Timer _timerToDisableInput = null!;
         private int _secondsToRun = 0;
         private HubConnection? hubConnection;
         private int WordIndexToDisplay = 0;
         private string? inputValue;
+        private bool IsInputDisabled = false;
+        private string UUID;
 
         private SpeedTypingGameRow? Row { get; set; } = null;
 
         [Inject]
         protected ISpeedTypingService SpeedTypingService { get; set; } = default!;
-
-
-        private ProtectedBrowserStorageResult<string> uuid;
-
-        private bool MustCheckDisabled = true;
 
         protected override async Task OnInitializedAsync()
         {
@@ -65,13 +61,14 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             if (firstRender)
             {
+                UUID = await GetUUID();
+
                 await base.OnAfterRenderAsync(firstRender);
-                var uuid = await GetUUID();
 
                 var elapsedTime = DateTime.UtcNow - Row!.LaunchTime;
                 _secondsToRun = 60 - (int)elapsedTime.TotalSeconds;
 
-                WordIndexToDisplay = await SpeedTypingService.GetScore(new Guid(uuid));
+                WordIndexToDisplay = await SpeedTypingService.GetScore(new Guid(UUID));
             }
         }
 
@@ -83,44 +80,20 @@ namespace PatteDoie.Views.SpeedTypingGames
             {
                 return;
             }
-            var uuid = await GetUUID();
 
-            if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row!.Id, new Guid(uuid), Text.TrimEnd())).Result)
+            if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row!.Id, new Guid(UUID), Text.TrimEnd())).Result)
             {
                 this.WordIndexToDisplay += 1;
                 inputValue = "";
                 await InvokeAsync(StateHasChanged);
             }
-
-
-            }
         }
 
-        public async ValueTask DisposeAsync()
-        {
-            MustCheckDisabled = false;
-            if (_timer != null)
-            {
-                _timer.Dispose();
-            }
-
-            if (_timerToDisableInput != null)
-            {
-                _timerToDisableInput.Dispose();
-            }
-
-            if (hubConnection != null)
-            {
-                await hubConnection.DisposeAsync();
-            }
-        }
-
-        override
-        protected void OnInitialized()
         protected override void OnInitialized()
         {
             _timer = new Timer(1000);
             _timer.Elapsed += OnTimedEvent;
+            _timer.Elapsed += CanPlay;
             _timer.AutoReset = true;
             _timer.Enabled = true;
         }
@@ -138,28 +111,12 @@ namespace PatteDoie.Views.SpeedTypingGames
 
         private async void CanPlay(object? sender, ElapsedEventArgs e)
         {
-            if (!MustCheckDisabled)
+            if (IsInputDisabled || UUID == null)
             {
                 return;
             }
-
-            try
-            {
-                if (!await SpeedTypingService.CanPlay(new Guid(uuid.Value ?? ""), Row.Id))
-                {
-                    await InvokeAsync(async () =>
-                    {
-                        if (MustCheckDisabled)
-                        {
-                            await JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('inputText').disabled = 'disabled'");
-                        }
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                await DisposeAsync();
-            }
+            IsInputDisabled = !await SpeedTypingService.CanPlay(new Guid(UUID), this.Row!.Id);
+            await InvokeAsync(StateHasChanged);
         }
     }
 }

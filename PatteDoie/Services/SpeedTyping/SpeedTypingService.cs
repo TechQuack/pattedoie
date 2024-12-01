@@ -35,7 +35,7 @@ namespace PatteDoie.Services.SpeedTyping
         public async Task<SpeedTypingGameRow> CreateGame(Lobby lobby)
         {
             using var _context = _factory.CreateDbContext();
-            await _context.Entry(lobby).ReloadAsync();  
+            await _context.Entry(lobby).ReloadAsync();
             lobby.Users.ForEach(async u => await _context.Entry(u).ReloadAsync());
             List<SpeedTypingPlayer> players = [];
             foreach (User platformUser in lobby.Users)
@@ -131,7 +131,7 @@ namespace PatteDoie.Services.SpeedTyping
             var launch = game.LaunchTime;
             var now = DateTime.UtcNow;
             var elaspedTime = (now - launch).TotalMilliseconds;
-            if (IsSetTimeProgress(game.TimeProgresses, player))
+            if (HasFinished(game, player))
             {
                 return false;
             }
@@ -150,7 +150,7 @@ namespace PatteDoie.Services.SpeedTyping
             }
             foreach (SpeedTypingPlayer player in game.Players)
             {
-                if (!IsSetTimeProgress(game.TimeProgresses, player))
+                if (!HasFinished(game, player))
                 {
                     await SetTimeProgress(game, player, DateTime.UtcNow);
                 }
@@ -185,7 +185,13 @@ namespace PatteDoie.Services.SpeedTyping
 
         public async Task<bool> CheckWord(Guid gameId, Guid uuid, string word)
         {
+
             using var _context = _factory.CreateDbContext();
+            if (!await CanPlay(uuid, gameId))
+            {
+                await _context.DisposeAsync();
+                return false;
+            }
             var game = _context.SpeedTypingGame.AsQueryable()
                 .Where(g => g.Id == gameId)
                 .FirstOrDefault<SpeedTypingGame>() ?? throw new GameNotValidException("Game not found");
@@ -193,11 +199,6 @@ namespace PatteDoie.Services.SpeedTyping
             var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync()
                 ?? throw new PlayerNotValidException("Player not found");
             var wordIndexToCheck = player.Score;
-            if (wordIndexToCheck >= game.Words.Count)
-            {
-                await _context.DisposeAsync();
-                return false;
-            }
             var wordToCheck = game.Words[wordIndexToCheck];
             if (wordToCheck == word)
             {
@@ -241,9 +242,9 @@ namespace PatteDoie.Services.SpeedTyping
             return game.Players.All(p => p.Score == game.Words.Count);
         }
 
-        private bool IsSetTimeProgress(List<SpeedTypingTimeProgress> timeProgresses, SpeedTypingPlayer player)
+        private bool HasFinished(SpeedTypingGame game, SpeedTypingPlayer player)
         {
-            return timeProgresses.Any(timeProgress => timeProgress.Player == player);
+            return player.Score == game.Words.Count;
         }
 
         private async Task DelayedDeletion(SpeedTypingGame game)
