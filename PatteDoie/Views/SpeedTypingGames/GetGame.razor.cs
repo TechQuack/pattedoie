@@ -8,6 +8,7 @@ using PatteDoie.Rows.SpeedTypingGame;
 using PatteDoie.Services.SpeedTyping;
 using System.Timers;
 using Timer = System.Timers.Timer;
+
 namespace PatteDoie.Views.SpeedTypingGames
 {
     public partial class GetGame : ComponentBase
@@ -21,8 +22,6 @@ namespace PatteDoie.Views.SpeedTypingGames
         private Timer _timer = null!;
         private int _secondsToRun = 0;
         private HubConnection? hubConnection;
-
-        private ElementReference InputTextRef;
         private int WordIndexToDisplay = 0;
 
         private SpeedTypingGameRow? Row { get; set; } = null;
@@ -82,22 +81,21 @@ namespace PatteDoie.Views.SpeedTypingGames
 
         public async void CheckTextSpace(string Text)
         {
-            if (Text.Contains(' '))
+            if (!Text.Contains(' '))
             {
-                var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
-
-                if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row.Id, new Guid(uuid.Value ?? ""), Text.TrimEnd())).Result)
-                {
-                    this.WordIndexToDisplay += 1;
-                    await JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('inputText').value = ''");
-                }
-
-
+                return;
             }
+            var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
+
+            if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row!.Id, new Guid(uuid.Value ?? ""), Text.TrimEnd())).Result)
+            {
+                this.WordIndexToDisplay += 1;
+                await JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('inputText').value = ''");
+            }
+
         }
 
-        override
-        protected void OnInitialized()
+        protected override void OnInitialized()
         {
             _timer = new Timer(1000);
             _timer.Elapsed += OnTimedEvent;
