@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<PatteDoieContext>(options =>
+builder.Services.AddDbContextFactory<PatteDoieContext>(options =>
     options.UseSqlServer(string.Format(builder.Configuration.GetConnectionString("PatteDoieContext") ?? "", Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD"))));
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ISpeedTypingService, SpeedTypingService>();
@@ -58,5 +58,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapHub<SpeedTypingHub>("/hub/speedtyping");
+
+app.MapHub<ScattergoriesHub>("/hub/scattergories");
 
 app.Run();

@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
 using PatteDoie.PatteDoieException;
-using PatteDoie.Rows.Platform;
 using PatteDoie.Rows.Scattegories;
 
 namespace PatteDoie.Services.Scattergories
@@ -26,7 +25,9 @@ namespace PatteDoie.Services.Scattergories
 
         public async Task<ScattegoriesGameRow> GetGame(Guid gameId)
         {
-            var game = (await _context.ScattergoriesGame.AsQueryable().Where(game => game.Id == gameId).ToListAsync()).FirstOrDefault();
+            var game = _context.ScattergoriesGame.AsQueryable()
+               .Where(g => g.Id == gameId)
+               .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Scattergories game cannot be null");
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
         public Task<IEnumerable<ScattegoriesGameRow>> SearchGames()
@@ -66,13 +67,33 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
+        public async Task<ScattegoriesGameRow> NextRound(ScattergoriesGame game)
+        {
+            if (HasGameEnded(game))
+            {
+                return EndScattergoriesGame(game).Result;
+            }
+            else
+            {
+                game.CurrentLetter = RandomLetter();
+                game.CurrentRound += 1;
+                game.IsHostCheckingPhase = false;
+                foreach (var player in game.Players)
+                {
+                    player.Answers = new List<ScattergoriesAnswer>();
+                }
+                await _context.SaveChangesAsync();
+                return _mapper.Map<ScattegoriesGameRow>(game);
+            }
+        }
+
         public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<User> users, User host)
         {
             var rand = new Random();
 
             var potentialsCategories = (await _context.ScattergoriesCategory.AsQueryable().ToListAsync());
             List<ScattergoriesCategory> categories = potentialsCategories.OrderBy(x => rand.Next()).Take(numberCategories).ToList();
-
+            
             var players = new List<ScattergoriesPlayer>();
             foreach (var user in users)
             {
@@ -86,17 +107,21 @@ namespace PatteDoie.Services.Scattergories
             players.Add(hostPlayer);
             _context.ScattergoriesPlayer.Add(hostPlayer);
 
-            char letter = (char)rand.Next(65, 90);
-
             var game = new ScattergoriesGame
             {
                 Players = players,
                 MaxRound = roundNumber,
                 CurrentRound = 1,
-                CurrentLetter = letter,
-                Categories = categories
+                CurrentLetter = RandomLetter(),
+                Categories = categories,
+                IsHostCheckingPhase = false
             };
             _context.ScattergoriesGame.Add(game);
+
+            foreach (var category in categories)
+            {
+                category.Games.Add(game);
+            }
 
             await _context.SaveChangesAsync();
 
@@ -108,37 +133,28 @@ namespace PatteDoie.Services.Scattergories
             var game = _context.ScattergoriesGame.AsQueryable()
                .Where(g => g.Id == gameId)
                .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Scattergories game cannot be null");
+            foreach (var category in  game.Categories)
+            {
+                category.Games.Remove(game);
+            }
             _context.ScattergoriesPlayer.RemoveRange(game.Players);
-            _context.ScattergoriesCategory.RemoveRange(game.Categories);
             _context.ScattergoriesGame.Remove(game);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PlatformUserRow> EndScattergoriesGame(Guid gameId)
+        public async Task<ScattegoriesGameRow> EndScattergoriesGame(ScattergoriesGame game)
         {
-            var game = _context.ScattergoriesGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefault<ScattergoriesGame>()
-                    ?? throw new Exception("Scattergories game is null");
-            if (!IsGameEnded(game))
+            if (!HasGameEnded(game))
             {
                 throw new Exception("Scattergories game is not ended");
             }
-            var players = game.Players;
-            ScattergoriesPlayer bestPlayer = players.First();
-            foreach (var player in players)
-            {
-                if (player.Score > bestPlayer.Score)
-                {
-                    bestPlayer = player;
-                }
-            }
-            var bestUser = bestPlayer.User;
 
             Task deleteGame = this.DelayedDeletion(game);
 
-            return _mapper.Map<PlatformUserRow>(bestUser);
+            return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
-        public async Task HostVerifyWord(ScattergoriesGame game, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision)
+        public async Task<ScattegoriesGameRow> HostVerifyWord(ScattergoriesGame game, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision)
         {
             if (decision)
             {
@@ -150,8 +166,9 @@ namespace PatteDoie.Services.Scattergories
 
             if (AreAllWordsChecked(game))
             {
-                // TODO : CALL NEXT ROUND METHOD
+                return NextRound(game).Result;
             }
+            return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
         //TOOLS
@@ -167,13 +184,9 @@ namespace PatteDoie.Services.Scattergories
             };
         }
 
-        private static bool IsGameEnded(ScattergoriesGame game)
+        private static bool HasGameEnded(ScattergoriesGame game)
         {
-            if (game.CurrentRound == game.MaxRound)
-            {
-                return true;
-            }
-            return false;
+            return game.CurrentRound == game.MaxRound;
         }
 
         private async Task DelayedDeletion(ScattergoriesGame game)
@@ -182,6 +195,7 @@ namespace PatteDoie.Services.Scattergories
             await DeleteGame(game.Id);
             NavigationManager.NavigateTo("/home");
         }
+
 
         private static bool AreAllWordsChecked(ScattergoriesGame game)
         {
@@ -212,6 +226,11 @@ namespace PatteDoie.Services.Scattergories
                 categoriesAnswered.Add(answer.Category);
             }
             return Enumerable.SequenceEqual(game.Categories.OrderBy(x => x), categoriesAnswered.OrderBy(x => x));
+        }
+
+        private static char RandomLetter()
+        {
+            return (char)new Random().Next(65, 90);
         }
     }
 }
