@@ -169,7 +169,7 @@ namespace PatteDoie.Services.SpeedTyping
                 Player = player,
                 TimeProgress = timeProgress
             };
-            _context.SpeedTypingTimeProgress.Add(playerProgress);
+            _context.SpeedTypingTimeProgress.Update(playerProgress);
 
             game.TimeProgresses.Add(playerProgress);
             _context.SpeedTypingGame.Update(game);
