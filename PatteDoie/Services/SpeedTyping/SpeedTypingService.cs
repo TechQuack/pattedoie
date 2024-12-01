@@ -35,6 +35,7 @@ namespace PatteDoie.Services.SpeedTyping
         public async Task<SpeedTypingGameRow> CreateGame(Lobby lobby)
         {
             using var _context = _factory.CreateDbContext();
+            await _context.Entry(lobby).ReloadAsync();  
             lobby.Users.ForEach(async u => await _context.Entry(u).ReloadAsync());
             List<SpeedTypingPlayer> players = [];
             foreach (User platformUser in lobby.Users)
@@ -94,7 +95,10 @@ namespace PatteDoie.Services.SpeedTyping
         public async Task<SpeedTypingGameRow> GetGame(Guid gameId)
         {
             using var _context = _factory.CreateDbContext();
-            var game = await _context.SpeedTypingGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefaultAsync();
+            var game = await _context.SpeedTypingGame.AsQueryable()
+                .Include(g => g.Lobby)
+                .ThenInclude(l => l.Users)
+                .FirstOrDefaultAsync(g => g.Id == gameId);
             await _context.DisposeAsync();
             return _mapper.Map<SpeedTypingGameRow>(game);
         }

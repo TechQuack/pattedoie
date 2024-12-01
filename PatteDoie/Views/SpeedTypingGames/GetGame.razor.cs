@@ -9,7 +9,7 @@ using Timer = System.Timers.Timer;
 
 namespace PatteDoie.Views.SpeedTypingGames
 {
-    public partial class GetGame : BasePage
+    public partial class GetGame : GamePage
     {
         [BindProperty(SupportsGet = true)]
         [Parameter]
@@ -60,9 +60,10 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             if (firstRender)
             {
+                await base.OnAfterRenderAsync(firstRender);
                 var uuid = await GetUUID();
 
-                var elapsedTime = DateTime.UtcNow - Row.LaunchTime;
+                var elapsedTime = DateTime.UtcNow - Row!.LaunchTime;
                 _secondsToRun = 60 - (int)elapsedTime.TotalSeconds;
 
                 WordIndexToDisplay = await SpeedTypingService.GetScore(new Guid(uuid));
@@ -100,6 +101,11 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             _secondsToRun = _secondsToRun > 0 ? _secondsToRun - 1 : 0;
             await InvokeAsync(StateHasChanged);
+        }
+
+        protected override Guid GetLobbyGuid()
+        {
+            return Row!.Lobby.Id;
         }
     }
 }

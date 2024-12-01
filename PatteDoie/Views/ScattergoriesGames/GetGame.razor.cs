@@ -5,7 +5,7 @@ using PatteDoie.Services.Scattergories;
 
 namespace PatteDoie.Views.ScattergoriesGames
 {
-    public partial class GetGame : ComponentBase
+    public partial class GetGame : GamePage
     {
 
         [Parameter]
@@ -15,9 +15,6 @@ namespace PatteDoie.Views.ScattergoriesGames
         private ScattegoriesGameRow? Row { get; set; } = null;
 
         [Inject]
-        private NavigationManager Navigation { get; set; } = default!;
-
-        [Inject]
         protected IScattegoriesService ScattergoriesService { get; set; } = default!;
 
         protected override async Task OnInitializedAsync()
@@ -25,7 +22,7 @@ namespace PatteDoie.Views.ScattergoriesGames
             this.Row = await ScattergoriesService.GetGame(new Guid(this.Id));
 
             HubConnection = new HubConnectionBuilder()
-                .WithUrl(Navigation.ToAbsoluteUri("/hub/scattergories"), (opts) =>
+                .WithUrl(NavigationManager.ToAbsoluteUri("/hub/scattergories"), (opts) =>
                 {
                     opts.HttpMessageHandlerFactory = (message) =>
                     {
@@ -39,6 +36,11 @@ namespace PatteDoie.Views.ScattergoriesGames
 
             await HubConnection.StartAsync();
             await HubConnection.SendAsync("JoinGame", this.Id);
+        }
+
+        protected override Guid GetLobbyGuid()
+        {
+            return Row!.Lobby.Id;
         }
     }
 }
