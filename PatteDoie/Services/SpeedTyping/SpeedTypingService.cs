@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using PatteDoie.Hubs;
@@ -22,14 +21,11 @@ namespace PatteDoie.Services.SpeedTyping
         private readonly IMapper _mapper;
         private readonly IHubContext<SpeedTypingHub> _hub;
 
-        private readonly NavigationManager NavigationManager;
-
-        public SpeedTypingService(IDbContextFactory<PatteDoieContext> factory, IMapper mapper, IHubContext<SpeedTypingHub> hub, NavigationManager navigationManager)
+        public SpeedTypingService(IDbContextFactory<PatteDoieContext> factory, IMapper mapper, IHubContext<SpeedTypingHub> hub)
         {
             _factory = factory;
             _mapper = mapper;
             _hub = hub;
-            NavigationManager = navigationManager;
         }
 
         public async Task<SpeedTypingGameRow> CreateGame(Lobby lobby)
@@ -64,7 +60,6 @@ namespace PatteDoie.Services.SpeedTyping
                 Lobby = lobby
             };
             _context.SpeedTypingGame.Add(speedTypingGame);
-
             await _context.SaveChangesAsync();
             Task endGame = this.DelayedEnding(speedTypingGame);
             await _context.DisposeAsync();
@@ -122,12 +117,17 @@ namespace PatteDoie.Services.SpeedTyping
         public async Task<bool> CanPlay(Guid playerId, Guid gameId)
         {
             using var _context = _factory.CreateDbContext();
-            var platformUser = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == playerId).FirstOrDefaultAsync();
-            var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync()
-                ?? throw new PlayerNotValidException("Player not found");
             var game = _context.SpeedTypingGame.AsQueryable()
                .Where(g => g.Id == gameId)
                .FirstOrDefault<SpeedTypingGame>();
+            if (game == null)
+            {
+                return false;
+            }
+            var platformUser = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == playerId).FirstOrDefaultAsync();
+            var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync()
+                ?? throw new PlayerNotValidException("Player not found");
+
             var launch = game.LaunchTime;
             var now = DateTime.UtcNow;
             var elaspedTime = (now - launch).TotalMilliseconds;
@@ -200,6 +200,7 @@ namespace PatteDoie.Services.SpeedTyping
                 ?? throw new PlayerNotValidException("Player not found");
             var wordIndexToCheck = player.Score;
             var wordToCheck = game.Words[wordIndexToCheck];
+
             if (wordToCheck == word)
             {
                 player.Score += 1;
@@ -239,7 +240,12 @@ namespace PatteDoie.Services.SpeedTyping
 
         private bool allPlayersHaveFinished(SpeedTypingGame game)
         {
-            return game.Players.All(p => p.Score == game.Words.Count);
+            using var _context = _factory.CreateDbContext();
+            var players = _context.SpeedTypingGame
+                .Where(game => game.Id == game.Id)
+                .SelectMany(game => game.Players)
+                .ToList();
+            return players.All(p => p.Score == game.Words.Count);
         }
 
         private bool HasFinished(SpeedTypingGame game, SpeedTypingPlayer player)
@@ -251,7 +257,8 @@ namespace PatteDoie.Services.SpeedTyping
         {
             await Task.Delay(TIME_BEFORE_DELETION);
             await DeleteGame(game.Id);
-            NavigationManager.NavigateTo("/lobby");
+            await _hub.Clients.Group(game.Id.ToString())
+                    .SendAsync("RedirectToHome", game.Id);
         }
 
         private async Task DelayedEnding(SpeedTypingGame game)

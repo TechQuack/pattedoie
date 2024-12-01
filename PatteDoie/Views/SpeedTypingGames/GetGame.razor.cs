@@ -33,24 +33,33 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             this.Row = await SpeedTypingService.GetGame(new Guid(this.Id));
             _players = await SpeedTypingService.GetRank(new Guid(this.Id));
+
             hubConnection = new HubConnectionBuilder()
-             .WithUrl(NavigationManager.ToAbsoluteUri("/hub/speedtyping"), (opts) =>
-             {
-                 opts.HttpMessageHandlerFactory = (message) =>
-                 {
-                     if (message is HttpClientHandler clientHandler)
-                         // always verify the SSL certificate
-                         clientHandler.ServerCertificateCustomValidationCallback +=
-                             (sender, certificate, chain, sslPolicyErrors) => { return true; };
-                     return message;
-                 };
-             })
-             .Build();
+                .WithUrl(NavigationManager.ToAbsoluteUri("/hub/speedtyping"), (opts) =>
+                {
+                    opts.HttpMessageHandlerFactory = (message) =>
+                    {
+                        if (message is HttpClientHandler clientHandler)
+                            // always verify the SSL certificate
+                            clientHandler.ServerCertificateCustomValidationCallback +=
+                                (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                        return message;
+                    };
+                })
+                .Build();
 
             hubConnection.On<SpeedTypingPlayerRow>("ReceiveProgression", async (player) =>
             {
                 _players = await SpeedTypingService.GetRank(new Guid(this.Id));
                 await InvokeAsync(StateHasChanged);
+            });
+
+            hubConnection.On("RedirectToHome", async (Guid gameId) =>
+            {
+                if (UUID != null)
+                {
+                    NavigationManager.NavigateTo("/");
+                }
             });
 
             await hubConnection.StartAsync();
