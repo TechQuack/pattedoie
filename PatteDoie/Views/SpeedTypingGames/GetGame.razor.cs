@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.JSInterop;
 using PatteDoie.Rows.SpeedTyping;
 using PatteDoie.Rows.SpeedTypingGame;
 using PatteDoie.Services.SpeedTyping;
@@ -11,28 +9,20 @@ using Timer = System.Timers.Timer;
 
 namespace PatteDoie.Views.SpeedTypingGames
 {
-    public partial class GetGame : ComponentBase
+    public partial class GetGame : BasePage
     {
         [BindProperty(SupportsGet = true)]
         [Parameter]
         public required string Id { get; set; }
 
         private List<SpeedTypingPlayerRow> _players = [];
-
         private Timer _timer = null!;
         private int _secondsToRun = 0;
         private HubConnection? hubConnection;
         private int WordIndexToDisplay = 0;
-
         private string? inputValue;
 
         private SpeedTypingGameRow? Row { get; set; } = null;
-
-        [Inject]
-        private ProtectedLocalStorage ProtectedLocalStorage { get; set; } = default!;
-
-        [Inject]
-        private NavigationManager Navigation { get; set; } = default!;
 
         [Inject]
         protected ISpeedTypingService SpeedTypingService { get; set; } = default!;
@@ -43,7 +33,7 @@ namespace PatteDoie.Views.SpeedTypingGames
             this.Row = await SpeedTypingService.GetGame(new Guid(this.Id));
             _players = await SpeedTypingService.GetRank(new Guid(this.Id));
             hubConnection = new HubConnectionBuilder()
-             .WithUrl(Navigation.ToAbsoluteUri("/hub/speedtyping"), (opts) =>
+             .WithUrl(NavigationManager.ToAbsoluteUri("/hub/speedtyping"), (opts) =>
              {
                  opts.HttpMessageHandlerFactory = (message) =>
                  {
@@ -70,12 +60,12 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             if (firstRender)
             {
-                var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
+                var uuid = await GetUUID();
 
                 var elapsedTime = DateTime.UtcNow - Row.LaunchTime;
                 _secondsToRun = 60 - (int)elapsedTime.TotalSeconds;
 
-                WordIndexToDisplay = await SpeedTypingService.GetScore(new Guid(uuid.Value ?? ""));
+                WordIndexToDisplay = await SpeedTypingService.GetScore(new Guid(uuid));
             }
         }
 
@@ -87,9 +77,9 @@ namespace PatteDoie.Views.SpeedTypingGames
             {
                 return;
             }
-            var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
+            var uuid = await GetUUID();
 
-            if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row!.Id, new Guid(uuid.Value ?? ""), Text.TrimEnd())).Result)
+            if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row!.Id, new Guid(uuid), Text.TrimEnd())).Result)
             {
                 this.WordIndexToDisplay += 1;
                 inputValue = "";
