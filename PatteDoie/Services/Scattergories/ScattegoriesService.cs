@@ -60,7 +60,7 @@ namespace PatteDoie.Services.Scattergories
             }
         }
 
-        public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, List<User> users, User host)
+        public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, Lobby lobby)
         {
             var rand = new Random();
 
@@ -68,7 +68,7 @@ namespace PatteDoie.Services.Scattergories
             List<ScattergoriesCategory> categories = potentialsCategories.OrderBy(x => rand.Next()).Take(numberCategories).ToList();
             
             var players = new List<ScattergoriesPlayer>();
-            foreach (var user in users)
+            foreach (var user in lobby.Users)
             {
                 var playerAnswers = new List<ScattergoriesAnswer>();
                 var player = CreatePlayer(user, playerAnswers, false);
@@ -76,7 +76,7 @@ namespace PatteDoie.Services.Scattergories
                 _context.ScattergoriesPlayer.Add(player);
             }
             var hostAnswers = new List<ScattergoriesAnswer>();
-            var hostPlayer = CreatePlayer(host, hostAnswers, true);
+            var hostPlayer = CreatePlayer(lobby.Creator, hostAnswers, true);
             players.Add(hostPlayer);
             _context.ScattergoriesPlayer.Add(hostPlayer);
 
@@ -87,7 +87,8 @@ namespace PatteDoie.Services.Scattergories
                 CurrentRound = 1,
                 CurrentLetter = RandomLetter(),
                 Categories = categories,
-                IsHostCheckingPhase = false
+                IsHostCheckingPhase = false,
+                Lobby = lobby
             };
             _context.ScattergoriesGame.Add(game);
 
