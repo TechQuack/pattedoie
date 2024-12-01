@@ -51,17 +51,30 @@ namespace PatteDoie.Services.Scattergories
             {
                 throw new Exception($"invalid word(wrong first letter)  - {word}");
             }
-
-            ScattergoriesAnswer answer = new ScattergoriesAnswer
+            ScattergoriesAnswer? ExistingAnswer = null;
+            foreach (var ans in player.Answers)
             {
-                Category = category,
-                Text = word,
-                IsChecked = false
-            };
-            player.Answers.Add(answer);
-            if (HasCompletedCategories(player, game))
+                if (ans.Category == category)
+                {
+                    ExistingAnswer = ans;
+                }
+            }
+            if (ExistingAnswer != null)
             {
-                //TODO change phase in database
+                ExistingAnswer.Text = word;
+            } else
+            {
+                ScattergoriesAnswer answer = new ScattergoriesAnswer
+                {
+                    Category = category,
+                    Text = word,
+                    IsChecked = false
+                };
+                player.Answers.Add(answer);
+            }
+            if (HasCompletedCategories(player, game) && !game.IsHostCheckingPhase)
+            {
+                game.IsHostCheckingPhase = true;
             }
             await _context.SaveChangesAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
