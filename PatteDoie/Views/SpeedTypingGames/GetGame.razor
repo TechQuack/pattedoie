@@ -16,7 +16,7 @@
         <div class="clock">
             <h1>@_secondsToRun</h1>
         </div>
-        <input type="text" id="inputText" name="inputText"
+        <input type="text" id="inputText" name="inputText" @bind-value="@inputValue"
             @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")'/>
         <script>
             function hasSpace() {
