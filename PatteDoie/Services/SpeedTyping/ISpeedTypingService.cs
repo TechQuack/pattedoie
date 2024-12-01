@@ -1,6 +1,7 @@
 ﻿using PatteDoie.Models.Platform;
 using PatteDoie.Models.SpeedTyping;
 using PatteDoie.Queries.SpeedTyping;
+using PatteDoie.Rows.SpeedTyping;
 using PatteDoie.Rows.SpeedTypingGame;
 
 namespace PatteDoie.Services.SpeedTyping
@@ -23,5 +24,7 @@ namespace PatteDoie.Services.SpeedTyping
 
         public Task<int> GetScore(Guid playerId);
         public Task ManageEndOfGame(Guid gameId);
+
+        public Task<List<SpeedTypingPlayerRow>> GetRank(Guid gameId);
     }
 }
