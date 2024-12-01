@@ -21,12 +21,13 @@ namespace PatteDoie.Views.SpeedTypingGames
         private HubConnection? hubConnection;
         private int WordIndexToDisplay = 0;
         private string? inputValue;
+        private bool IsInputDisabled = false;
+        private string UUID;
 
         private SpeedTypingGameRow? Row { get; set; } = null;
 
         [Inject]
         protected ISpeedTypingService SpeedTypingService { get; set; } = default!;
-
 
         protected override async Task OnInitializedAsync()
         {
@@ -60,13 +61,14 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             if (firstRender)
             {
+                UUID = await GetUUID();
+
                 await base.OnAfterRenderAsync(firstRender);
-                var uuid = await GetUUID();
 
                 var elapsedTime = DateTime.UtcNow - Row!.LaunchTime;
                 _secondsToRun = 60 - (int)elapsedTime.TotalSeconds;
 
-                WordIndexToDisplay = await SpeedTypingService.GetScore(new Guid(uuid));
+                WordIndexToDisplay = await SpeedTypingService.GetScore(new Guid(UUID));
             }
         }
 
@@ -78,21 +80,20 @@ namespace PatteDoie.Views.SpeedTypingGames
             {
                 return;
             }
-            var uuid = await GetUUID();
 
-            if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row!.Id, new Guid(uuid), Text.TrimEnd())).Result)
+            if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row!.Id, new Guid(UUID), Text.TrimEnd())).Result)
             {
                 this.WordIndexToDisplay += 1;
                 inputValue = "";
                 await InvokeAsync(StateHasChanged);
             }
-
         }
 
         protected override void OnInitialized()
         {
             _timer = new Timer(1000);
             _timer.Elapsed += OnTimedEvent;
+            _timer.Elapsed += CanPlay;
             _timer.AutoReset = true;
             _timer.Enabled = true;
         }
@@ -106,6 +107,16 @@ namespace PatteDoie.Views.SpeedTypingGames
         protected override Guid GetLobbyGuid()
         {
             return Row!.Lobby.Id;
+        }
+
+        private async void CanPlay(object? sender, ElapsedEventArgs e)
+        {
+            if (IsInputDisabled || UUID == null)
+            {
+                return;
+            }
+            IsInputDisabled = !await SpeedTypingService.CanPlay(new Guid(UUID), this.Row!.Id);
+            await InvokeAsync(StateHasChanged);
         }
     }
 }

@@ -25,6 +25,7 @@ namespace PatteDoie.Services.SpeedTyping
         public Task<int> GetScore(Guid playerId);
         public Task ManageEndOfGame(Guid gameId);
 
+        public Task<bool> CanPlay(Guid playerId, Guid gameId);
         public Task<List<SpeedTypingPlayerRow>> GetRank(Guid gameId);
     }
 }
