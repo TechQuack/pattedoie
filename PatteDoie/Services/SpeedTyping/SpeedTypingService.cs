@@ -32,12 +32,13 @@ namespace PatteDoie.Services.SpeedTyping
             NavigationManager = navigationManager;
         }
 
-        public async Task<SpeedTypingGameRow> CreateGame(List<User> platformUsers)
+        public async Task<SpeedTypingGameRow> CreateGame(Lobby lobby)
         {
             using var _context = _factory.CreateDbContext();
-            platformUsers.ForEach(async u => await _context.Entry(u).ReloadAsync());
+            await _context.Entry(lobby).ReloadAsync();  
+            lobby.Users.ForEach(async u => await _context.Entry(u).ReloadAsync());
             List<SpeedTypingPlayer> players = [];
-            foreach (User platformUser in platformUsers)
+            foreach (User platformUser in lobby.Users)
             {
                 var speedTypingPlayer = new SpeedTypingPlayer
                 {
@@ -59,7 +60,8 @@ namespace PatteDoie.Services.SpeedTyping
                 LaunchTime = DateTime.Now,
                 Players = players,
                 Words = new List<string>(words),
-                TimeProgresses = []
+                TimeProgresses = [],
+                Lobby = lobby
             };
             _context.SpeedTypingGame.Add(speedTypingGame);
 
@@ -93,7 +95,10 @@ namespace PatteDoie.Services.SpeedTyping
         public async Task<SpeedTypingGameRow> GetGame(Guid gameId)
         {
             using var _context = _factory.CreateDbContext();
-            var game = await _context.SpeedTypingGame.AsQueryable().Where(g => g.Id == gameId).FirstOrDefaultAsync();
+            var game = await _context.SpeedTypingGame.AsQueryable()
+                .Include(g => g.Lobby)
+                .ThenInclude(l => l.Users)
+                .FirstOrDefaultAsync(g => g.Id == gameId);
             await _context.DisposeAsync();
             return _mapper.Map<SpeedTypingGameRow>(game);
         }
