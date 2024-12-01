@@ -19,6 +19,7 @@ namespace PatteDoie.Views.SpeedTypingGames
         private List<SpeedTypingPlayerRow> _players = [];
 
         private Timer _timer = null!;
+        private Timer _timerToDisableInput = null!;
         private int _secondsToRun = 0;
         private HubConnection? hubConnection;
 
@@ -38,6 +39,10 @@ namespace PatteDoie.Views.SpeedTypingGames
 
         [Inject]
         private IJSRuntime JSRuntime { get; set; } = default!;
+
+        private ProtectedBrowserStorageResult<string> uuid;
+
+        private bool MustCheckDisabled = true;
 
         protected override async Task OnInitializedAsync()
         {
@@ -71,12 +76,17 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             if (firstRender)
             {
-                var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
+                uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
 
                 var elapsedTime = DateTime.UtcNow - Row.LaunchTime;
                 _secondsToRun = 60 - (int)elapsedTime.TotalSeconds;
 
                 WordIndexToDisplay = await SpeedTypingService.GetScore(new Guid(uuid.Value ?? ""));
+
+                _timerToDisableInput = new Timer(1000);
+                _timerToDisableInput.Elapsed += CanPlay;
+                _timerToDisableInput.AutoReset = true;
+                _timerToDisableInput.Enabled = true;
             }
         }
 
@@ -84,8 +94,6 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             if (Text.Contains(' '))
             {
-                var uuid = await ProtectedLocalStorage.GetAsync<string>("uuid");
-
                 if (Task.Run(() => this.SpeedTypingService.CheckWord(this.Row.Id, new Guid(uuid.Value ?? ""), Text.TrimEnd())).Result)
                 {
                     this.WordIndexToDisplay += 1;
@@ -93,6 +101,25 @@ namespace PatteDoie.Views.SpeedTypingGames
                 }
 
 
+            }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            MustCheckDisabled = false;
+            if (_timer != null)
+            {
+                _timer.Dispose();
+            }
+
+            if (_timerToDisableInput != null)
+            {
+                _timerToDisableInput.Dispose();
+            }
+
+            if (hubConnection != null)
+            {
+                await hubConnection.DisposeAsync();
             }
         }
 
@@ -109,6 +136,32 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             _secondsToRun = _secondsToRun > 0 ? _secondsToRun - 1 : 0;
             await InvokeAsync(StateHasChanged);
+        }
+
+        private async void CanPlay(object? sender, ElapsedEventArgs e)
+        {
+            if (!MustCheckDisabled)
+            {
+                return;
+            }
+
+            try
+            {
+                if (!await SpeedTypingService.CanPlay(new Guid(uuid.Value ?? ""), Row.Id))
+                {
+                    await InvokeAsync(async () =>
+                    {
+                        if (MustCheckDisabled)
+                        {
+                            await JSRuntime.InvokeVoidAsync("eval", $"document.getElementById('inputText').disabled = 'disabled'");
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisposeAsync();
+            }
         }
     }
 }

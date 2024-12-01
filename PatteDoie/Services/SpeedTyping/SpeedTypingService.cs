@@ -113,6 +113,26 @@ namespace PatteDoie.Services.SpeedTyping
             return player.Score;
         }
 
+
+        public async Task<bool> CanPlay(Guid playerId, Guid gameId)
+        {
+            using var _context = _factory.CreateDbContext();
+            var platformUser = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == playerId).FirstOrDefaultAsync();
+            var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync()
+                ?? throw new PlayerNotValidException("Player not found");
+            var game = _context.SpeedTypingGame.AsQueryable()
+               .Where(g => g.Id == gameId)
+               .FirstOrDefault<SpeedTypingGame>();
+            var launch = game.LaunchTime;
+            var now = DateTime.UtcNow;
+            var elaspedTime = (now - launch).TotalMilliseconds;
+            if (IsSetTimeProgress(game.TimeProgresses, player))
+            {
+                return false;
+            }
+            return elaspedTime < TIME_BEFORE_ENDING;
+        }
+
         public async Task ManageEndOfGame(Guid gameId)
         {
             using var _context = _factory.CreateDbContext();
@@ -149,7 +169,11 @@ namespace PatteDoie.Services.SpeedTyping
                 Player = player,
                 TimeProgress = timeProgress
             };
+            _context.SpeedTypingTimeProgress.Add(playerProgress);
+
             game.TimeProgresses.Add(playerProgress);
+            _context.SpeedTypingGame.Update(game);
+
             await _context.SaveChangesAsync();
             await _context.DisposeAsync();
         }
@@ -173,6 +197,7 @@ namespace PatteDoie.Services.SpeedTyping
             if (wordToCheck == word)
             {
                 player.Score += 1;
+                _context.SpeedTypingPlayer.Update(player);
                 await _context.SaveChangesAsync();
                 await _hub.Clients.Group(gameId.ToString())
                     .SendAsync("ReceiveProgression", _mapper.Map<SpeedTypingPlayerRow>(player));

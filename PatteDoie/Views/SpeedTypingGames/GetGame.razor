@@ -16,8 +16,10 @@
         <div class="clock">
             <h1>@_secondsToRun</h1>
         </div>
+        
         <input type="text" id="inputText" name="inputText" @ref="InputTextRef"
-            @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")'/>
+                 @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")'/>
+        
         <script>
             function hasSpace() {
                 var text = document.getElementById("inputText")
