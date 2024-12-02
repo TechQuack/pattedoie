@@ -24,5 +24,10 @@ namespace PatteDoie.Hubs
         {
             await Clients.Group(gameId.ToString()).SendAsync("RedirectToHome");
         }
+
+        public async Task ShowRanking(Guid gameId)
+        {
+            await Clients.Group(gameId.ToString()).SendAsync("ShowRanking");
+        }
     }
 }
