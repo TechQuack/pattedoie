@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web
 @page "/speedtyping/{Id}"
+@inherits GamePage
 
 
 <PageTitle>SpeedTyping</PageTitle>
@@ -16,7 +17,7 @@
         <div class="clock">
             <h1>@_secondsToRun</h1>
         </div>
-        <input type="text" id="inputText" name="inputText" @ref="InputTextRef"
+        <input type="text" id="inputText" name="inputText" @bind-value="@inputValue" disabled="@IsInputDisabled"
             @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")'/>
         <script>
             function hasSpace() {
@@ -36,6 +37,17 @@
             }
         }
      </div>
+
+     <div>
+         @foreach(var playerRow in _players)
+        {
+            <label for="@playerRow.User.Nickname">@playerRow.User.Nickname</label>
+            <progress id="@playerRow.User.Nickname" value="@playerRow.Score" max="10"> 
+                @(playerRow.Score / 10 * 100)
+            </progress>
+            <hr />
+        }
+    </div>
 </div>
 <div>
     <a asp-action="Index">Back to List</a>

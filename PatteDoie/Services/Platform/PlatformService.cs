@@ -211,11 +211,11 @@ namespace PatteDoie.Services.Platform
                     // Verify number of users
                     var numCat = 5;
                     var numRound = 5;
-                    var gameScattergories = await _scattergoriesService.CreateGame(numCat, numRound, users, lobby.Creator);
+                    var gameScattergories = await _scattergoriesService.CreateGame(numCat, numRound, lobby);
                     return gameScattergories.Id;
                 case GameType.SpeedTyping:
                     // Verify number of users
-                    var gameSpeedTyping = await _speedTypingService.CreateGame(users);
+                    var gameSpeedTyping = await _speedTypingService.CreateGame(lobby);
                     return gameSpeedTyping.Id;
             }
             return null;
