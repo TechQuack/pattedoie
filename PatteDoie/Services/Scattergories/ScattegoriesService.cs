@@ -44,6 +44,46 @@ namespace PatteDoie.Services.Scattergories
             throw new NotImplementedException();
         }
 
+        public async Task<ScattegoriesGameRow> AddPlayerWord(ScattergoriesGame game, ScattergoriesPlayer player, string word, ScattergoriesCategory category)
+        {
+            if (word.Trim().IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(nameof(word));
+            }
+            char letter = game.CurrentLetter;
+            if (!word.Trim().First().Equals(letter))
+            {
+                throw new Exception($"invalid word(wrong first letter)  - {word}");
+            }
+            ScattergoriesAnswer? ExistingAnswer = null;
+            foreach (var ans in player.Answers)
+            {
+                if (ans.Category == category)
+                {
+                    ExistingAnswer = ans;
+                }
+            }
+            if (ExistingAnswer != null)
+            {
+                ExistingAnswer.Text = word;
+            } else
+            {
+                ScattergoriesAnswer answer = new ScattergoriesAnswer
+                {
+                    Category = category,
+                    Text = word,
+                    IsChecked = false
+                };
+                player.Answers.Add(answer);
+            }
+            if (HasCompletedCategories(player, game) && !game.IsHostCheckingPhase)
+            {
+                game.IsHostCheckingPhase = true;
+            }
+            await _context.SaveChangesAsync();
+            return _mapper.Map<ScattegoriesGameRow>(game);
+        }
+
         public async Task<ScattegoriesGameRow> NextRound(ScattergoriesGame game)
         {
             using var _context = _factory.CreateDbContext();
