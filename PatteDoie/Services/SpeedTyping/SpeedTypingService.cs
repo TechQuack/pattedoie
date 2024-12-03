@@ -171,6 +171,8 @@ namespace PatteDoie.Services.SpeedTyping
             {
                 throw new GameNotValidException("Speed typing game cannot be null");
             }
+            player.SecondsToFinish = (int)(DateTime.UtcNow - game.LaunchTime).TotalSeconds;
+            _context.SpeedTypingPlayer.Update(player);
             SpeedTypingTimeProgress playerProgress = new()
             {
                 Player = player,

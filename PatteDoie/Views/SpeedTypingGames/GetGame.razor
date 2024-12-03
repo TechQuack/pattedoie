@@ -51,10 +51,12 @@
     <div>
         @{
             int i = 1;
+            int wordsPerMinute = 0;
         }
         @foreach (var player in FinalRanking)
         {
-            <p>@i - @player.User.Nickname: @player.Score</p>
+            wordsPerMinute = @player.Score * 60 / @player.SecondsToFinish;
+            <p>@i - @player.User.Nickname: @player.Score in @player.SecondsToFinish seconds (@wordsPerMinute words per minute)</p>
             ++i;
             <hr />
         }
