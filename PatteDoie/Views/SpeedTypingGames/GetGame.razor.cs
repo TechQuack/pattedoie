@@ -34,6 +34,7 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             this.Row = await SpeedTypingService.GetGame(new Guid(this.Id));
             _players = await SpeedTypingService.GetRank(new Guid(this.Id));
+            FinalRanking = _players;
             hubConnection = new HubConnectionBuilder()
                 .WithUrl(NavigationManager.ToAbsoluteUri("/hub/speedtyping"), (opts) =>
                 {

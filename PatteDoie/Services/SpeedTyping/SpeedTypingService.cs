@@ -238,6 +238,10 @@ namespace PatteDoie.Services.SpeedTyping
             var game = await _context.SpeedTypingGame.AsQueryable()
                 .Include(g => g.Players).ThenInclude(p => p.User)
                 .FirstOrDefaultAsync<SpeedTypingGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+            if (!await IsGameFinishedAsync(game))
+            {
+                return [];
+            }
             await _context.DisposeAsync();
             return _mapper.Map<List<SpeedTypingPlayerRow>>(game.Players
                 .OrderByDescending(player => player.Score)
@@ -280,6 +284,18 @@ namespace PatteDoie.Services.SpeedTyping
                 .AsQueryable()
                 .Where(s => s.Player == player).FirstOrDefault() ?? null;
             return timeProgress?.TimeProgress;
+        }
+
+        private async Task<bool> IsGameFinishedAsync(SpeedTypingGame game)
+        {
+            foreach (SpeedTypingPlayer player in game.Players)
+            {
+                if (await CanPlay(player.User.UserUUID, game.Id))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
