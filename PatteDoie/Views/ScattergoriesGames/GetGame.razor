@@ -14,27 +14,27 @@
             <h2>@Row.CurrentLetter</h2>
         </div>
         <div>
-            <table>
-                <thead>
-                    <tr>
+                <table>
+                    <thead>
+                        <tr>
+                            @foreach (var cattegories in @Row.Categories)
+                            {
+                                <th>@cattegories.Name</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
                         @foreach (var cattegories in @Row.Categories)
                         {
-                            <th>@cattegories.Name</th>
+                            <td><input name="@cattegories.Name" placeholder="Enter your word here" 
+                                @oninput='(e) => ValidateField(e.Value.ToString() ?? "", cattegories)'/></td>
                         }
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    @foreach (var cattegories in @Row.Categories)
-                    {
-                        <td><input placeholder="Enter your word here"/></td>
-                    }
-                    </tr>
-                </tbody>
-            </table>
-            <div>
-                <button>Validate</button>
-            </div>
+                        </tr>
+                    </tbody>
+                </table>
+                <div>
+                </div>
         </div>
     </div>
 

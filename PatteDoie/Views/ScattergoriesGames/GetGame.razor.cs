@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
+using PatteDoie.Models.Scattergories;
 using PatteDoie.Rows.Scattegories;
 using PatteDoie.Services.Scattergories;
 
@@ -41,6 +42,11 @@ namespace PatteDoie.Views.ScattergoriesGames
         protected override Guid GetLobbyGuid()
         {
             return Row!.Lobby.Id;
+        }
+
+        private async void ValidateField(string word, ScattergoriesCategory category)
+        {
+
         }
     }
 }
