@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PatteDoie;
 
@@ -11,9 +12,11 @@ using PatteDoie;
 namespace PatteDoie.Migrations
 {
     [DbContext(typeof(PatteDoieContext))]
-    partial class PatteDoieContextModelSnapshot : ModelSnapshot
+    [Migration("20241203163116_AddSecondsToFinishToPlayers")]
+    partial class AddSecondsToFinishToPlayers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -173,63 +176,6 @@ namespace PatteDoie.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ScattergoriesCategory");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("009b2b44-43f8-4cb2-8a1e-d97e90ac3173"),
-                            Name = "country"
-                        },
-                        new
-                        {
-                            Id = new Guid("4db12c6f-a881-4222-ac1d-bb703a2c8975"),
-                            Name = "animal"
-                        },
-                        new
-                        {
-                            Id = new Guid("412bca46-0c38-49e3-81a5-e166abe022d1"),
-                            Name = "firstname"
-                        },
-                        new
-                        {
-                            Id = new Guid("90dddb10-656f-4327-9b6f-2349edd07a35"),
-                            Name = "clothes"
-                        },
-                        new
-                        {
-                            Id = new Guid("aa86b4ed-20bf-480c-9027-dbb272fede5b"),
-                            Name = "sport"
-                        },
-                        new
-                        {
-                            Id = new Guid("ca79df4b-9a32-4787-9d2f-022ee6d5253f"),
-                            Name = "occupation"
-                        },
-                        new
-                        {
-                            Id = new Guid("5fc35a0e-6259-46b9-a436-473e1f04b5e4"),
-                            Name = "fruit or vegetable"
-                        },
-                        new
-                        {
-                            Id = new Guid("582acaaa-eed5-4ff3-8ca0-2f049ff9fef6"),
-                            Name = "brand"
-                        },
-                        new
-                        {
-                            Id = new Guid("a008c25d-e90c-4de4-b9cf-c960a31eeebd"),
-                            Name = "famous person"
-                        },
-                        new
-                        {
-                            Id = new Guid("d21597fe-9c39-4a0b-9104-97408b59ffd8"),
-                            Name = "game"
-                        },
-                        new
-                        {
-                            Id = new Guid("2ebe66c6-96f1-4ca0-aaf7-bee53c31f0d6"),
-                            Name = "movie/tv show"
-                        });
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesGame", b =>

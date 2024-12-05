@@ -7,5 +7,6 @@ namespace PatteDoie.Rows.SpeedTyping
         public Guid Id { get; set; }
         public int Score { get; set; }
         public required PlatformUserRow User { get; set; }
+        public int SecondsToFinish { get; set; }
     }
 }
