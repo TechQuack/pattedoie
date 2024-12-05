@@ -2,6 +2,7 @@
 using PatteDoie.Enums;
 using PatteDoie.Extensions;
 using PatteDoie.Models.Platform;
+using PatteDoie.Models.Scattergories;
 
 namespace PatteDoie;
 
@@ -24,6 +25,20 @@ public partial class PatteDoieContext : DbContext
         modelBuilder.Entity<Game>().HasData(
             new Game { Id = Guid.NewGuid(), Name = GameType.Scattergories.GetDescription(), MinPlayers = 2, MaxPlayers = 8 },
             new Game { Id = Guid.NewGuid(), Name = GameType.SpeedTyping.GetDescription(), MinPlayers = 1, MaxPlayers = 5 }
+        );
+
+        modelBuilder.Entity<ScattergoriesCategory>().HasData(
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "country" },
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "animal" },
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "firstname" },
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "clothes" },
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "sport" },
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "occupation" },
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "fruit or vegetable" },
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "brand" },
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "famous person" },
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "game" },
+            new ScattergoriesCategory { Id = Guid.NewGuid(), Name = "movie/tv show" }
         );
     }
 

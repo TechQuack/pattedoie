@@ -52,10 +52,13 @@
         }
         @foreach (var player in FinalRanking)
         {
-            wordsPerMinute = @player.Score * 60 / @player.SecondsToFinish;
-            <p>@i - @player.User.Nickname: @player.Score in @player.SecondsToFinish seconds (@wordsPerMinute words per minute)</p>
-            ++i;
-            <hr />
+            if (player.SecondsToFinish != 0)
+            {
+                wordsPerMinute = @player.Score * 60 / @player.SecondsToFinish;
+                <p>@i - @player.User.Nickname: @player.Score in @player.SecondsToFinish seconds (@wordsPerMinute words per minute)</p>
+                ++i;
+                <hr />
+            }
         }
     </div>
 </div>
