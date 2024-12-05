@@ -44,7 +44,7 @@ namespace PatteDoie.Services.SpeedTyping
                 players.Add(speedTypingPlayer);
                 _context.SpeedTypingPlayer.Add(speedTypingPlayer);
             }
-            String ApiUrl = "https://random-word-api.herokuapp.com/word?lang=fr&number=10";
+            String ApiUrl = "https://random-word-api.herokuapp.com/word?lang=en&number=10";
             String result = await ApiCall.GetAsync(ApiUrl);
             result = result.Remove(0, 1);
             result = result.Remove(result.Length - 1);
@@ -148,9 +148,12 @@ namespace PatteDoie.Services.SpeedTyping
             {
                 throw new GameNotValidException("Speed typing game cannot be null");
             }
-            foreach (SpeedTypingPlayer player in game.Players)
+            var players = await _context.SpeedTypingGame
+                .Where(g => g.Id == game.Id)
+                .SelectMany(game => game.Players).ToListAsync();
+            foreach (SpeedTypingPlayer player in players)
             {
-                if (!HasFinished(game, player))
+                if (!HasFinished(game, player) && player.SecondsToFinish == 0)
                 {
                     await SetTimeProgress(game, player, DateTime.UtcNow);
                 }
@@ -238,10 +241,6 @@ namespace PatteDoie.Services.SpeedTyping
             var game = await _context.SpeedTypingGame.AsQueryable()
                 .Include(g => g.Players).ThenInclude(p => p.User)
                 .FirstOrDefaultAsync<SpeedTypingGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
-            if (!await IsGameFinishedAsync(game))
-            {
-                return [];
-            }
             await _context.DisposeAsync();
             return _mapper.Map<List<SpeedTypingPlayerRow>>(game.Players
                 .OrderByDescending(player => player.Score)
