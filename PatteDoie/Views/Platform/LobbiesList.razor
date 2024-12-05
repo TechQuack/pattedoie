@@ -59,10 +59,11 @@
                 @item.Started
             </td>
             <td>
-                <a href="/lobby/edit">Edit</a> |
+                @if (item.Started) {
+                        <a href="/@item.Game.Name/@GameUUIDFromLobbies.GetValueOrDefault(item)">Join game</a>
+                }
                 <a href="/lobby/@item.Id">Details</a> |
-                <a href="/lobby/delete">Delete</a> |
-                <a href="/lobby/join/@item.Id">Rejoindre le lobby</a>
+                <a href="/lobby/join/@item.Id">Join lobby</a>
             </td>
         </tr>
     }

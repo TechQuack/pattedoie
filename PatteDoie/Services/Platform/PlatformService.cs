@@ -108,7 +108,7 @@ namespace PatteDoie.Services.Platform
                 default:
                     break;
             }
-            switch(gameType)
+            switch (gameType)
             {
                 case FilterGameType.Scattergories:
                     query = query.Where(p => p.Game.Name == GameType.Scattergories.GetDescription());
@@ -202,9 +202,25 @@ namespace PatteDoie.Services.Platform
             return id;
         }
 
+        public async Task<Guid?> GetGameUUIDFromLobby(Guid lobbyId)
+        {
+            var lobby = await _context.PlatformLobby.AsQueryable()
+                .Include(l => l.Game)
+                .FirstOrDefaultAsync(l => l.Id == lobbyId) ?? throw new LobbyNotFoundException("Lobby not found");
+            var gameType = GameTypeHelper.GetGameTypeFromString(lobby.Game.Name);
+            switch (gameType)
+            {
+                case GameType.Scattergories:
+                    return (await _context.ScattergoriesGame.AsQueryable().FirstOrDefaultAsync(g => g.Lobby.Id == lobbyId))?.Id;
+                case GameType.SpeedTyping:
+                    return (await _context.SpeedTypingGame.AsQueryable().FirstOrDefaultAsync(g => g.Lobby.Id == lobbyId))?.Id;
+                default:
+                    return null;
+            }
+        }
+
         private async Task<Guid?> CreateGame(GameType type, Lobby lobby)
         {
-            var users = lobby.Users;
             switch (type)
             {
                 case GameType.Scattergories:
