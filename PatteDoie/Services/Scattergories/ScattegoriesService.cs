@@ -201,6 +201,17 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
+        public async Task<List<ScattergoriesPlayerRow>> GetRank(Guid gameId)
+        {
+            using var _context = _factory.CreateDbContext();
+            var game = await _context.ScattergoriesGame.AsQueryable()
+                .Include(g => g.Players).ThenInclude(p => p.User)
+                .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+            return _mapper.Map<List<ScattergoriesPlayerRow>>(game.Players
+                .OrderByDescending(player => player.Score)
+            );
+        }
+
         //TOOLS
 
         private ScattergoriesPlayer CreatePlayer(User player, List<ScattergoriesAnswer> answers, bool isHost)

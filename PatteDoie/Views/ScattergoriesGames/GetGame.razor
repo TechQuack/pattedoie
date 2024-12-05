@@ -14,4 +14,14 @@
         </div>
     </div>
 
+    <div>
+        <h4>Ranking</h4>
+        <ol>
+            @foreach(var player in FinalRanking)
+            {
+                <li>@player.User.Nickname - @player.Score</li>
+            }
+        </ol>
+    </div>
+
 </div>

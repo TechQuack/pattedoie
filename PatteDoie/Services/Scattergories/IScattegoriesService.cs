@@ -16,5 +16,6 @@ namespace PatteDoie.Services.Scattergories
         public Task DeleteGame(Guid gameId);
         public Task<ScattegoriesGameRow> EndScattergoriesGame(ScattergoriesGame game);
         public Task<ScattegoriesGameRow> HostVerifyWord(ScattergoriesGame game, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision);
+        public Task<List<ScattergoriesPlayerRow>> GetRank(Guid gameId);
     }
 }
