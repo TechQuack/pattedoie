@@ -2,3 +2,9 @@
     font-weight: bold;
     font-size: 24px; 
 }
+
+#game {
+    display: flex;
+    align-items: center;
+    justify-content: center
+}

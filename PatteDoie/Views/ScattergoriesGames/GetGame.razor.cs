@@ -62,9 +62,9 @@ namespace PatteDoie.Views.ScattergoriesGames
             await hubConnection.SendAsync("JoinGame", this.Id);
         }
 
-        protected override Guid GetLobbyGuid()
+        protected override Guid? GetLobbyGuid()
         {
-            return Row!.Lobby.Id;
+            return Row?.Lobby?.Id;
         }
     }
 }
