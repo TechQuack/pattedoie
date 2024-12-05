@@ -46,6 +46,7 @@ namespace PatteDoie.Services.Scattergories
 
         public async Task<ScattegoriesGameRow> AddPlayerWord(ScattergoriesGame game, ScattergoriesPlayer player, string word, ScattergoriesCategory category)
         {
+            using var _context = _factory.CreateDbContext();
             if (word.Trim().IsNullOrEmpty())
             {
                 throw new ArgumentNullException(nameof(word));
@@ -66,7 +67,8 @@ namespace PatteDoie.Services.Scattergories
             if (ExistingAnswer != null)
             {
                 ExistingAnswer.Text = word;
-            } else
+            }
+            else
             {
                 ScattergoriesAnswer answer = new ScattergoriesAnswer
                 {
@@ -115,7 +117,7 @@ namespace PatteDoie.Services.Scattergories
 
             var potentialsCategories = (await _context.ScattergoriesCategory.AsQueryable().ToListAsync());
             List<ScattergoriesCategory> categories = potentialsCategories.OrderBy(x => rand.Next()).Take(numberCategories).ToList();
-            
+
             var players = new List<ScattergoriesPlayer>();
             foreach (var user in lobby.Users)
             {
@@ -157,7 +159,7 @@ namespace PatteDoie.Services.Scattergories
             var game = _context.ScattergoriesGame.AsQueryable()
                .Where(g => g.Id == gameId)
                .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Scattergories game cannot be null");
-            foreach (var category in  game.Categories)
+            foreach (var category in game.Categories)
             {
                 category.Games.Remove(game);
             }
