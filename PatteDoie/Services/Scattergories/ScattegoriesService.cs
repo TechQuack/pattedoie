@@ -123,14 +123,10 @@ namespace PatteDoie.Services.Scattergories
             foreach (var user in lobby.Users)
             {
                 var playerAnswers = new List<ScattergoriesAnswer>();
-                var player = CreatePlayer(user, playerAnswers, false);
+                var player = CreatePlayer(user, playerAnswers, user == lobby.Creator);
                 players.Add(player);
                 _context.ScattergoriesPlayer.Add(player);
             }
-            var hostAnswers = new List<ScattergoriesAnswer>();
-            var hostPlayer = CreatePlayer(lobby.Creator, hostAnswers, true);
-            players.Add(hostPlayer);
-            _context.ScattergoriesPlayer.Add(hostPlayer);
 
             var game = new ScattergoriesGame
             {
