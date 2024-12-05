@@ -47,7 +47,6 @@ namespace PatteDoie.Services.Scattergories
         public async Task<ScattegoriesGameRow> AddPlayerWord(ScattergoriesGame game, ScattergoriesPlayer player, string word, ScattergoriesCategory category)
         {
             using var _context = _factory.CreateDbContext();
-
             if (word.Trim().IsNullOrEmpty())
             {
                 throw new ArgumentNullException(nameof(word));

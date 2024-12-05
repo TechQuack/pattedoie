@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PatteDoie;
 
@@ -11,9 +12,11 @@ using PatteDoie;
 namespace PatteDoie.Migrations
 {
     [DbContext(typeof(PatteDoieContext))]
-    partial class PatteDoieContextModelSnapshot : ModelSnapshot
+    [Migration("20241205164108_AddBaseScattergoriesCategories")]
+    partial class AddBaseScattergoriesCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,14 +48,14 @@ namespace PatteDoie.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("be1cb1d7-1dfd-48df-8124-6fef68293ed5"),
+                            Id = new Guid("71c86cec-183d-4b20-b6d4-113ec365bece"),
                             MaxPlayers = 8,
                             MinPlayers = 2,
                             Name = "Scattergories"
                         },
                         new
                         {
-                            Id = new Guid("f2b32db7-aca3-4572-99dd-fd4682c81af6"),
+                            Id = new Guid("60b10965-da66-46c2-b5e2-a0cf758ea4e4"),
                             MaxPlayers = 5,
                             MinPlayers = 1,
                             Name = "SpeedTyping"
@@ -318,9 +321,6 @@ namespace PatteDoie.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SecondsToFinish")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("SpeedTypingGameId")
