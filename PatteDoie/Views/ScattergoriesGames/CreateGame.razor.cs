@@ -27,7 +27,6 @@ namespace PatteDoie.Views.ScattergoriesGames
             {
                 Nickname = "host"
             };
-            Row = ScattegoriesService.CreateGame(5, 3, players, host).Result;
         }
 
     }

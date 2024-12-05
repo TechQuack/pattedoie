@@ -94,7 +94,7 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<PlatformLobbyRow>(lobby);
         }
 
-        public async Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(LobbyType type)
+        public async Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(LobbyType type, FilterGameType gameType)
         {
             var query = _context.PlatformLobby.AsQueryable();
             switch (type)
@@ -108,7 +108,19 @@ namespace PatteDoie.Services.Platform
                 default:
                     break;
             }
-            return _mapper.Map<List<PlatformLobbyRow>>(await query.ToListAsync());
+            switch(gameType)
+            {
+                case FilterGameType.Scattergories:
+                    query = query.Where(p => p.Game.Name == GameType.Scattergories.GetDescription());
+                    break;
+                case FilterGameType.SpeedTyping:
+                    query = query.Where(p => p.Game.Name == GameType.SpeedTyping.GetDescription());
+                    break;
+                default:
+                    break;
+            }
+
+            return _mapper.Map<List<PlatformLobbyRow>>(await query.Include(l => l.Game).ToListAsync());
         }
 
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command)
@@ -120,6 +132,11 @@ namespace PatteDoie.Services.Platform
         {
 
             var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
+
+            if (IsLobbyContainingPlayer(userUUID, lobby))
+            {
+                throw new Exception("Lobby already contains this player");
+            }
 
             if (String.IsNullOrEmpty(password))
             {
@@ -173,7 +190,7 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<List<PlatformHighScoreRow>>(highScores);
         }
 
-        public async Task<bool> StartGame(Guid lobbyId)
+        public async Task<Guid?> StartGame(Guid lobbyId)
         {
             var lobby = await _context.PlatformLobby.AsQueryable()
                 .Include(l => l.Game)
@@ -181,11 +198,11 @@ namespace PatteDoie.Services.Platform
             lobby.Started = true;
             _context.PlatformLobby.Update(lobby);
             await _context.SaveChangesAsync();
-            await CreateGame(GameTypeHelper.GetGameTypeFromString(lobby.Game.Name), lobby);
-            return true;
+            var id = await CreateGame(GameTypeHelper.GetGameTypeFromString(lobby.Game.Name), lobby);
+            return id;
         }
 
-        private async Task CreateGame(GameType type, Lobby lobby)
+        private async Task<Guid?> CreateGame(GameType type, Lobby lobby)
         {
             var users = lobby.Users;
             switch (type)
@@ -194,13 +211,24 @@ namespace PatteDoie.Services.Platform
                     // Verify number of users
                     var numCat = 5;
                     var numRound = 5;
-                    await _scattergoriesService.CreateGame(numCat, numRound, users, lobby.Creator);
-                    break;
+                    var gameScattergories = await _scattergoriesService.CreateGame(numCat, numRound, lobby);
+                    return gameScattergories.Id;
                 case GameType.SpeedTyping:
                     // Verify number of users
-                    await _speedTypingService.CreateGame(users);
-                    break;
+                    var gameSpeedTyping = await _speedTypingService.CreateGame(lobby);
+                    return gameSpeedTyping.Id;
             }
+            return null;
+        }
+
+        private bool IsLobbyContainingPlayer(Guid userUUID, Lobby lobby)
+        {
+            var players = lobby.Users;
+            foreach (var player in players)
+            {
+                if (player.UserUUID == userUUID) return true;
+            }
+            return false;
         }
     }
 }

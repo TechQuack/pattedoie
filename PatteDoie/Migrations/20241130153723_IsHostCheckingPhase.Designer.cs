@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PatteDoie;
 
@@ -11,9 +12,11 @@ using PatteDoie;
 namespace PatteDoie.Migrations
 {
     [DbContext(typeof(PatteDoieContext))]
-    partial class PatteDoieContextModelSnapshot : ModelSnapshot
+    [Migration("20241130153723_IsHostCheckingPhase")]
+    partial class IsHostCheckingPhase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,14 +48,14 @@ namespace PatteDoie.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("be1cb1d7-1dfd-48df-8124-6fef68293ed5"),
+                            Id = new Guid("240fbf2e-01d7-415e-be25-9023e7391aad"),
                             MaxPlayers = 8,
                             MinPlayers = 2,
                             Name = "Scattergories"
                         },
                         new
                         {
-                            Id = new Guid("f2b32db7-aca3-4572-99dd-fd4682c81af6"),
+                            Id = new Guid("964c9e7a-f29a-489d-86ee-ddc4ecb4df48"),
                             MaxPlayers = 5,
                             MinPlayers = 1,
                             Name = "SpeedTyping"
@@ -170,66 +173,14 @@ namespace PatteDoie.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("ScattergoriesGameId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.ToTable("ScattergoriesCategory");
+                    b.HasIndex("ScattergoriesGameId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("009b2b44-43f8-4cb2-8a1e-d97e90ac3173"),
-                            Name = "country"
-                        },
-                        new
-                        {
-                            Id = new Guid("4db12c6f-a881-4222-ac1d-bb703a2c8975"),
-                            Name = "animal"
-                        },
-                        new
-                        {
-                            Id = new Guid("412bca46-0c38-49e3-81a5-e166abe022d1"),
-                            Name = "firstname"
-                        },
-                        new
-                        {
-                            Id = new Guid("90dddb10-656f-4327-9b6f-2349edd07a35"),
-                            Name = "clothes"
-                        },
-                        new
-                        {
-                            Id = new Guid("aa86b4ed-20bf-480c-9027-dbb272fede5b"),
-                            Name = "sport"
-                        },
-                        new
-                        {
-                            Id = new Guid("ca79df4b-9a32-4787-9d2f-022ee6d5253f"),
-                            Name = "occupation"
-                        },
-                        new
-                        {
-                            Id = new Guid("5fc35a0e-6259-46b9-a436-473e1f04b5e4"),
-                            Name = "fruit or vegetable"
-                        },
-                        new
-                        {
-                            Id = new Guid("582acaaa-eed5-4ff3-8ca0-2f049ff9fef6"),
-                            Name = "brand"
-                        },
-                        new
-                        {
-                            Id = new Guid("a008c25d-e90c-4de4-b9cf-c960a31eeebd"),
-                            Name = "famous person"
-                        },
-                        new
-                        {
-                            Id = new Guid("d21597fe-9c39-4a0b-9104-97408b59ffd8"),
-                            Name = "game"
-                        },
-                        new
-                        {
-                            Id = new Guid("2ebe66c6-96f1-4ca0-aaf7-bee53c31f0d6"),
-                            Name = "movie/tv show"
-                        });
+                    b.ToTable("ScattergoriesCategory");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesGame", b =>
@@ -248,15 +199,10 @@ namespace PatteDoie.Migrations
                     b.Property<bool>("IsHostCheckingPhase")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("LobbyId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("MaxRound")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LobbyId");
 
                     b.ToTable("ScattergoriesGame");
                 });
@@ -297,16 +243,11 @@ namespace PatteDoie.Migrations
                     b.Property<DateTime>("LaunchTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LobbyId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Words")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LobbyId");
 
                     b.ToTable("SpeedTypingGame");
                 });
@@ -318,9 +259,6 @@ namespace PatteDoie.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SecondsToFinish")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("SpeedTypingGameId")
@@ -360,21 +298,6 @@ namespace PatteDoie.Migrations
                     b.HasIndex("SpeedTypingGameId");
 
                     b.ToTable("SpeedTypingTimeProgress");
-                });
-
-            modelBuilder.Entity("ScattergoriesCategoryScattergoriesGame", b =>
-                {
-                    b.Property<Guid>("CategoriesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("GamesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("CategoriesId", "GamesId");
-
-                    b.HasIndex("GamesId");
-
-                    b.ToTable("ScattergoriesCategoryScattergoriesGame");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Platform.HighScore", b =>
@@ -425,15 +348,11 @@ namespace PatteDoie.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesGame", b =>
+            modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesCategory", b =>
                 {
-                    b.HasOne("PatteDoie.Models.Platform.Lobby", "Lobby")
-                        .WithMany()
-                        .HasForeignKey("LobbyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Lobby");
+                    b.HasOne("PatteDoie.Models.Scattergories.ScattergoriesGame", null)
+                        .WithMany("Categories")
+                        .HasForeignKey("ScattergoriesGameId");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesPlayer", b =>
@@ -449,17 +368,6 @@ namespace PatteDoie.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("PatteDoie.Models.SpeedTyping.SpeedTypingGame", b =>
-                {
-                    b.HasOne("PatteDoie.Models.Platform.Lobby", "Lobby")
-                        .WithMany()
-                        .HasForeignKey("LobbyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Lobby");
                 });
 
             modelBuilder.Entity("PatteDoie.Models.SpeedTyping.SpeedTypingPlayer", b =>
@@ -492,21 +400,6 @@ namespace PatteDoie.Migrations
                     b.Navigation("Player");
                 });
 
-            modelBuilder.Entity("ScattergoriesCategoryScattergoriesGame", b =>
-                {
-                    b.HasOne("PatteDoie.Models.Scattergories.ScattergoriesCategory", null)
-                        .WithMany()
-                        .HasForeignKey("CategoriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PatteDoie.Models.Scattergories.ScattergoriesGame", null)
-                        .WithMany()
-                        .HasForeignKey("GamesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("PatteDoie.Models.Platform.Game", b =>
                 {
                     b.Navigation("HighScores");
@@ -521,6 +414,8 @@ namespace PatteDoie.Migrations
 
             modelBuilder.Entity("PatteDoie.Models.Scattergories.ScattergoriesGame", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("Players");
                 });
 

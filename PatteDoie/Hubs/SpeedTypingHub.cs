@@ -19,5 +19,15 @@ namespace PatteDoie.Hubs
         {
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId.ToString());
         }
+
+        public async Task RedirectToHome(Guid gameId)
+        {
+            await Clients.Group(gameId.ToString()).SendAsync("RedirectToHome");
+        }
+
+        public async Task ShowRanking(Guid gameId)
+        {
+            await Clients.Group(gameId.ToString()).SendAsync("ShowRanking");
+        }
     }
 }
