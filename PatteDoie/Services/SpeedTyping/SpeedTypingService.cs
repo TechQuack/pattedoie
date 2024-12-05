@@ -155,6 +155,8 @@ namespace PatteDoie.Services.SpeedTyping
                     await SetTimeProgress(game, player, DateTime.UtcNow);
                 }
             }
+            await _hub.Clients.Group(gameId.ToString())
+                    .SendAsync("ShowRanking", gameId);
             Task deleteGame = this.DelayedDeletion(game);
             await _context.DisposeAsync();
         }
@@ -169,6 +171,8 @@ namespace PatteDoie.Services.SpeedTyping
             {
                 throw new GameNotValidException("Speed typing game cannot be null");
             }
+            player.SecondsToFinish = (int)(DateTime.UtcNow - game.LaunchTime).TotalSeconds;
+            _context.SpeedTypingPlayer.Update(player);
             SpeedTypingTimeProgress playerProgress = new()
             {
                 Player = player,
@@ -209,13 +213,13 @@ namespace PatteDoie.Services.SpeedTyping
                 await _hub.Clients.Group(gameId.ToString())
                     .SendAsync("ReceiveProgression", _mapper.Map<SpeedTypingPlayerRow>(player));
 
-                if (player.Score == game.Words.Count)
+                if (HasFinished(game, player))
                 {
                     await SetTimeProgress(game, player, DateTime.UtcNow);
-                }
-                if (allPlayersHaveFinished(game))
-                {
-                    await ManageEndOfGame(gameId);
+                    if (await AllPlayersHaveFinished(game))
+                    {
+                        await ManageEndOfGame(gameId);
+                    }
                 }
                 await _context.DisposeAsync();
                 return true;
@@ -234,18 +238,24 @@ namespace PatteDoie.Services.SpeedTyping
             var game = await _context.SpeedTypingGame.AsQueryable()
                 .Include(g => g.Players).ThenInclude(p => p.User)
                 .FirstOrDefaultAsync<SpeedTypingGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+            if (!await IsGameFinishedAsync(game))
+            {
+                return [];
+            }
             await _context.DisposeAsync();
-            return _mapper.Map<List<SpeedTypingPlayerRow>>(game.Players.OrderByDescending(player => player.Score));
+            return _mapper.Map<List<SpeedTypingPlayerRow>>(game.Players
+                .OrderByDescending(player => player.Score)
+                .ThenBy(player => GetTimeProgress(player))
+                );
         }
 
-        private bool allPlayersHaveFinished(SpeedTypingGame game)
+        private async Task<bool> AllPlayersHaveFinished(SpeedTypingGame game)
         {
             using var _context = _factory.CreateDbContext();
-            var players = _context.SpeedTypingGame
-                .Where(game => game.Id == game.Id)
-                .SelectMany(game => game.Players)
-                .ToList();
-            return players.All(p => p.Score == game.Words.Count);
+            var players = await _context.SpeedTypingGame
+                .Where(g => g.Id == game.Id)
+                .SelectMany(game => game.Players).ToListAsync();
+            return players.All(p => HasFinished(game, p));
         }
 
         private bool HasFinished(SpeedTypingGame game, SpeedTypingPlayer player)
@@ -265,6 +275,27 @@ namespace PatteDoie.Services.SpeedTyping
         {
             await Task.Delay(TIME_BEFORE_ENDING);
             await ManageEndOfGame(game.Id);
+        }
+
+        private DateTime? GetTimeProgress(SpeedTypingPlayer player)
+        {
+            using var _context = _factory.CreateDbContext();
+            var timeProgress = _context.SpeedTypingTimeProgress
+                .AsQueryable()
+                .Where(s => s.Player == player).FirstOrDefault() ?? null;
+            return timeProgress?.TimeProgress;
+        }
+
+        private async Task<bool> IsGameFinishedAsync(SpeedTypingGame game)
+        {
+            foreach (SpeedTypingPlayer player in game.Players)
+            {
+                if (await CanPlay(player.User.UserUUID, game.Id))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

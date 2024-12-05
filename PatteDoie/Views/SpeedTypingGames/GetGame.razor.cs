@@ -23,6 +23,7 @@ namespace PatteDoie.Views.SpeedTypingGames
         private string? inputValue;
         private bool IsInputDisabled = false;
         private string UUID;
+        private List<SpeedTypingPlayerRow> FinalRanking = [];
 
         private SpeedTypingGameRow? Row { get; set; } = null;
 
@@ -33,7 +34,7 @@ namespace PatteDoie.Views.SpeedTypingGames
         {
             this.Row = await SpeedTypingService.GetGame(new Guid(this.Id));
             _players = await SpeedTypingService.GetRank(new Guid(this.Id));
-
+            FinalRanking = _players;
             hubConnection = new HubConnectionBuilder()
                 .WithUrl(NavigationManager.ToAbsoluteUri("/hub/speedtyping"), (opts) =>
                 {
@@ -60,6 +61,13 @@ namespace PatteDoie.Views.SpeedTypingGames
                 {
                     NavigationManager.NavigateTo("/");
                 }
+            });
+
+            hubConnection.On("ShowRanking", async (Guid gameId) =>
+            {
+                FinalRanking = await SpeedTypingService.GetRank(gameId);
+                await InvokeAsync(StateHasChanged);
+
             });
 
             await hubConnection.StartAsync();
