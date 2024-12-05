@@ -30,6 +30,7 @@ namespace PatteDoie.Services.Scattergories
             var game = (_context.ScattergoriesGame.AsQueryable()
                .Include(g => g.Lobby)
                .ThenInclude(l => l.Users)
+               .Include(g => g.Categories)
                .FirstOrDefault(g => g.Id == gameId)) ?? throw new GameNotValidException("Scattergories game cannot be null");
             await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
@@ -198,6 +199,15 @@ namespace PatteDoie.Services.Scattergories
             }
             await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
+        }
+
+        public async Task<List<ScattergoriesCategoryRow>> GetCategories(Guid gameId)
+        {
+            using var _context = _factory.CreateDbContext();
+            var game = await _context.ScattergoriesGame.AsQueryable()
+                .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+
+            return _mapper.Map<List<ScattergoriesCategoryRow>>(game.Categories);
         }
 
         //TOOLS

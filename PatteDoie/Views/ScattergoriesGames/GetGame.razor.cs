@@ -20,7 +20,6 @@ namespace PatteDoie.Views.ScattergoriesGames
         protected override async Task OnInitializedAsync()
         {
             this.Row = await ScattergoriesService.GetGame(new Guid(this.Id));
-
             HubConnection = new HubConnectionBuilder()
                 .WithUrl(NavigationManager.ToAbsoluteUri("/hub/scattergories"), (opts) =>
                 {
