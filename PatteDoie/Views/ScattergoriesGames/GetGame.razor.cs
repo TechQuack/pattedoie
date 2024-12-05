@@ -11,8 +11,11 @@ namespace PatteDoie.Views.ScattergoriesGames
         [Parameter]
         public required string Id { get; set; }
 
-        private HubConnection? HubConnection;
+        private HubConnection? hubConnection;
+        private List<ScattergoriesPlayerRow> _players = [];
         private ScattegoriesGameRow? Row { get; set; } = null;
+        private List<ScattergoriesPlayerRow> FinalRanking = [];
+        private string UUID;
 
         [Inject]
         protected IScattegoriesService ScattergoriesService { get; set; } = default!;
@@ -20,7 +23,9 @@ namespace PatteDoie.Views.ScattergoriesGames
         protected override async Task OnInitializedAsync()
         {
             this.Row = await ScattergoriesService.GetGame(new Guid(this.Id));
-            HubConnection = new HubConnectionBuilder()
+            _players = await ScattergoriesService.GetRank(new Guid(this.Id));
+            FinalRanking = _players;
+            hubConnection = new HubConnectionBuilder()
                 .WithUrl(NavigationManager.ToAbsoluteUri("/hub/scattergories"), (opts) =>
                 {
                     opts.HttpMessageHandlerFactory = (message) =>
@@ -33,8 +38,28 @@ namespace PatteDoie.Views.ScattergoriesGames
                 })
                 .Build();
 
-            await HubConnection.StartAsync();
-            await HubConnection.SendAsync("JoinGame", this.Id);
+            hubConnection.On<ScattergoriesPlayerRow>("ReceiveProgression", async (player) =>
+            {
+                _players = await ScattergoriesService.GetRank(new Guid(this.Id));
+                await InvokeAsync(StateHasChanged);
+            });
+            hubConnection.On("RedirectToHome", async (Guid gameId) =>
+            {
+                if (UUID != null)
+                {
+                    NavigationManager.NavigateTo("/");
+                }
+            });
+
+            hubConnection.On("ShowRanking", async (Guid gameId) =>
+            {
+                FinalRanking = await ScattergoriesService.GetRank(gameId);
+                await InvokeAsync(StateHasChanged);
+
+            });
+
+            await hubConnection.StartAsync();
+            await hubConnection.SendAsync("JoinGame", this.Id);
         }
 
         protected override Guid GetLobbyGuid()
