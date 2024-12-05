@@ -3,7 +3,7 @@ using PatteDoie.Rows.Platform;
 
 namespace PatteDoie.Rows.Scattegories
 {
-    public class ScattegoriesGameRow
+    public class ScattergoriesGameRow
     {
         public Guid Id { get; set; }
         public List<ScattergoriesPlayer> Players { get; set; } = [];

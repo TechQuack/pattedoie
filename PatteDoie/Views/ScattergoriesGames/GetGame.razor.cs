@@ -12,7 +12,7 @@ namespace PatteDoie.Views.ScattergoriesGames
         public required string Id { get; set; }
 
         private HubConnection? HubConnection;
-        private ScattegoriesGameRow? Row { get; set; } = null;
+        private ScattergoriesGameRow? Row { get; set; } = null;
 
         [Inject]
         protected IScattegoriesService ScattergoriesService { get; set; } = default!;
