@@ -50,7 +50,6 @@ namespace PatteDoie.Services.SpeedTyping
             result = result.Remove(result.Length - 1);
             String[] words = result.Replace("\"", "").Split(',');
 
-
             var speedTypingGame = new SpeedTypingGame
             {
                 LaunchTime = DateTime.Now,
@@ -59,11 +58,13 @@ namespace PatteDoie.Services.SpeedTyping
                 TimeProgresses = [],
                 Lobby = lobby
             };
-            _context.SpeedTypingGame.Add(speedTypingGame);
-            await _context.SaveChangesAsync();
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                await _context.SpeedTypingGame.AddAsync(speedTypingGame);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
             Task endGame = this.DelayedEnding(speedTypingGame);
-            await _context.DisposeAsync();
-
             return _mapper.Map<SpeedTypingGameRow>(speedTypingGame);
         }
 
@@ -73,13 +74,28 @@ namespace PatteDoie.Services.SpeedTyping
             var game = _context.SpeedTypingGame
                 .Include(g => g.Players)
                 .Include(g => g.TimeProgresses)
+                .Include(g => g.Lobby)
                 .FirstOrDefault(g => g.Id == id)
                 ?? throw new GameNotValidException("Speed typing game cannot be null");
-            _context.SpeedTypingPlayer.RemoveRange(game.Players);
-            _context.SpeedTypingTimeProgress.RemoveRange(game.TimeProgresses);
-            _context.SpeedTypingGame.Remove(game);
-            await _context.SaveChangesAsync();
-            await _context.DisposeAsync();
+
+            var lobby = _context.PlatformLobby
+                .Include(l => l.Users)
+                .Include(l => l.Creator)
+                .FirstOrDefault(l => l.Id == game.Lobby.Id)
+                ?? throw new LobbyNotFoundException("Lobby cannot be null");
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+
+                _context.SpeedTypingPlayer.RemoveRange(game.Players);
+                _context.SpeedTypingTimeProgress.RemoveRange(game.TimeProgresses);
+                _context.SpeedTypingGame.Remove(game);
+
+                _context.PlatformLobby.Remove(lobby);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
         }
 
         public Task<IEnumerable<SpeedTypingGameRow>> GetAllGames()
