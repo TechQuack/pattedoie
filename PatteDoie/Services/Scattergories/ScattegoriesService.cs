@@ -204,6 +204,7 @@ namespace PatteDoie.Services.Scattergories
                 .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
 
             return _mapper.Map<List<ScattergoriesCategoryRow>>(game.Categories);
+        }
 
         public async Task<List<ScattergoriesPlayerRow>> GetRank(Guid gameId)
         {
