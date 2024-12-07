@@ -58,7 +58,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapHub<SpeedTypingHub>("/hub/speedtyping");
-
 app.MapHub<ScattergoriesHub>("/hub/scattergories");
+app.MapHub<PlatformHub>("/hub/platform");
 
 app.Run();

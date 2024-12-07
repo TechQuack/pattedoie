@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Enums;
 using PatteDoie.Extensions;
+using PatteDoie.Hubs;
 using PatteDoie.Models.Platform;
 using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
@@ -13,12 +15,17 @@ using PatteDoie.Services.SpeedTyping;
 
 namespace PatteDoie.Services.Platform
 {
-    public class PlatformService(PatteDoieContext context, IMapper mapper, ISpeedTypingService speedTypingService, IScattegoriesService scattergoriesService) : IPlatformService
+    public class PlatformService(PatteDoieContext context,
+        IMapper mapper,
+        ISpeedTypingService speedTypingService,
+        IScattegoriesService scattergoriesService,
+        IHubContext<PlatformHub> hub) : IPlatformService
     {
         private readonly PatteDoieContext _context = context;
         private readonly IMapper _mapper = mapper;
         private readonly ISpeedTypingService _speedTypingService = speedTypingService;
         private readonly IScattegoriesService _scattergoriesService = scattergoriesService;
+        private readonly IHubContext<PlatformHub> _hub = hub;
 
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type)
@@ -108,7 +115,7 @@ namespace PatteDoie.Services.Platform
                 default:
                     break;
             }
-            switch(gameType)
+            switch (gameType)
             {
                 case FilterGameType.Scattergories:
                     query = query.Where(p => p.Game.Name == GameType.Scattergories.GetDescription());
@@ -174,6 +181,9 @@ namespace PatteDoie.Services.Platform
 
             await _context.SaveChangesAsync();
 
+            await _hub.Clients.Group(lobbyId.ToString())
+                    .SendAsync("ReceivePlayerJoined", platformUser.UserUUID);
+
             return _mapper.Map<PlatformUserRow>(platformUser);
         }
 
@@ -199,12 +209,33 @@ namespace PatteDoie.Services.Platform
             _context.PlatformLobby.Update(lobby);
             await _context.SaveChangesAsync();
             var id = await CreateGame(GameTypeHelper.GetGameTypeFromString(lobby.Game.Name), lobby);
+            if (id != null)
+            {
+                await _hub.Clients.Group(lobbyId.ToString())
+                    .SendAsync("ReceiveGameStarted", id);
+            }
             return id;
+        }
+
+        public async Task<Guid?> GetGameUUIDFromLobby(Guid lobbyId)
+        {
+            var lobby = await _context.PlatformLobby.AsQueryable()
+                .Include(l => l.Game)
+                .FirstOrDefaultAsync(l => l.Id == lobbyId) ?? throw new LobbyNotFoundException("Lobby not found");
+            var gameType = GameTypeHelper.GetGameTypeFromString(lobby.Game.Name);
+            switch (gameType)
+            {
+                case GameType.Scattergories:
+                    return (await _context.ScattergoriesGame.AsQueryable().FirstOrDefaultAsync(g => g.Lobby.Id == lobbyId))?.Id;
+                case GameType.SpeedTyping:
+                    return (await _context.SpeedTypingGame.AsQueryable().FirstOrDefaultAsync(g => g.Lobby.Id == lobbyId))?.Id;
+                default:
+                    return null;
+            }
         }
 
         private async Task<Guid?> CreateGame(GameType type, Lobby lobby)
         {
-            var users = lobby.Users;
             switch (type)
             {
                 case GameType.Scattergories:

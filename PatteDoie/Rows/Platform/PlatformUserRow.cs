@@ -7,5 +7,7 @@
 
         public string Nickname { get; set; }
 
+        public Guid UserUUID { get; set; }
+
     }
 }
