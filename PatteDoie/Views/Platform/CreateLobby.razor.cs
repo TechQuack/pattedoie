@@ -9,8 +9,8 @@ public partial class CreateLobby : AuthenticatedPage
 {
     [Parameter, SupplyParameterFromQuery]
     public string? GameName { get; set; }
-
-    private string Password { get; set; } = "";
+    private string? Password { get; set; }
+    private string LobbyName { get; set; } = "";
 
     private bool IsLobbyPublic { get; set; } = true;
 
@@ -37,7 +37,7 @@ public partial class CreateLobby : AuthenticatedPage
             //TODO: Notify error invalid password
             return;
         }
-        var lobbyRow = await PlatformService.CreateLobby(new Guid(uuid), name, IsLobbyPublic ? "" : Password, gameType);
+        var lobbyRow = await PlatformService.CreateLobby(new Guid(uuid), name, IsLobbyPublic ? "" : Password, gameType, LobbyName);
 
         NavigationManager.NavigateTo($"/lobby/{lobbyRow.Id}");
     }

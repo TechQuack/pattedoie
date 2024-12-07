@@ -25,6 +25,10 @@
     <div id="creation">
         <form @onsubmit="Submit">
             <AntiforgeryToken/>
+            <div class="form-group">
+                <label class="control-label">Lobby Name</label>
+                <InputText @bind-Value="LobbyName" class="form-control" />
+            </div>
             @if (!IsLobbyPublic)
             {
                 <div class="form-group">
