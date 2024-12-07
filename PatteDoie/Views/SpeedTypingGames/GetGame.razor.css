@@ -2,3 +2,76 @@
     font-weight: bold;
     font-size: 24px; 
 }
+
+#game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #FF7A00;
+    border-radius: 25px;
+    padding-inline: 1rem;
+}
+
+#command {
+    width: 5%;
+}
+
+img {
+    width: 50%;
+}
+
+#gameHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.clock {
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(ellipse at center, #f73134 0%,#ff0000 47%,#ff0000 47%,#FF7A00 47%,#FF7A00 48%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#progression, #ranking {
+    background-color: #DAAB3A;
+    margin-block: 2rem;
+    border-radius: 25px;
+    padding-inline: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+progress[value] {
+    --w: 200px;
+    --color: linear-gradient(90deg,#ff6161,#1ecd1e) 0/var(--w);
+    --background: lightgrey;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    width: var(--w);
+    margin: 0 10px;
+    border-radius: 10em;
+    background: var(--background);
+}
+
+progress[value]::-webkit-progress-bar {
+    border-radius: 10em;
+    background: var(--background);
+}
+
+progress[value]::-webkit-progress-value {
+    border-radius: 10em;
+    background: var(--color);
+}
+
+progress[value]::-moz-progress-bar {
+    border-radius: 10em;
+    background: var(--color);
+}
