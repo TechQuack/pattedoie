@@ -1,10 +1,17 @@
 ﻿@page "/"
 @using PatteDoie.Views.Shared
+@inherits BasePage
 
 <PageTitle>Home</PageTitle>
 
 <div class="text-center">
     <h1 class="display-4">Welcome On PatteDoie</h1>
-    <p class="display-4">You need to set an username to play games</p>
-    <Authenticator/>
+    @if (!Authenticated)
+    {
+        <p class="display-4">You need to set an username to play games</p>
+        <Authenticator />
+    } else
+    {
+        <a href="/lobby">Go to lobbies list</a>
+    }
 </div>
