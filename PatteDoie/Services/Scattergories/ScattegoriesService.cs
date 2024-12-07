@@ -49,7 +49,7 @@ namespace PatteDoie.Services.Scattergories
             throw new NotImplementedException();
         }
 
-        public async Task<ScattegoriesGameRow> AddPlayerWord(Guid gameId, ScattergoriesPlayer player, string word, ScattergoriesCategory category)
+        public async Task<ScattegoriesGameRow> AddPlayerWord(Guid gameId, Guid playerId, string word, ScattergoriesCategory category)
         {
 
             using var _context = _factory.CreateDbContext();
@@ -58,6 +58,10 @@ namespace PatteDoie.Services.Scattergories
                 .ThenInclude(p => p.Answers)
                 .Include(g => g.Categories)
                 .FirstOrDefaultAsync(g => g.Id == gameId);
+            var player = await _context.ScattergoriesPlayer.AsQueryable()
+                .Include(p => p.Answers)
+                .ThenInclude(a => a.Category)
+                .FirstOrDefaultAsync(p => p.Id == playerId);
             if (word.Trim().IsNullOrEmpty())
             {
                 throw new ArgumentNullException(nameof(word));
