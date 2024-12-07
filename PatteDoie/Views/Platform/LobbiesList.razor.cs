@@ -57,6 +57,24 @@ public partial class LobbiesList : AuthenticatedPage
         }
     }
 
+    private async void JoinPublicLobby(Guid Id)
+    {
+        var uuid = await GetUUID();
+        var name = await GetName();
+
+
+        try
+        {
+            await PlatformService.JoinLobby(Id, name, new Guid(uuid), "");
+        }
+        catch (Exception ex)
+        {
+            // TODO : display an error to the user
+        }
+
+        NavigationManager.NavigateTo($"/lobby/{Id}");
+    }
+
     private static string GetLobbyTypeDescription(LobbyType type)
     {
         return type.GetDescription();
