@@ -26,7 +26,7 @@
         <form @onsubmit="Submit">
             <AntiforgeryToken/>
             <div class="form-group">
-                <label class="control-label">Lobby Name</label>
+                <label class="label">Lobby Name: &nbsp;</label>
                 <InputText @bind-Value="LobbyName" class="form-control" />
             </div>
             @if (!IsLobbyPublic)

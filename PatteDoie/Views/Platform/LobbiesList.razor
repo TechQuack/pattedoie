@@ -5,13 +5,15 @@
 
 <PageTitle>Lobbies</PageTitle>
 
-<h1>Index</h1>
+<h1>Game lobbies list</h1>
 
-<div>
-    <a href="/lobby/create?GameName=@GameType.SpeedTyping.GetDescription()">Create new Speedtyping game</a>
-</div>
-<div>
-    <a href="/lobby/create?GameName=@GameType.Scattergories.GetDescription()">Create new Scattergories game</a>
+<div id="create-game">
+    <div class="create-option">
+        <a href="/lobby/create?GameName=@GameType.SpeedTyping.GetDescription()">Create new Speedtyping game</a>
+    </div>
+    <div class="create-option">
+        <a href="/lobby/create?GameName=@GameType.Scattergories.GetDescription()">Create new Scattergories game</a>
+    </div>
 </div>
 <InputSelect @bind-Value="Type" @bind-Value:after="SearchLobbies">
     @foreach (var type in Types)
