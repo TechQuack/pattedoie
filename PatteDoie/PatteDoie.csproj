@@ -29,7 +29,11 @@
 	<ItemGroup>
 		<Folder Include="Services\SpeedTyping\" />
 		<Folder Include="Services\Platform\" />
-		<Folder Include="Services\Scattergories\"/>
+		<Folder Include="Services\Scattergories\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="wwwroot\back-arrow.svg" />
 	</ItemGroup>
 
 </Project>

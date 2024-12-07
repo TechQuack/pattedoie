@@ -6,28 +6,30 @@
 
 <PageTitle>SpeedTyping</PageTitle>
 
-<h1>GetGame</h1>
-
-<div>
-    <h4>Speed Typing</h4>
-    <hr />
+<div id="gameHeader">
     <div id="command">
-        <a asp-action="Index" href="/">Back to Home</a>
+        <a asp-action="Index" href="/">
+            <img src="back-arrow.svg" />
+        </a>
     </div>
-
+    <h1>Speed Typing</h1>
+</div>
+<div>
     <div id="game">
         <div class="clock">
             <h1>@_secondsToRun</h1>
         </div>
         
-        @foreach (string Word in Row?.Words ?? [])
-        {
-            @if (Array.IndexOf(Row.Words, Word) == WordIndexToDisplay) {
-                <span id="wordToDisplay"> @Word &nbsp;</span>
-            } else {
-                <span> @Word &nbsp;</span>
+        <div>
+            @foreach (string Word in Row?.Words ?? [])
+            {
+                @if (Array.IndexOf(Row.Words, Word) == WordIndexToDisplay) {
+                    <span id="wordToDisplay"> @Word &nbsp;</span>
+                } else {
+                    <span> @Word &nbsp;</span>
+                }
             }
-        }
+        </div>
         <hr />
 
         <input type="text" id="inputText" name="inputText" @bind-value="@inputValue" disabled="@IsInputDisabled"
@@ -36,16 +38,20 @@
     </div>
 
     <div id="progression">
+        <h2>Progression</h2>
         @foreach(var playerRow in _players)
         {
-            <label for="@playerRow.User.Nickname">@playerRow.User.Nickname</label>
-            <progress id="@playerRow.User.Nickname" value="@playerRow.Score" max="10"> 
-                @(playerRow.Score / 10 * 100)
-            </progress>
+            <div class="playerProgression">
+                <label for="@playerRow.User.Nickname">@playerRow.User.Nickname</label>
+                <progress id="@playerRow.User.Nickname" value="@playerRow.Score" max="10"> 
+                    @(playerRow.Score / 10 * 100)
+                </progress>
+            </div>
             <hr />
         }
     </div>
     <div id="ranking">
+        <h2>Ranking</h2>
         @{
             int i = 1;
             int wordsPerMinute = 0;
