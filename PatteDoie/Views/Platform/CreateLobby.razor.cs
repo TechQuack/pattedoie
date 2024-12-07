@@ -37,6 +37,11 @@ public partial class CreateLobby : AuthenticatedPage
             //TODO: Notify error invalid password
             return;
         }
+        if (LobbyName.Trim().IsNullOrEmpty())
+        {
+            //TODO: Notify error invalid lobby name
+            return;
+        }
         var lobbyRow = await PlatformService.CreateLobby(new Guid(uuid), name, IsLobbyPublic ? "" : Password, gameType, LobbyName);
 
         NavigationManager.NavigateTo($"/lobby/{lobbyRow.Id}");
