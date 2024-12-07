@@ -26,12 +26,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var categories in Row.Categories)
+                    @foreach (var category in Row.Categories)
                     {
                         <tr>
-                            <td>@categories.Name</td>
+                            <td>@category.Name</td>
                             <td>Response</td>
                         </tr>
+                    }
                     </tbody>
                 </table>
                 <div>
