@@ -1,0 +1,50 @@
+﻿#creation {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction:column;
+    margin: 2rem;
+}
+
+#form {
+    padding-top: 10rem;
+}
+
+#command {
+    width: 5%;
+}
+.label {
+    white-space:nowrap;
+}
+
+img {
+    width: 50%;
+}
+
+#lobbyHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.form-group {
+    display: flex;
+    flex-direction:row;
+    align-items: center;
+    justify-content:center;
+    margin: 2rem;
+    height:80%;
+}
+
+.radio-button {
+    padding-inline:2rem;
+    font-size: 200%;
+    align-content: center;
+    height: 20%;
+}
+
+#radio {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
