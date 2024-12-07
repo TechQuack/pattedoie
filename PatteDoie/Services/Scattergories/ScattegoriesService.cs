@@ -92,6 +92,7 @@ namespace PatteDoie.Services.Scattergories
                     IsChecked = false
                 };
                 player.Answers.Add(answer);
+                _context.ScattergoriesAnswer.Add(answer);
             }
             if (HasCompletedCategories(player, game) && !game.IsHostCheckingPhase)
             {

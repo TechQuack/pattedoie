@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
-using PatteDoie.Models.Scattergories;
 using PatteDoie.Rows.Scattegories;
 using PatteDoie.Services.Scattergories;
 
@@ -17,6 +16,7 @@ namespace PatteDoie.Views.ScattergoriesGames
         private ScattegoriesGameRow? Row { get; set; } = null;
         private List<ScattergoriesPlayerRow> FinalRanking = [];
         private string UUID;
+        private string[] inputs = [];
 
         [Inject]
         protected IScattegoriesService ScattergoriesService { get; set; } = default!;
@@ -24,6 +24,8 @@ namespace PatteDoie.Views.ScattergoriesGames
         protected override async Task OnInitializedAsync()
         {
             this.Row = await ScattergoriesService.GetGame(new Guid(this.Id));
+            inputs = new string[Row.Categories.Count];
+            Console.WriteLine("jaaaaaaaaaaaaj " + Row.Categories.Count);
             _players = await ScattergoriesService.GetRank(new Guid(this.Id));
             FinalRanking = _players;
             hubConnection = new HubConnectionBuilder()
@@ -70,11 +72,27 @@ namespace PatteDoie.Views.ScattergoriesGames
             return Row?.Lobby?.Id;
         }
 
-        public void sendWords(List<string> inputs, List<ScattergoriesCategory> categories)
+        public async void SendWords()
         {
-            for (var i = 0; i < inputs.Count; ++i)
+            Console.WriteLine("_________________________________________________1");
+            for (var i = 0; i < inputs.Length; ++i)
             {
-                //TODO call service.addplayerword() avec tous les mots et faire verif
+                try
+                {
+                    Console.WriteLine("_________________________________________________2");
+                    Row = await ScattergoriesService.AddPlayerWord(new Guid(Id), new Guid(UUID), inputs[i], Row!.Categories[i]);
+                    Console.WriteLine("_________________________________________________3");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("_________________________________________________4");
+                    //TODO afficher erreur au joueur pour la catégorie concernée (categories[i]) 940
+                }
+
+            }
+            if (Row.IsHostCheckingPhase)
+            {
+                //TODO faire en sorte que les mots de tous les joueurs soient ajoutés 920
             }
         }
     }

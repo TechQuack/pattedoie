@@ -28,14 +28,13 @@
                 <tbody>
                     @{
                         int i = 0;
-                        List<string> inputs = new List<string>(new string[Row.Categories.Count]);
                     }
                     @foreach (var category in Row.Categories)
                     {
-                        
+                        var local = i;
                         <tr>
                             <td>@category.Name</td>
-                            <input type="text" name="input_@category.Name" placeholder="@category.Name" @bind="inputs[i]"/>
+                            <input type="text" name="input_@category.Name" placeholder="@category.Name" @bind="inputs[local]"/>
                         </tr>
                         ++i;
                     }
@@ -43,7 +42,7 @@
             </table>
         </div>
         <div>
-            <button type="button" @onclick="() => sendWords(inputs, Row.Categories)">Envoyer les mots</button>
+            <button type="button" @onclick="SendWords">Envoyer les mots</button>
         </div>
     </div>
 
