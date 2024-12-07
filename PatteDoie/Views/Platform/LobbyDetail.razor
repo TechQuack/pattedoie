@@ -3,15 +3,21 @@
 
 <PageTitle>Detail du lobby</PageTitle>
 
-<div>
+<div id="details">
     @if (@Lobby != null) {
-        <div>
-            <h1>@Lobby.LobbyName</h1>
+        <h1>@Lobby.LobbyName</h1>
+        <div class="information">
+            @if (Lobby.Game != null)
+            {
+                <p>Game : @Lobby.Game.Name</p>
+            }
+        </div>
+        <div class="information">
             <p>Started : @Lobby.Started</p>
             <p>Hash Password: @Lobby.Password</p>
             <p>Creator : @Lobby.Creator.Nickname</p>
         </div>
-        <div>
+        <div class="information">
             <h2>Participants</h2>
             <ul>
                 @foreach (var user in Lobby.Users)
@@ -20,12 +26,9 @@
                 }
             </ul>
         </div>
-        <div>
-            @if (Lobby.Game != null) {
-                <p>@Lobby.Game.Name</p>
-            }
+        <div id="start">
+            <input type="button" @onclick="StartGame" value="Start" class="btn btn-danger" />
         </div>
-        <input type="button" @onclick="StartGame" value="Start" />
     } else {
         <p>Loading...</p>
     }

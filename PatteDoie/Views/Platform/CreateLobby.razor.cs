@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Enums;
 using PatteDoie.Services.Platform;
 
@@ -10,6 +11,8 @@ public partial class CreateLobby : AuthenticatedPage
     public string? GameName { get; set; }
     private string? Password { get; set; }
     private string LobbyName { get; set; } = "";
+
+    private bool IsLobbyPublic { get; set; } = true;
 
     [Inject]
     private IPlatformService PlatformService { get; set; } = default!;
@@ -29,8 +32,17 @@ public partial class CreateLobby : AuthenticatedPage
             //TODO: Notify error invalid game
             return;
         }
-
-        var lobbyRow = await PlatformService.CreateLobby(new Guid(uuid), name, Password, gameType, LobbyName);
+        if (!IsLobbyPublic && Password.Trim().IsNullOrEmpty())
+        {
+            //TODO: Notify error invalid password
+            return;
+        }
+        if (LobbyName.Trim().IsNullOrEmpty())
+        {
+            //TODO: Notify error invalid lobby name
+            return;
+        }
+        var lobbyRow = await PlatformService.CreateLobby(new Guid(uuid), name, IsLobbyPublic ? "" : Password, gameType, LobbyName);
 
         NavigationManager.NavigateTo($"/lobby/{lobbyRow.Id}");
     }

@@ -8,10 +8,10 @@
     <h1 class="display-4">Welcome On PatteDoie</h1>
     @if (!Authenticated)
     {
-        <p class="display-4">You need to set an username to play games</p>
+        <p class="welcome-text">You need to set an username to play games</p>
         <Authenticator />
     } else
     {
-        <a href="/lobby">Go to lobbies list</a>
+        <a class="welcome-text" href="/lobby">Go to lobbies list</a>
     }
 </div>
