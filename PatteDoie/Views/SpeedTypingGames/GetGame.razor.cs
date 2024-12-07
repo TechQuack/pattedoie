@@ -24,6 +24,7 @@ namespace PatteDoie.Views.SpeedTypingGames
         private bool IsInputDisabled = false;
         private string UUID;
         private List<SpeedTypingPlayerRow> FinalRanking = [];
+        private bool IsTimerInitialized = false;
 
         private SpeedTypingGameRow? Row { get; set; } = null;
 
@@ -35,6 +36,7 @@ namespace PatteDoie.Views.SpeedTypingGames
             this.Row = await SpeedTypingService.GetGame(new Guid(this.Id));
             _players = await SpeedTypingService.GetRank(new Guid(this.Id));
             FinalRanking = _players;
+
             hubConnection = new HubConnectionBuilder()
                 .WithUrl(NavigationManager.ToAbsoluteUri("/hub/speedtyping"), (opts) =>
                 {
@@ -72,20 +74,27 @@ namespace PatteDoie.Views.SpeedTypingGames
 
             await hubConnection.StartAsync();
             await hubConnection.SendAsync("JoinGame", this.Id);
+            Initialized = true;
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            if (firstRender)
+            if (Initialized && !IsTimerInitialized)
             {
-                UUID = await GetUUID();
-
                 await base.OnAfterRenderAsync(firstRender);
+                IsTimerInitialized = true;
+                UUID = await GetUUID();
 
                 var elapsedTime = DateTime.UtcNow - Row!.LaunchTime;
                 _secondsToRun = 60 - (int)elapsedTime.TotalSeconds;
 
                 WordIndexToDisplay = await SpeedTypingService.GetScore(new Guid(UUID));
+
+                _timer = new Timer(1000);
+                _timer.Elapsed += OnTimedEvent;
+                _timer.Elapsed += CanPlay;
+                _timer.AutoReset = true;
+                _timer.Enabled = true;
             }
         }
 
@@ -108,11 +117,7 @@ namespace PatteDoie.Views.SpeedTypingGames
 
         protected override void OnInitialized()
         {
-            _timer = new Timer(1000);
-            _timer.Elapsed += OnTimedEvent;
-            _timer.Elapsed += CanPlay;
-            _timer.AutoReset = true;
-            _timer.Enabled = true;
+
         }
 
         private async void OnTimedEvent(object? sender, ElapsedEventArgs e)
@@ -121,9 +126,9 @@ namespace PatteDoie.Views.SpeedTypingGames
             await InvokeAsync(StateHasChanged);
         }
 
-        protected override Guid GetLobbyGuid()
+        protected override Guid? GetLobbyGuid()
         {
-            return Row!.Lobby.Id;
+            return Row?.Lobby?.Id;
         }
 
         private async void CanPlay(object? sender, ElapsedEventArgs e)

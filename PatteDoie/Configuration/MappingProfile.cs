@@ -19,6 +19,7 @@ namespace PatteDoie.Configuration
             CreateMap<HighScore, PlatformHighScoreRow>();
             CreateMap<ScattergoriesGame, ScattegoriesGameRow>();
             CreateMap<ScattergoriesPlayer, ScattergoriesPlayerRow>();
+            CreateMap<ScattergoriesCategory, ScattergoriesCategoryRow>();
             CreateMap<User, PlatformUserRow>();
             CreateMap<Lobby, PlatformLobbyRow>();
             CreateMap<Game, GameRow>();

@@ -30,6 +30,7 @@ namespace PatteDoie.Services.Scattergories
             var game = (_context.ScattergoriesGame.AsQueryable()
                .Include(g => g.Lobby)
                .ThenInclude(l => l.Users)
+               .Include(g => g.Categories)
                .FirstOrDefault(g => g.Id == gameId)) ?? throw new GameNotValidException("Scattergories game cannot be null");
             await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
@@ -122,14 +123,10 @@ namespace PatteDoie.Services.Scattergories
             foreach (var user in lobby.Users)
             {
                 var playerAnswers = new List<ScattergoriesAnswer>();
-                var player = CreatePlayer(user, playerAnswers, false);
+                var player = CreatePlayer(user, playerAnswers, user == lobby.Creator);
                 players.Add(player);
                 _context.ScattergoriesPlayer.Add(player);
             }
-            var hostAnswers = new List<ScattergoriesAnswer>();
-            var hostPlayer = CreatePlayer(lobby.Creator, hostAnswers, true);
-            players.Add(hostPlayer);
-            _context.ScattergoriesPlayer.Add(hostPlayer);
 
             var game = new ScattergoriesGame
             {
@@ -198,6 +195,26 @@ namespace PatteDoie.Services.Scattergories
             }
             await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
+        }
+
+        public async Task<List<ScattergoriesCategoryRow>> GetCategories(Guid gameId)
+        {
+            using var _context = _factory.CreateDbContext();
+            var game = await _context.ScattergoriesGame.AsQueryable()
+                .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+
+            return _mapper.Map<List<ScattergoriesCategoryRow>>(game.Categories);
+        }
+
+        public async Task<List<ScattergoriesPlayerRow>> GetRank(Guid gameId)
+        {
+            using var _context = _factory.CreateDbContext();
+            var game = await _context.ScattergoriesGame.AsQueryable()
+                .Include(g => g.Players).ThenInclude(p => p.User)
+                .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+            return _mapper.Map<List<ScattergoriesPlayerRow>>(game.Players
+                .OrderByDescending(player => player.Score)
+            );
         }
 
         //TOOLS

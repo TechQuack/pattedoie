@@ -44,12 +44,11 @@ namespace PatteDoie.Services.SpeedTyping
                 players.Add(speedTypingPlayer);
                 _context.SpeedTypingPlayer.Add(speedTypingPlayer);
             }
-            String ApiUrl = "https://random-word-api.herokuapp.com/word?lang=fr&number=10";
+            String ApiUrl = "https://random-word-api.herokuapp.com/word?lang=en&number=10";
             String result = await ApiCall.GetAsync(ApiUrl);
             result = result.Remove(0, 1);
             result = result.Remove(result.Length - 1);
             String[] words = result.Replace("\"", "").Split(',');
-
 
             var speedTypingGame = new SpeedTypingGame
             {
@@ -59,11 +58,13 @@ namespace PatteDoie.Services.SpeedTyping
                 TimeProgresses = [],
                 Lobby = lobby
             };
-            _context.SpeedTypingGame.Add(speedTypingGame);
-            await _context.SaveChangesAsync();
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                await _context.SpeedTypingGame.AddAsync(speedTypingGame);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
             Task endGame = this.DelayedEnding(speedTypingGame);
-            await _context.DisposeAsync();
-
             return _mapper.Map<SpeedTypingGameRow>(speedTypingGame);
         }
 
@@ -73,13 +74,28 @@ namespace PatteDoie.Services.SpeedTyping
             var game = _context.SpeedTypingGame
                 .Include(g => g.Players)
                 .Include(g => g.TimeProgresses)
+                .Include(g => g.Lobby)
                 .FirstOrDefault(g => g.Id == id)
                 ?? throw new GameNotValidException("Speed typing game cannot be null");
-            _context.SpeedTypingPlayer.RemoveRange(game.Players);
-            _context.SpeedTypingTimeProgress.RemoveRange(game.TimeProgresses);
-            _context.SpeedTypingGame.Remove(game);
-            await _context.SaveChangesAsync();
-            await _context.DisposeAsync();
+
+            var lobby = _context.PlatformLobby
+                .Include(l => l.Users)
+                .Include(l => l.Creator)
+                .FirstOrDefault(l => l.Id == game.Lobby.Id)
+                ?? throw new LobbyNotFoundException("Lobby cannot be null");
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+
+                _context.SpeedTypingPlayer.RemoveRange(game.Players);
+                _context.SpeedTypingTimeProgress.RemoveRange(game.TimeProgresses);
+                _context.SpeedTypingGame.Remove(game);
+
+                _context.PlatformLobby.Remove(lobby);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
         }
 
         public Task<IEnumerable<SpeedTypingGameRow>> GetAllGames()
@@ -148,9 +164,12 @@ namespace PatteDoie.Services.SpeedTyping
             {
                 throw new GameNotValidException("Speed typing game cannot be null");
             }
-            foreach (SpeedTypingPlayer player in game.Players)
+            var players = await _context.SpeedTypingGame
+                .Where(g => g.Id == game.Id)
+                .SelectMany(game => game.Players).ToListAsync();
+            foreach (SpeedTypingPlayer player in players)
             {
-                if (!HasFinished(game, player))
+                if (!HasFinished(game, player) && player.SecondsToFinish == 0)
                 {
                     await SetTimeProgress(game, player, DateTime.UtcNow);
                 }
@@ -238,10 +257,6 @@ namespace PatteDoie.Services.SpeedTyping
             var game = await _context.SpeedTypingGame.AsQueryable()
                 .Include(g => g.Players).ThenInclude(p => p.User)
                 .FirstOrDefaultAsync<SpeedTypingGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
-            if (!await IsGameFinishedAsync(game))
-            {
-                return [];
-            }
             await _context.DisposeAsync();
             return _mapper.Map<List<SpeedTypingPlayerRow>>(game.Players
                 .OrderByDescending(player => player.Score)

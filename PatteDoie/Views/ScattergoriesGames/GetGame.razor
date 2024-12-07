@@ -14,28 +14,39 @@
             <h2>@Row.CurrentLetter</h2>
         </div>
         <div>
-                <table>
-                    <thead>
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            Category
+                        </th>
+                        <th>
+                            Your answers
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var categories in Row.Categories)
+                    {
                         <tr>
-                            @foreach (var cattegories in @Row.Categories)
-                            {
-                                <th>@cattegories.Name</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                        @foreach (var cattegories in @Row.Categories)
-                        {
-                            <td><input name="@cattegories.Name" placeholder="Enter your word here" 
-                                @oninput='(e) => ValidateField(e.Value.ToString() ?? "", cattegories)'/></td>
-                        }
+                            <td>@categories.Name</td>
+                            <td>Response</td>
                         </tr>
                     </tbody>
                 </table>
                 <div>
                 </div>
         </div>
+    </div>
+
+    <div>
+        <h4>Ranking</h4>
+        <ol>
+            @foreach(var player in FinalRanking)
+            {
+                <li>@player.User.Nickname - @player.Score</li>
+            }
+        </ol>
     </div>
 
 </div>
