@@ -128,7 +128,7 @@ namespace PatteDoie.Services.Platform
                     break;
             }
 
-            return _mapper.Map<List<PlatformLobbyRow>>(await query.Include(l => l.Game).ToListAsync());
+            return _mapper.Map<List<PlatformLobbyRow>>(await query.Include(l => l.Game).Include(l => l.Users).ToListAsync());
         }
 
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command)

@@ -55,10 +55,10 @@
                 @item.Started
             </td>
             <td>
-                @if (item.Started) {
+                @if (item.Started && IsUserInLobbies.GetValueOrDefault(item, false)) {
                     <a href="/@item.Game.Name/@GameUUIDFromLobbies.GetValueOrDefault(item)">Join game</a>
                 } 
-                else {
+                else if(!item.Started) {
                     <a href="/lobby/@item.Id">Details</a> <span>|</span>
                     <a href="/lobby/join/@item.Id">Join lobby</a>
                 }

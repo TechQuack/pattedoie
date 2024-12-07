@@ -19,6 +19,8 @@ public partial class LobbiesList : AuthenticatedPage
 
     private FilterGameType GameTypeValue = FilterGameType.All;
 
+    private Dictionary<PlatformLobbyRow, bool> IsUserInLobbies = [];
+
     private readonly List<LobbyType> Types =
     [
         LobbyType.Public,
@@ -35,6 +37,23 @@ public partial class LobbiesList : AuthenticatedPage
             {
                 GameUUIDFromLobbies.Add(item, await PlatformService.GetGameUUIDFromLobby(item.Id));
             }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (firstRender)
+        {
+            var userId = new Guid(await GetUUID());
+            foreach (var item in Items)
+            {
+                if (item.Started)
+                {
+                    IsUserInLobbies[item] = item.Users.Exists(u => u.UserUUID == userId);
+                }
+            }
+            await InvokeAsync(StateHasChanged);
         }
     }
 
