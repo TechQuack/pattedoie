@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Enums;
 using PatteDoie.Extensions;
+using PatteDoie.Hubs;
 using PatteDoie.Models.Platform;
 using PatteDoie.PatteDoieException;
 using PatteDoie.Queries.Platform;
@@ -13,12 +15,17 @@ using PatteDoie.Services.SpeedTyping;
 
 namespace PatteDoie.Services.Platform
 {
-    public class PlatformService(PatteDoieContext context, IMapper mapper, ISpeedTypingService speedTypingService, IScattegoriesService scattergoriesService) : IPlatformService
+    public class PlatformService(PatteDoieContext context,
+        IMapper mapper,
+        ISpeedTypingService speedTypingService,
+        IScattegoriesService scattergoriesService,
+        IHubContext<PlatformHub> hub) : IPlatformService
     {
         private readonly PatteDoieContext _context = context;
         private readonly IMapper _mapper = mapper;
         private readonly ISpeedTypingService _speedTypingService = speedTypingService;
         private readonly IScattegoriesService _scattergoriesService = scattergoriesService;
+        private readonly IHubContext<PlatformHub> _hub = hub;
 
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type)
@@ -199,6 +206,11 @@ namespace PatteDoie.Services.Platform
             _context.PlatformLobby.Update(lobby);
             await _context.SaveChangesAsync();
             var id = await CreateGame(GameTypeHelper.GetGameTypeFromString(lobby.Game.Name), lobby);
+            if (id != null)
+            {
+                await _hub.Clients.Group(lobbyId.ToString())
+                    .SendAsync("ReceiveGameStarted", id);
+            }
             return id;
         }
 
