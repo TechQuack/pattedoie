@@ -68,9 +68,12 @@ namespace PatteDoie.Views.ScattergoriesGames
             return Row?.Lobby?.Id;
         }
 
-        private async void ValidateField(string word, ScattergoriesCategory category)
+        public void sendWords(List<string> inputs, List<ScattergoriesCategory> categories)
         {
-
+            for (var i = 0; i < inputs.Count; ++i)
+            {
+                //TODO call service.addplayerword() avec tous les mots et faire verif
+            }
         }
     }
 }
