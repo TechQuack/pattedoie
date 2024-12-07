@@ -181,6 +181,9 @@ namespace PatteDoie.Services.Platform
 
             await _context.SaveChangesAsync();
 
+            await _hub.Clients.Group(lobbyId.ToString())
+                    .SendAsync("ReceivePlayerJoined", platformUser.UserUUID);
+
             return _mapper.Map<PlatformUserRow>(platformUser);
         }
 

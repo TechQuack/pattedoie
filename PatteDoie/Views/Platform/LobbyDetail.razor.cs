@@ -37,7 +37,16 @@ public partial class LobbyDetail : AuthenticatedPage
                 })
                 .Build();
 
-        hubConnection.On<Guid>("ReceiveGameStarted", async (id) => await RedirectToGame(id));
+        hubConnection.On<Guid>("ReceiveGameStarted", RedirectToGame);
+        hubConnection.On<Guid>("ReceivePlayerJoined", async (id) =>
+        {
+            var user = await PlatformService.GetUser(id);
+            if (user != null)
+            {
+                Lobby.Users.Add(user);
+                await InvokeAsync(StateHasChanged);
+            }
+        });
 
         await hubConnection.StartAsync();
         await hubConnection.SendAsync("JoinLobby", this.Id);
