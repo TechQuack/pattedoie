@@ -26,15 +26,24 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var categories in Row.Categories)
+                    @{
+                        int i = 0;
+                        List<string> inputs = new List<string>(new string[Row.Categories.Count]);
+                    }
+                    @foreach (var category in Row.Categories)
                     {
+                        
                         <tr>
-                            <td>@categories.Name</td>
-                            <td>Response</td>
+                            <td>@category.Name</td>
+                            <input type="text" name="input_@category.Name" placeholder="@category.Name" @bind="inputs[i]"/>
                         </tr>
+                        ++i;
                     }
                 </tbody>
             </table>
+        </div>
+        <div>
+            <button type="button" @onclick="() => sendWords(inputs, Row.Categories)">Envoyer les mots</button>
         </div>
     </div>
 

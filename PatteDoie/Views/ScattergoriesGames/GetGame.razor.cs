@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
+using PatteDoie.Models.Scattergories;
 using PatteDoie.Rows.Scattegories;
 using PatteDoie.Services.Scattergories;
 
@@ -67,6 +68,14 @@ namespace PatteDoie.Views.ScattergoriesGames
         protected override Guid? GetLobbyGuid()
         {
             return Row?.Lobby?.Id;
+        }
+
+        public void sendWords(List<string> inputs, List<ScattergoriesCategory> categories)
+        {
+            for (var i = 0; i < inputs.Count; ++i)
+            {
+                //TODO call service.addplayerword() avec tous les mots et faire verif
+            }
         }
     }
 }
