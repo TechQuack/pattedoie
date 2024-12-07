@@ -28,7 +28,7 @@ namespace PatteDoie.Services.Platform
         private readonly IHubContext<PlatformHub> _hub = hub;
 
 
-        public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type)
+        public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type, string lobbyName)
         {
             var gameName = type.GetDescription();
             var game = await _context.PlatformGame.AsQueryable().Where(g => g.Name == gameName).FirstOrDefaultAsync() ?? throw new GameNotFoundException("Game not found");
@@ -45,6 +45,7 @@ namespace PatteDoie.Services.Platform
                 Password = null,
                 Users = [],
                 Game = game,
+                LobbyName = lobbyName
             };
 
             if (!String.IsNullOrEmpty(password))
