@@ -8,8 +8,8 @@ public partial class CreateLobby : AuthenticatedPage
 {
     [Parameter, SupplyParameterFromQuery]
     public string? GameName { get; set; }
-
     private string? Password { get; set; }
+    private string LobbyName { get; set; } = "";
 
     [Inject]
     private IPlatformService PlatformService { get; set; } = default!;
@@ -20,15 +20,17 @@ public partial class CreateLobby : AuthenticatedPage
         var name = await GetName();
 
         GameType gameType;
-        try { 
-            gameType = GameTypeHelper.GetGameTypeFromString(GameName ?? ""); 
+        try
+        {
+            gameType = GameTypeHelper.GetGameTypeFromString(GameName ?? "");
         }
-        catch { 
+        catch
+        {
             //TODO: Notify error invalid game
-            return; 
+            return;
         }
 
-        var lobbyRow = await PlatformService.CreateLobby(new Guid(uuid), name, Password, gameType);
+        var lobbyRow = await PlatformService.CreateLobby(new Guid(uuid), name, Password, gameType, LobbyName);
 
         NavigationManager.NavigateTo($"/lobby/{lobbyRow.Id}");
     }

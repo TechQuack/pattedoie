@@ -15,5 +15,7 @@
 
         public bool Started { get; set; }
 
+        public string LobbyName { get; set; } = "";
+
     }
 }
