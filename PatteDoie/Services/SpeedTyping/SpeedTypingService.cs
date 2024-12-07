@@ -9,6 +9,7 @@ using PatteDoie.Queries.SpeedTyping;
 using PatteDoie.Rows.SpeedTyping;
 using PatteDoie.Rows.SpeedTypingGame;
 
+
 namespace PatteDoie.Services.SpeedTyping
 {
     public class SpeedTypingService : ISpeedTypingService
@@ -64,7 +65,9 @@ namespace PatteDoie.Services.SpeedTyping
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
-            Task endGame = this.DelayedEnding(speedTypingGame);
+            await _context.DisposeAsync();
+
+            Task endGame = this.DelayedEnding(speedTypingGame, _factory.CreateDbContext());
             return _mapper.Map<SpeedTypingGameRow>(speedTypingGame);
         }
 
@@ -96,6 +99,7 @@ namespace PatteDoie.Services.SpeedTyping
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
+            await _context.DisposeAsync();
         }
 
         public Task<IEnumerable<SpeedTypingGameRow>> GetAllGames()
@@ -149,63 +153,12 @@ namespace PatteDoie.Services.SpeedTyping
             var elaspedTime = (now - launch).TotalMilliseconds;
             if (HasFinished(game, player))
             {
+                await _context.DisposeAsync();
                 return false;
             }
+            await _context.DisposeAsync();
             return elaspedTime < TIME_BEFORE_ENDING;
         }
-
-        public async Task ManageEndOfGame(Guid gameId)
-        {
-            using var _context = _factory.CreateDbContext();
-            var game = _context.SpeedTypingGame.AsQueryable()
-               .Where(g => g.Id == gameId)
-               .FirstOrDefault<SpeedTypingGame>();
-            if (game is null)
-            {
-                throw new GameNotValidException("Speed typing game cannot be null");
-            }
-            var players = await _context.SpeedTypingGame
-                .Where(g => g.Id == game.Id)
-                .SelectMany(game => game.Players).ToListAsync();
-            foreach (SpeedTypingPlayer player in players)
-            {
-                if (!HasFinished(game, player) && player.SecondsToFinish == 0)
-                {
-                    await SetTimeProgress(game, player, DateTime.UtcNow);
-                }
-            }
-            await _hub.Clients.Group(gameId.ToString())
-                    .SendAsync("ShowRanking", gameId);
-            Task deleteGame = this.DelayedDeletion(game);
-            await _context.DisposeAsync();
-        }
-        public async Task SetTimeProgress(SpeedTypingGame game, SpeedTypingPlayer player, DateTime timeProgress)
-        {
-            using var _context = _factory.CreateDbContext();
-            if (player is null)
-            {
-                throw new PlayerNotValidException("Speed typing player cannot be null");
-            }
-            if (game is null)
-            {
-                throw new GameNotValidException("Speed typing game cannot be null");
-            }
-            player.SecondsToFinish = (int)(DateTime.UtcNow - game.LaunchTime).TotalSeconds;
-            _context.SpeedTypingPlayer.Update(player);
-            SpeedTypingTimeProgress playerProgress = new()
-            {
-                Player = player,
-                TimeProgress = timeProgress
-            };
-            _context.SpeedTypingTimeProgress.Update(playerProgress);
-
-            game.TimeProgresses.Add(playerProgress);
-            _context.SpeedTypingGame.Update(game);
-
-            await _context.SaveChangesAsync();
-            await _context.DisposeAsync();
-        }
-
         public async Task<bool> CheckWord(Guid gameId, Guid uuid, string word)
         {
 
@@ -215,9 +168,10 @@ namespace PatteDoie.Services.SpeedTyping
                 await _context.DisposeAsync();
                 return false;
             }
-            var game = _context.SpeedTypingGame.AsQueryable()
-                .Where(g => g.Id == gameId)
-                .FirstOrDefault<SpeedTypingGame>() ?? throw new GameNotValidException("Game not found");
+            var game = await _context.SpeedTypingGame.AsQueryable().AsNoTracking()
+                .Include(g => g.Players).ThenInclude(p => p.User)
+                .Include(g => g.Lobby)
+                .FirstOrDefaultAsync<SpeedTypingGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
             var platformUser = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == uuid).FirstOrDefaultAsync();
             var player = await _context.SpeedTypingPlayer.AsQueryable().Where(p => p.User == platformUser).FirstOrDefaultAsync()
                 ?? throw new PlayerNotValidException("Player not found");
@@ -234,18 +188,16 @@ namespace PatteDoie.Services.SpeedTyping
 
                 if (HasFinished(game, player))
                 {
-                    await SetTimeProgress(game, player, DateTime.UtcNow);
-                    if (await AllPlayersHaveFinished(game))
+                    await SetTimeProgress(game, player, DateTime.UtcNow, _context);
+                    if (await AllPlayersHaveFinished(game, _context))
                     {
-                        await ManageEndOfGame(gameId);
+                        await ManageEndOfGame(game, _context);
                     }
                 }
-                await _context.DisposeAsync();
                 return true;
             }
             else
             {
-                await _context.DisposeAsync();
                 return false;
             }
 
@@ -264,9 +216,50 @@ namespace PatteDoie.Services.SpeedTyping
                 );
         }
 
-        private async Task<bool> AllPlayersHaveFinished(SpeedTypingGame game)
+        private async Task UpdateHighscores(SpeedTypingGame game, PatteDoieContext _context)
         {
-            using var _context = _factory.CreateDbContext();
+            var game = await _context.SpeedTypingGame.AsQueryable().AsNoTracking()
+                .Include(g => g.Players).ThenInclude(p => p.User)
+                .Include(g => g.Lobby)
+                .FirstOrDefaultAsync<SpeedTypingGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+            var lobby = await _context.PlatformLobby
+               .Include(l => l.Game)
+               .FirstOrDefaultAsync(l => l.Id == game.Lobby.Id)
+               ?? throw new LobbyNotFoundException("Lobby cannot be null");
+
+            var platformGame = await _context.PlatformGame
+                .Include(l => l.HighScores)
+                .FirstOrDefaultAsync(p => p.Name == "SpeedTyping")
+                ?? throw new GameNotValidException("Game not valid");
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                var highScores = platformGame.HighScores;
+                game.Players.ForEach(async p =>
+                {
+                    HighScore highScore = new HighScore
+                    {
+                        Id = p.Id,
+                        Score = p.Score * 60 / p.SecondsToFinish,
+                        PlayerName = p.User.Nickname
+                    };
+                    await _context.PlatformHighScore.AddAsync(highScore);
+                    highScores.Add(highScore);
+                });
+                platformGame.HighScores = highScores.OrderByDescending(h => h.Score).Take(5).ToList();
+                var highScoresToDelete = platformGame.HighScores.OrderByDescending(h => h.Score).Skip(5).ToList();
+
+                _context.PlatformHighScore.RemoveRange(highScoresToDelete);
+
+                _context.PlatformGame.Update(platformGame);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+        }
+
+        private async Task<bool> AllPlayersHaveFinished(SpeedTypingGame game, PatteDoieContext _context)
+        {
+            await _context.Entry(game).ReloadAsync();
             var players = await _context.SpeedTypingGame
                 .Where(g => g.Id == game.Id)
                 .SelectMany(game => game.Players).ToListAsync();
@@ -286,10 +279,10 @@ namespace PatteDoie.Services.SpeedTyping
                     .SendAsync("RedirectToHome", game.Id);
         }
 
-        private async Task DelayedEnding(SpeedTypingGame game)
+        private async Task DelayedEnding(SpeedTypingGame game, PatteDoieContext _context)
         {
             await Task.Delay(TIME_BEFORE_ENDING);
-            await ManageEndOfGame(game.Id);
+            await ManageEndOfGame(game, _context);
         }
 
         private DateTime? GetTimeProgress(SpeedTypingPlayer player)
@@ -298,19 +291,57 @@ namespace PatteDoie.Services.SpeedTyping
             var timeProgress = _context.SpeedTypingTimeProgress
                 .AsQueryable()
                 .Where(s => s.Player == player).FirstOrDefault() ?? null;
+            _context.DisposeAsync();
             return timeProgress?.TimeProgress;
         }
 
-        private async Task<bool> IsGameFinishedAsync(SpeedTypingGame game)
+        private async Task ManageEndOfGame(SpeedTypingGame game, PatteDoieContext _context)
         {
+            await _context.Entry(game).ReloadAsync();
             foreach (SpeedTypingPlayer player in game.Players)
             {
-                if (await CanPlay(player.User.UserUUID, game.Id))
+                if (!HasFinished(game, player))
                 {
-                    return false;
+                    await SetTimeProgress(game, player, DateTime.UtcNow, _context);
                 }
             }
-            return true;
+            await _hub.Clients.Group(game.Id.ToString())
+                    .SendAsync("ShowRanking", game.Id);
+            await UpdateHighscores(game, _context);
+            Task deleteGame = this.DelayedDeletion(game);
+            await _context.DisposeAsync();
+        }
+
+        private async Task SetTimeProgress(SpeedTypingGame game, SpeedTypingPlayer player, DateTime timeProgress, PatteDoieContext _context)
+        {
+            await _context.Entry(player).ReloadAsync();
+            await _context.Entry(game).ReloadAsync();
+
+            if (player is null)
+            {
+                throw new PlayerNotValidException("Speed typing player cannot be null");
+            }
+            if (game is null)
+            {
+                throw new GameNotValidException("Speed typing game cannot be null");
+            }
+            player.SecondsToFinish = (int)(DateTime.UtcNow - game.LaunchTime).TotalSeconds;
+            SpeedTypingTimeProgress playerProgress = new()
+            {
+                Player = player,
+                TimeProgress = timeProgress
+            };
+            _context.SpeedTypingTimeProgress.Update(playerProgress);
+
+            game.TimeProgresses.Add(playerProgress);
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                _context.SpeedTypingPlayer.Update(player);
+
+                _context.SpeedTypingGame.Update(game);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
         }
     }
 }
