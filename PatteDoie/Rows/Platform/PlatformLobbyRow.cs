@@ -1,15 +1,13 @@
-﻿using PatteDoie.Models.Platform;
-
-namespace PatteDoie.Rows.Platform
+﻿namespace PatteDoie.Rows.Platform
 {
     public class PlatformLobbyRow
     {
 
         public Guid Id { get; set; }
 
-        public List<User> Users { get; set; } = [];
+        public List<PlatformUserRow> Users { get; set; } = [];
 
-        public required User Creator { get; set; }
+        public required PlatformUserRow Creator { get; set; }
 
         public required GameRow Game { get; set; }
 
