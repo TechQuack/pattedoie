@@ -67,6 +67,15 @@ namespace PatteDoie.Views.ScattergoriesGames
             Initialized = true;
         }
 
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (Initialized)
+            {
+                await base.OnAfterRenderAsync(firstRender);
+                UUID = await GetUUID();
+            }
+        }
+
         protected override Guid? GetLobbyGuid()
         {
             return Row?.Lobby?.Id;
@@ -79,7 +88,7 @@ namespace PatteDoie.Views.ScattergoriesGames
             {
                 try
                 {
-                    Console.WriteLine("_________________________________________________2");
+                    Console.WriteLine($"_________________________________________________2: {inputs[i]},{Row!.Categories[i].Name}, {Id}, {UUID}");
                     Row = await ScattergoriesService.AddPlayerWord(new Guid(Id), new Guid(UUID), inputs[i], Row!.Categories[i]);
                     Console.WriteLine("_________________________________________________3");
                 }
