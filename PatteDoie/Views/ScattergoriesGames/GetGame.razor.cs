@@ -40,7 +40,7 @@ namespace PatteDoie.Views.ScattergoriesGames
 
             hubConnection.On<ScattergoriesPlayerRow>("ReceiveProgression", async (player) =>
             {
-                _players = await ScattergoriesService.GetRank(new Guid(this.Id));
+                FinalRanking = await ScattergoriesService.GetRank(new Guid(this.Id));
                 await InvokeAsync(StateHasChanged);
             });
             hubConnection.On("RedirectToHome", async (Guid gameId) =>
@@ -60,11 +60,13 @@ namespace PatteDoie.Views.ScattergoriesGames
 
             await hubConnection.StartAsync();
             await hubConnection.SendAsync("JoinGame", this.Id);
+
+            Initialized = true;
         }
 
-        protected override Guid GetLobbyGuid()
+        protected override Guid? GetLobbyGuid()
         {
-            return Row!.Lobby.Id;
+            return Row?.Lobby?.Id;
         }
     }
 }

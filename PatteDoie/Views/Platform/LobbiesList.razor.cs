@@ -10,6 +10,8 @@ public partial class LobbiesList : AuthenticatedPage
 {
     public IEnumerable<PlatformLobbyRow> Items = [];
 
+    public Dictionary<PlatformLobbyRow, Guid?> GameUUIDFromLobbies = [];
+
     [Inject]
     private IPlatformService PlatformService { get; set; } = default!;
 
@@ -27,6 +29,13 @@ public partial class LobbiesList : AuthenticatedPage
     protected override async Task OnInitializedAsync()
     {
         await SearchLobbies();
+        foreach (var item in Items)
+        {
+            if (item.Started)
+            {
+                GameUUIDFromLobbies.Add(item, await PlatformService.GetGameUUIDFromLobby(item.Id));
+            }
+        }
     }
 
     private static string GetLobbyTypeDescription(LobbyType type)

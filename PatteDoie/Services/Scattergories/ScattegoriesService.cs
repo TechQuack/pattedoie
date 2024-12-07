@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PatteDoie.Hubs;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
 using PatteDoie.PatteDoieException;
@@ -9,13 +11,15 @@ using PatteDoie.Rows.Scattegories;
 
 namespace PatteDoie.Services.Scattergories
 {
-    public class ScattegoriesService(IDbContextFactory<PatteDoieContext> factory, IMapper mapper) : IScattegoriesService
+    public class ScattegoriesService(IDbContextFactory<PatteDoieContext> factory, IMapper mapper, IHubContext<ScattergoriesHub> hub) : IScattegoriesService
     {
         public static int TIME_BEFORE_DELETION = 60000;
 
         private readonly IDbContextFactory<PatteDoieContext> _factory = factory;
         private readonly IMapper _mapper = mapper;
         private readonly NavigationManager NavigationManager = default!;
+
+        private readonly IHubContext<ScattergoriesHub> _hub = hub;
 
         public async Task<IEnumerable<ScattegoriesGameRow>> GetAllGames()
         {
@@ -30,6 +34,7 @@ namespace PatteDoie.Services.Scattergories
             var game = (_context.ScattergoriesGame.AsQueryable()
                .Include(g => g.Lobby)
                .ThenInclude(l => l.Users)
+               .Include(g => g.Categories)
                .FirstOrDefault(g => g.Id == gameId)) ?? throw new GameNotValidException("Scattergories game cannot be null");
             await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
@@ -122,14 +127,10 @@ namespace PatteDoie.Services.Scattergories
             foreach (var user in lobby.Users)
             {
                 var playerAnswers = new List<ScattergoriesAnswer>();
-                var player = CreatePlayer(user, playerAnswers, false);
+                var player = CreatePlayer(user, playerAnswers, user == lobby.Creator);
                 players.Add(player);
                 _context.ScattergoriesPlayer.Add(player);
             }
-            var hostAnswers = new List<ScattergoriesAnswer>();
-            var hostPlayer = CreatePlayer(lobby.Creator, hostAnswers, true);
-            players.Add(hostPlayer);
-            _context.ScattergoriesPlayer.Add(hostPlayer);
 
             var game = new ScattergoriesGame
             {
@@ -181,23 +182,44 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
-        public async Task<ScattegoriesGameRow> HostVerifyWord(ScattergoriesGame game, ScattergoriesPlayer player, ScattergoriesAnswer answer, bool decision)
+        public async Task<ScattegoriesGameRow> HostVerifyWord(Guid gameId, Guid playerId, Guid answerId, bool decision)
         {
             using var _context = _factory.CreateDbContext();
+            var player = await _context.ScattergoriesPlayer.AsQueryable()
+                .Where(p => p.Id == playerId)
+                .Include(p => p.Answers)
+                .FirstOrDefaultAsync() ?? throw new Exception("Player does not exists");
+            var answer = player.Answers.Find(a => a.Id == answerId) ?? throw new Exception("Answer not found");
             if (decision)
             {
                 player.Score += 1;
+                _context.ScattergoriesPlayer.Update(player);
             }
             answer.IsChecked = true;
-            _context.ScattergoriesPlayer.Update(player);
+            _context.ScattergoriesAnswer.Update(answer);
             await _context.SaveChangesAsync();
 
+            var game = _context.ScattergoriesGame.AsQueryable()
+                .Where(g => g.Id == gameId)
+                .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Game not found");
+            await _context.DisposeAsync();
+            await _hub.Clients.Group(gameId.ToString())
+                    .SendAsync("ReceiveProgression", _mapper.Map<ScattergoriesPlayerRow>(player));
             if (AreAllWordsChecked(game))
             {
                 return NextRound(game).Result;
             }
-            await _context.DisposeAsync();
+
             return _mapper.Map<ScattegoriesGameRow>(game);
+        }
+
+        public async Task<List<ScattergoriesCategoryRow>> GetCategories(Guid gameId)
+        {
+            using var _context = _factory.CreateDbContext();
+            var game = await _context.ScattergoriesGame.AsQueryable()
+                .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+
+            return _mapper.Map<List<ScattergoriesCategoryRow>>(game.Categories);
         }
 
         public async Task<List<ScattergoriesPlayerRow>> GetRank(Guid gameId)
