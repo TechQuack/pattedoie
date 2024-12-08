@@ -83,18 +83,14 @@ namespace PatteDoie.Views.ScattergoriesGames
 
         public async void SendWords()
         {
-            Console.WriteLine("_________________________________________________1");
             for (var i = 0; i < inputs.Length; ++i)
             {
                 try
                 {
-                    Console.WriteLine($"_________________________________________________2: {inputs[i]},{Row!.Categories[i].Name}, {Id}, {UUID}");
                     Row = await ScattergoriesService.AddPlayerWord(new Guid(Id), new Guid(UUID), inputs[i], Row!.Categories[i]);
-                    Console.WriteLine("_________________________________________________3");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("_________________________________________________4");
                     //TODO afficher erreur au joueur pour la catégorie concernée (categories[i]) 940
                 }
 

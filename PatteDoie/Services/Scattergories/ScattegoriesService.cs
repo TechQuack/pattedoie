@@ -13,7 +13,7 @@ namespace PatteDoie.Services.Scattergories
 {
     public class ScattegoriesService(IDbContextFactory<PatteDoieContext> factory, IMapper mapper, IHubContext<ScattergoriesHub> hub) : IScattegoriesService
     {
-        public static int TIME_BEFORE_DELETION = 60000;
+        private readonly static int TIME_BEFORE_DELETION = 60000;
 
         private readonly IDbContextFactory<PatteDoieContext> _factory = factory;
         private readonly IMapper _mapper = mapper;
@@ -51,20 +51,18 @@ namespace PatteDoie.Services.Scattergories
 
         public async Task<ScattegoriesGameRow> AddPlayerWord(Guid gameId, Guid userId, string word, ScattergoriesCategory category)
         {
-            Console.WriteLine("_________________________________________________2.1");
             using var _context = _factory.CreateDbContext();
             var game = await _context.ScattergoriesGame.AsQueryable()
                 .Include(g => g.Players)
                 .ThenInclude(p => p.Answers)
                 .Include(g => g.Categories)
                 .FirstOrDefaultAsync(g => g.Id == gameId);
-            Console.WriteLine("_________________________________________________2.2");
             var platformUser = await _context.PlatformUser.AsQueryable().FirstOrDefaultAsync(u => u.UserUUID == userId);
             var player = await _context.ScattergoriesPlayer.AsQueryable()
                 .Include(p => p.Answers)
                 .ThenInclude(a => a.Category)
                 .FirstOrDefaultAsync(p => p.User == platformUser) ?? throw new PlayerNotValidException("Player not found");
-            Console.WriteLine($"_________________________________________________2.3 {word}");
+
             if (word.IsNullOrEmpty())
             {
                 throw new ArgumentNullException(nameof(word));
@@ -73,53 +71,30 @@ namespace PatteDoie.Services.Scattergories
             {
                 throw new Exception($"invalid word(empty word)");
             }
-            Console.WriteLine($"_________________________________________________2.4: {word.Trim().ToUpper().First()}, {game.CurrentLetter}");
+
             char letter = game.CurrentLetter;
             if (!(word.Trim().ToUpper().First() == letter))
             {
                 throw new Exception($"invalid word(wrong first letter) - {word}");
             }
-            Console.WriteLine("_________________________________________________2.5");
-            ScattergoriesAnswer? ExistingAnswer = null;
-            Console.WriteLine(player == null);
+
             foreach (var ans in player.Answers)
             {
-                if (ans.Category == category)
+                if (ans.Category.Name == category.Name)
                 {
-                    ExistingAnswer = ans;
+                    ans.Text = word;
+                    _context.ScattergoriesAnswer.Update(ans);
                 }
             }
-            Console.WriteLine("_________________________________________________2.6");
-            if (ExistingAnswer != null)
-            {
-                ExistingAnswer.Text = word;
-            }
-            else
-            {
-                Console.WriteLine("____________________________________________________2.6.1");
-                Console.WriteLine($"catégorie: {category.Name}");
-                ScattergoriesAnswer answer = new ScattergoriesAnswer
-                {
-                    Id = Guid.NewGuid(),
-                    Category = category,
-                    Text = word,
-                    IsChecked = false
-                };
-                Console.WriteLine("____________________________________________________2.6.2");
-                await _context.ScattergoriesAnswer.AddAsync(answer);
-                Console.WriteLine("____________________________________________________2.6.3");
-                player.Answers.Add(answer);
-            }
-            Console.WriteLine("_________________________________________________2.7");
-            if (HasCompletedCategories(player, game) && !game.IsHostCheckingPhase)
+
+            if (HasCompletedCategories(player) && !game.IsHostCheckingPhase)
             {
                 game.IsHostCheckingPhase = true;
+                _context.ScattergoriesGame.Update(game);
             }
-            Console.WriteLine("_________________________________________________2.8");
-            _context.ScattergoriesPlayer.Update(player);
-            Console.WriteLine("_________________________________________________2.9");
+
             await _context.SaveChangesAsync();
-            Console.WriteLine("_________________________________________________2.10");
+
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
@@ -137,7 +112,8 @@ namespace PatteDoie.Services.Scattergories
                 game.IsHostCheckingPhase = false;
                 foreach (var player in game.Players)
                 {
-                    player.Answers = new List<ScattergoriesAnswer>();
+                    DeletePlayerAnswers(player);
+                    player.Answers = CreateEmptyAnswers(game.Categories).Result;
                 }
                 await _context.SaveChangesAsync();
                 await _context.DisposeAsync();
@@ -158,8 +134,7 @@ namespace PatteDoie.Services.Scattergories
             var players = new List<ScattergoriesPlayer>();
             foreach (var user in lobby.Users)
             {
-                var playerAnswers = new List<ScattergoriesAnswer>();
-                var player = CreatePlayer(user, playerAnswers, user == lobby.Creator);
+                var player = CreatePlayer(user, CreateEmptyAnswers(categories).Result, user == lobby.Creator);
                 players.Add(player);
                 _context.ScattergoriesPlayer.Add(player);
             }
@@ -195,6 +170,10 @@ namespace PatteDoie.Services.Scattergories
             foreach (var category in game.Categories)
             {
                 category.Games.Remove(game);
+            }
+            foreach (var player in game.Players)
+            {
+                DeletePlayerAnswers(player);
             }
             _context.ScattergoriesPlayer.RemoveRange(game.Players);
             _context.ScattergoriesGame.Remove(game);
@@ -267,7 +246,7 @@ namespace PatteDoie.Services.Scattergories
 
         //TOOLS
 
-        private ScattergoriesPlayer CreatePlayer(User player, List<ScattergoriesAnswer> answers, bool isHost)
+        private static ScattergoriesPlayer CreatePlayer(User player, List<ScattergoriesAnswer> answers, bool isHost)
         {
             return new ScattergoriesPlayer
             {
@@ -276,6 +255,34 @@ namespace PatteDoie.Services.Scattergories
                 Answers = answers,
                 IsHost = isHost
             };
+        }
+
+        private async Task<List<ScattergoriesAnswer>> CreateEmptyAnswers(List<ScattergoriesCategory> categories)
+        {
+            using var _context = _factory.CreateDbContext();
+            List<ScattergoriesAnswer> answers = [];
+            foreach (var category in categories)
+            {
+                var answer = new ScattergoriesAnswer
+                {
+                    Text = "",
+                    Category = category,
+                    IsChecked = false
+                };
+                answers.Add(answer);
+                await _context.ScattergoriesAnswer.AddAsync(answer);
+            }
+            return answers;
+        }
+
+        private void DeletePlayerAnswers(ScattergoriesPlayer player)
+        {
+            using var _context = _factory.CreateDbContext();
+            foreach (var answer in player.Answers)
+            {
+                _context.Remove(answer);
+            }
+            player.Answers = [];
         }
 
         private static bool HasGameEnded(ScattergoriesGame game)
@@ -308,9 +315,17 @@ namespace PatteDoie.Services.Scattergories
             return true;
         }
 
-        private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
+        private static bool HasCompletedCategories(ScattergoriesPlayer player)
         {
-            return player.Answers.Count == game.Categories.Count;
+            var res = true;
+            foreach (var answer in player.Answers)
+            {
+                if (answer.Text == "")
+                {
+                    res = false;
+                }
+            }
+            return res;
         }
 
         private static char RandomLetter()
