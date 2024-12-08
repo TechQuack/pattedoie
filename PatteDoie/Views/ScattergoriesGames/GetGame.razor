@@ -32,7 +32,7 @@
                         {
                             var local = i;
                             <td>
-                                <input type="text" name="input_@category.Name" placeholder="@category.Name" @bind="inputs[local]" />
+                                <input type="text" name="input_@category.Name" placeholder="@category.Name" @bind="inputs[local]" @bind:event="oninput" @onkeyup="() => SendWord(local)"/>
                             </td>
                             ++i;
                         }
@@ -41,7 +41,7 @@
             </table>
         </div>
         <div>
-            <button type="button" @onclick="SendWords">Envoyer les mots</button>
+            <button type="button" @onclick="ConfirmWords">Envoyer les mots</button>
         </div>
     </div>
 
