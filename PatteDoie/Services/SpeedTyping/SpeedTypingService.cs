@@ -176,6 +176,7 @@ namespace PatteDoie.Services.SpeedTyping
             }
             await _hub.Clients.Group(gameId.ToString())
                     .SendAsync("ShowRanking", gameId);
+            await UpdateHighscores(gameId);
             Task deleteGame = this.DelayedDeletion(game);
             await _context.DisposeAsync();
         }
@@ -301,16 +302,53 @@ namespace PatteDoie.Services.SpeedTyping
             return timeProgress?.TimeProgress;
         }
 
-        private async Task<bool> IsGameFinishedAsync(SpeedTypingGame game)
+        private async Task UpdateHighscores(Guid gameId)
         {
-            foreach (SpeedTypingPlayer player in game.Players)
+            using var _context = _factory.CreateDbContext();
+
+            var game = await _context.SpeedTypingGame.AsQueryable().AsNoTracking()
+                .Include(g => g.Players).ThenInclude(p => p.User)
+                .Include(g => g.Lobby)
+                .FirstOrDefaultAsync<SpeedTypingGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+            var lobby = await _context.PlatformLobby
+               .Include(l => l.Game)
+               .FirstOrDefaultAsync(l => l.Id == game.Lobby.Id)
+               ?? throw new LobbyNotFoundException("Lobby cannot be null");
+
+            var platformGame = await _context.PlatformGame
+                .Include(l => l.HighScores)
+                .FirstOrDefaultAsync(p => p.Name == "SpeedTyping")
+                ?? throw new GameNotValidException("Game not valid");
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                if (await CanPlay(player.User.UserUUID, game.Id))
+                foreach (var p in game.Players)
                 {
-                    return false;
+                    var existingHighScore = await _context.PlatformHighScore
+                         .FirstOrDefaultAsync(h => h.Id == p.Id);
+                    if (existingHighScore == null)
+                    {
+                        var highScore = new HighScore
+                        {
+                            Id = p.Id,
+                            Score = p.Score * 60 / p.SecondsToFinish,
+                            PlayerName = p.User.Nickname
+                        };
+                        await _context.PlatformHighScore.AddAsync(highScore);
+                        platformGame.HighScores.Add(highScore);
+                    }
                 }
+                var highScoresToDelete = platformGame.HighScores.OrderByDescending(h => h.Score).Skip(5).ToList();
+
+                platformGame.HighScores = platformGame.HighScores.OrderByDescending(h => h.Score).Take(5).ToList();
+
+                _context.PlatformHighScore.RemoveRange(highScoresToDelete);
+
+                _context.PlatformGame.Update(platformGame);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
-            return true;
         }
+
     }
 }
