@@ -338,8 +338,9 @@ namespace PatteDoie.Services.SpeedTyping
                         platformGame.HighScores.Add(highScore);
                     }
                 }
-                platformGame.HighScores = platformGame.HighScores.OrderByDescending(h => h.Score).Take(5).ToList();
                 var highScoresToDelete = platformGame.HighScores.OrderByDescending(h => h.Score).Skip(5).ToList();
+
+                platformGame.HighScores = platformGame.HighScores.OrderByDescending(h => h.Score).Take(5).ToList();
 
                 _context.PlatformHighScore.RemoveRange(highScoresToDelete);
 
