@@ -31,9 +31,16 @@
             }
         </div>
         <hr />
-
-        <input type="text" id="inputText" name="inputText" @bind-value="@inputValue" disabled="@IsInputDisabled"
+        @if (!IsInputIncorrect)
+        {
+            <input type="text" id="inputText" name="inputText" @bind-value="@inputValue" disabled="@IsInputDisabled"
                @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")' />
+        } 
+        else 
+        {
+            <input type="text" id="inputTextIncorrect" name="inputText" @bind-value="@inputValueIncorrect" disabled="@IsInputDisabled"
+                   @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")' />
+        }
         
     </div>
 
