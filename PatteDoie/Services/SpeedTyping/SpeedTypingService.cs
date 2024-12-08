@@ -80,20 +80,21 @@ namespace PatteDoie.Services.SpeedTyping
 
             var lobby = _context.PlatformLobby
                 .Include(l => l.Users)
-                .Include(l => l.Creator)
                 .FirstOrDefault(l => l.Id == game.Lobby.Id)
                 ?? throw new LobbyNotFoundException("Lobby cannot be null");
-
+            var users = lobby?.Users;
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
 
                 _context.SpeedTypingPlayer.RemoveRange(game.Players);
                 _context.SpeedTypingTimeProgress.RemoveRange(game.TimeProgresses);
                 _context.SpeedTypingGame.Remove(game);
-
                 _context.PlatformLobby.Remove(lobby);
-
                 await _context.SaveChangesAsync();
+
+                _context.PlatformUser.RemoveRange(users);
+                await _context.SaveChangesAsync();
+
                 await transaction.CommitAsync();
             }
         }
