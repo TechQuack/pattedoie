@@ -28,5 +28,7 @@ namespace PatteDoie.Services.Platform
         public Task<Guid?> StartGame(Guid lobbyId);
 
         public Task<Guid?> GetGameUUIDFromLobby(Guid lobbyId);
+
+        public Task<List<PlatformHighScoreRow>> GetGameHighScores(string gameName);
     }
 }

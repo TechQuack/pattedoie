@@ -1,0 +1,35 @@
+﻿@page "/highscores"
+
+<PageTitle>HighScores</PageTitle>
+
+<div id="header">
+    <div id="command">
+        <a asp-action="Index" href="/">
+            <img src="back-arrow.svg" />
+        </a>
+    </div>
+    <h1>High scores</h1>
+</div>
+<div id="highScores">
+    <div id="games">
+        <div id="SpeedTyping">
+            <p class="title">SpeedTyping best scores: </p>
+            <ol>
+            @foreach(var score in SpeedTypingHighScores)
+            {
+                    <li>@score.PlayerName: @score.Score words per minute</li>
+            }
+            </ol>
+        </div>
+
+        <div id="Scattergories">
+            <p class="title">Scattergories best scores: </p>
+            <ol>
+                @foreach (var score in ScattergoriesHighScores)
+                {
+                    <li>@score.PlayerName: @score.Score points</li>
+                }
+            </ol>
+        </div>
+    </div>
+</div>
