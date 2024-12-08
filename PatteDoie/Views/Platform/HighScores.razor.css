@@ -1,0 +1,66 @@
+﻿#command {
+    width: 5%;
+    display: flex;
+    align-items: center;
+}
+
+img {
+    width: 50%;
+}
+
+#SpeedTyping {
+    flex-direction: column;
+    background-color: #DAAB3A;
+    margin-block: 2rem;
+    border-radius: 25px;
+    padding-inline: 1rem;
+    display: flex;
+    align-items: center;
+    margin-inline: 2rem;
+    justify-content: center;
+}
+
+#Scattergories {
+    flex-direction: column;
+    background-color: #DAAB3A;
+    margin-block: 2rem;
+    margin-inline: 2rem;
+    border-radius: 25px;
+    padding-inline: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#highScores {
+    flex-direction: row;
+}
+
+#games {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 8rem;
+    margin-inline: 2rem;
+}
+
+.title {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#header {
+    background-color: #FF7A00;
+    border-radius: 25px;
+    padding-inline: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+h1 {
+    flex-grow: 1;
+    margin: 0;
+    text-align: center;
+}
