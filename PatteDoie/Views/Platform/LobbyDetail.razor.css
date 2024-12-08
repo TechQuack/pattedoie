@@ -1,0 +1,33 @@
+﻿.informations, h1, #start {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+}
+
+p, h2, ul {
+    text-align: center;
+}
+
+.information, h1 {
+    margin: 2rem;
+    margin-inline: 5rem;
+    border-radius: 25px;
+}
+
+.information {
+    background-color: #DAAB3A;
+}
+
+#start {
+    width: 100%;
+}
+
+h1 {
+    background-color: #FF7A00;
+}
+
+input {
+    width: 5%;
+}

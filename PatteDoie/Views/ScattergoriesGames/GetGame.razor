@@ -17,28 +17,27 @@
             <table>
                 <thead>
                     <tr>
-                        <th>
-                            Category
-                        </th>
-                        <th>
-                            Your answers
-                        </th>
+                        @foreach (var category in Row.Categories)
+                        {
+                            <th>@category.Name</th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
-                    @{
-                        int i = 0;
-                        List<string> inputs = new List<string>(new string[Row.Categories.Count]);
-                    }
-                    @foreach (var category in Row.Categories)
-                    {
-                        
-                        <tr>
-                            <td>@category.Name</td>
-                            <input type="text" name="input_@category.Name" placeholder="@category.Name" @bind="inputs[i]"/>
-                        </tr>
-                        ++i;
-                    }
+                    <tr>
+                        @{
+                            int i = 0;
+                            List<string> inputs = new List<string>(new string[Row.Categories.Count]);
+                        }
+                        @foreach (var category in Row.Categories)
+                        {
+
+                            <td>
+                                <input type="text" name="input_@category.Name" placeholder="@category.Name" @bind="inputs[i]" />
+                            </td>
+                            ++i;
+                        }
+                    </tr>
                 </tbody>
             </table>
         </div>
