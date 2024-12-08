@@ -87,14 +87,30 @@ namespace PatteDoie.Services.Scattergories
                 }
             }
 
-            if (HasCompletedCategories(player) && !game.IsHostCheckingPhase)
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<ScattegoriesGameRow>(game);
+        }
+
+        public async Task<ScattegoriesGameRow> ConfirmWords(Guid gameId, Guid userId)
+        {
+            using var _context = _factory.CreateDbContext();
+            var game = await _context.ScattergoriesGame.AsQueryable()
+                .Include(g => g.Players)
+                .ThenInclude(p => p.Answers)
+                .Include(g => g.Categories)
+                .FirstOrDefaultAsync(g => g.Id == gameId);
+            var platformUser = await _context.PlatformUser.AsQueryable().FirstOrDefaultAsync(u => u.UserUUID == userId);
+            var player = await _context.ScattergoriesPlayer.AsQueryable()
+                .Include(p => p.Answers)
+                .ThenInclude(a => a.Category)
+                .FirstOrDefaultAsync(p => p.User == platformUser) ?? throw new PlayerNotValidException("Player not found");
+            if (HasCompletedCategories(player))
             {
                 game.IsHostCheckingPhase = true;
                 _context.ScattergoriesGame.Update(game);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
-
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 

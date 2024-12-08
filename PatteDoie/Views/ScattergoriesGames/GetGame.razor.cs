@@ -25,7 +25,6 @@ namespace PatteDoie.Views.ScattergoriesGames
         {
             this.Row = await ScattergoriesService.GetGame(new Guid(this.Id));
             inputs = new string[Row.Categories.Count];
-            Console.WriteLine("jaaaaaaaaaaaaj " + Row.Categories.Count);
             _players = await ScattergoriesService.GetRank(new Guid(this.Id));
             FinalRanking = _players;
             hubConnection = new HubConnectionBuilder()
@@ -81,23 +80,23 @@ namespace PatteDoie.Views.ScattergoriesGames
             return Row?.Lobby?.Id;
         }
 
-        public async void SendWords()
+        public async void SendWord(int index)
         {
-            for (var i = 0; i < inputs.Length; ++i)
+            try
             {
-                try
-                {
-                    Row = await ScattergoriesService.AddPlayerWord(new Guid(Id), new Guid(UUID), inputs[i], Row!.Categories[i]);
-                }
-                catch (Exception ex)
-                {
-                    //TODO afficher erreur au joueur pour la catégorie concernée (categories[i]) 940
-                }
-
+                Row = await ScattergoriesService.AddPlayerWord(new Guid(Id), new Guid(UUID), inputs[index], Row!.Categories[index]);
+            } catch (Exception ex)
+            {
+                //TODO afficher erreur au joueur pour la catégorie concernée (categories[i]) 940
             }
+        }
+
+        public async void ConfirmWords()
+        {
+            Row = await ScattergoriesService.ConfirmWords(new Guid(Id), new Guid(UUID));
             if (Row.IsHostCheckingPhase)
             {
-                //TODO faire en sorte que les mots de tous les joueurs soient ajoutés 920
+                await InvokeAsync(StateHasChanged);
             }
         }
     }
