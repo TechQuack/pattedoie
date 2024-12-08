@@ -25,7 +25,6 @@ namespace PatteDoie.Views.ScattergoriesGames
         {
             this.Row = await ScattergoriesService.GetGame(new Guid(this.Id));
             inputs = new string[Row.Categories.Count];
-            Console.WriteLine("jaaaaaaaaaaaaj " + Row.Categories.Count);
             _players = await ScattergoriesService.GetRank(new Guid(this.Id));
             FinalRanking = _players;
             hubConnection = new HubConnectionBuilder()

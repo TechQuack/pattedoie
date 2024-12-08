@@ -14,31 +14,64 @@
             <h2>@Row.CurrentLetter</h2>
         </div>
         <div>
-            <table>
-                <thead>
-                    <tr>
-                        @foreach (var category in Row.Categories)
-                        {
-                            <th>@category.Name</th>
+            @if(Row.IsHostCheckingPhase) {
+                <table>
+                    <thead>
+                        <tr>
+                            @foreach (var category in Row.Categories)
+                            {
+                                <th>@category.Name</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            @{
+                                int i = 0;
+                            }
+                            @foreach (var category in Row.Categories)
+                            {
+                                var local = i;
+                                <td>
+                                    <input type="text" name="input_@category.Name" placeholder="@category.Name" @bind="inputs[local]" />
+                                </td>
+                                ++i;
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            } else {
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            @foreach (var category in Row.Categories)
+                            {
+                                <th>@category.Name</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(var player in Row.Players) {
+                            <tr>
+                                <td>@player.User.Nickname</td>
+                                @{
+                                    int i = 0;
+                                }
+                                @foreach (var category in Row.Categories)
+                                {
+                                    var local = i;
+                                    <td>
+                                        
+                                    </td>
+                                    ++i;
+                                }
+                            </tr>
                         }
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        @{
-                            int i = 0;
-                        }
-                        @foreach (var category in Row.Categories)
-                        {
-                            var local = i;
-                            <td>
-                                <input type="text" name="input_@category.Name" placeholder="@category.Name" @bind="inputs[local]" />
-                            </td>
-                            ++i;
-                        }
-                    </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            }
+            
         </div>
         <div>
             <button type="button" @onclick="SendWords">Envoyer les mots</button>
