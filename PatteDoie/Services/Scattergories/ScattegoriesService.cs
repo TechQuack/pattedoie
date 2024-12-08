@@ -13,7 +13,7 @@ namespace PatteDoie.Services.Scattergories
 {
     public class ScattegoriesService(IDbContextFactory<PatteDoieContext> factory, IMapper mapper, IHubContext<ScattergoriesHub> hub) : IScattegoriesService
     {
-        public static int TIME_BEFORE_DELETION = 60000;
+        private readonly static int TIME_BEFORE_DELETION = 60000;
 
         private readonly IDbContextFactory<PatteDoieContext> _factory = factory;
         private readonly IMapper _mapper = mapper;
@@ -49,45 +49,52 @@ namespace PatteDoie.Services.Scattergories
             throw new NotImplementedException();
         }
 
-        public async Task<ScattegoriesGameRow> AddPlayerWord(ScattergoriesGame game, ScattergoriesPlayer player, string word, ScattergoriesCategory category)
+        public async Task<ScattegoriesGameRow> AddPlayerWord(Guid gameId, Guid userId, string word, ScattergoriesCategory category)
         {
             using var _context = _factory.CreateDbContext();
-            if (word.Trim().IsNullOrEmpty())
+            var game = await _context.ScattergoriesGame.AsQueryable()
+                .Include(g => g.Players)
+                .ThenInclude(p => p.Answers)
+                .Include(g => g.Categories)
+                .FirstOrDefaultAsync(g => g.Id == gameId);
+            var platformUser = await _context.PlatformUser.AsQueryable().FirstOrDefaultAsync(u => u.UserUUID == userId);
+            var player = await _context.ScattergoriesPlayer.AsQueryable()
+                .Include(p => p.Answers)
+                .ThenInclude(a => a.Category)
+                .FirstOrDefaultAsync(p => p.User == platformUser) ?? throw new PlayerNotValidException("Player not found");
+
+            if (word.IsNullOrEmpty())
             {
                 throw new ArgumentNullException(nameof(word));
             }
-            char letter = game.CurrentLetter;
-            if (!word.Trim().First().Equals(letter))
+            if (word.Trim().IsNullOrEmpty())
             {
-                throw new Exception($"invalid word(wrong first letter)  - {word}");
+                throw new Exception($"invalid word(empty word)");
             }
-            ScattergoriesAnswer? ExistingAnswer = null;
+
+            char letter = game.CurrentLetter;
+            if (!(word.Trim().ToUpper().First() == letter))
+            {
+                throw new Exception($"invalid word(wrong first letter) - {word}");
+            }
+
             foreach (var ans in player.Answers)
             {
-                if (ans.Category == category)
+                if (ans.Category.Name == category.Name)
                 {
-                    ExistingAnswer = ans;
+                    ans.Text = word;
+                    _context.ScattergoriesAnswer.Update(ans);
                 }
             }
-            if (ExistingAnswer != null)
-            {
-                ExistingAnswer.Text = word;
-            }
-            else
-            {
-                ScattergoriesAnswer answer = new ScattergoriesAnswer
-                {
-                    Category = category,
-                    Text = word,
-                    IsChecked = false
-                };
-                player.Answers.Add(answer);
-            }
-            if (HasCompletedCategories(player, game) && !game.IsHostCheckingPhase)
+
+            if (HasCompletedCategories(player) && !game.IsHostCheckingPhase)
             {
                 game.IsHostCheckingPhase = true;
+                _context.ScattergoriesGame.Update(game);
             }
+
             await _context.SaveChangesAsync();
+
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
@@ -105,7 +112,8 @@ namespace PatteDoie.Services.Scattergories
                 game.IsHostCheckingPhase = false;
                 foreach (var player in game.Players)
                 {
-                    player.Answers = new List<ScattergoriesAnswer>();
+                    DeletePlayerAnswers(player);
+                    player.Answers = CreateEmptyAnswers(game.Categories).Result;
                 }
                 await _context.SaveChangesAsync();
                 await _context.DisposeAsync();
@@ -126,8 +134,7 @@ namespace PatteDoie.Services.Scattergories
             var players = new List<ScattergoriesPlayer>();
             foreach (var user in lobby.Users)
             {
-                var playerAnswers = new List<ScattergoriesAnswer>();
-                var player = CreatePlayer(user, playerAnswers, user == lobby.Creator);
+                var player = CreatePlayer(user, CreateEmptyAnswers(categories).Result, user == lobby.Creator);
                 players.Add(player);
                 _context.ScattergoriesPlayer.Add(player);
             }
@@ -163,6 +170,10 @@ namespace PatteDoie.Services.Scattergories
             foreach (var category in game.Categories)
             {
                 category.Games.Remove(game);
+            }
+            foreach (var player in game.Players)
+            {
+                DeletePlayerAnswers(player);
             }
             _context.ScattergoriesPlayer.RemoveRange(game.Players);
             _context.ScattergoriesGame.Remove(game);
@@ -235,7 +246,7 @@ namespace PatteDoie.Services.Scattergories
 
         //TOOLS
 
-        private ScattergoriesPlayer CreatePlayer(User player, List<ScattergoriesAnswer> answers, bool isHost)
+        private static ScattergoriesPlayer CreatePlayer(User player, List<ScattergoriesAnswer> answers, bool isHost)
         {
             return new ScattergoriesPlayer
             {
@@ -244,6 +255,34 @@ namespace PatteDoie.Services.Scattergories
                 Answers = answers,
                 IsHost = isHost
             };
+        }
+
+        private async Task<List<ScattergoriesAnswer>> CreateEmptyAnswers(List<ScattergoriesCategory> categories)
+        {
+            using var _context = _factory.CreateDbContext();
+            List<ScattergoriesAnswer> answers = [];
+            foreach (var category in categories)
+            {
+                var answer = new ScattergoriesAnswer
+                {
+                    Text = "",
+                    Category = category,
+                    IsChecked = false
+                };
+                answers.Add(answer);
+                await _context.ScattergoriesAnswer.AddAsync(answer);
+            }
+            return answers;
+        }
+
+        private void DeletePlayerAnswers(ScattergoriesPlayer player)
+        {
+            using var _context = _factory.CreateDbContext();
+            foreach (var answer in player.Answers)
+            {
+                _context.Remove(answer);
+            }
+            player.Answers = [];
         }
 
         private static bool HasGameEnded(ScattergoriesGame game)
@@ -276,18 +315,17 @@ namespace PatteDoie.Services.Scattergories
             return true;
         }
 
-        private static bool HasCompletedCategories(ScattergoriesPlayer player, ScattergoriesGame game)
+        private static bool HasCompletedCategories(ScattergoriesPlayer player)
         {
-            List<ScattergoriesCategory> categoriesAnswered = new List<ScattergoriesCategory>();
+            var res = true;
             foreach (var answer in player.Answers)
             {
-                if (answer.Text.Trim().IsNullOrEmpty())
+                if (answer.Text == "")
                 {
-                    return false;
+                    res = false;
                 }
-                categoriesAnswered.Add(answer.Category);
             }
-            return Enumerable.SequenceEqual(game.Categories.OrderBy(x => x), categoriesAnswered.OrderBy(x => x));
+            return res;
         }
 
         private static char RandomLetter()
