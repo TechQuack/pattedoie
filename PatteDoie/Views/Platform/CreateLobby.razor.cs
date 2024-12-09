@@ -44,6 +44,6 @@ public partial class CreateLobby : AuthenticatedPage
         }
         var lobbyRow = await PlatformService.CreateLobby(new Guid(uuid), name, IsLobbyPublic ? "" : Password, gameType, LobbyName);
 
-        NavigationManager.NavigateTo($"/lobby/{lobbyRow.Id}");
+        NavigationManager.NavigateTo($"/lobby/{lobbyRow.Id}", forceLoad: true);
     }
 }

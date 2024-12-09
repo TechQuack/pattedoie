@@ -20,7 +20,7 @@ public partial class Authenticator : ComponentBase
     {
         await ProtectedLocalStorage.SetAsync("name", Name);
         await GenerateUUID();
-        NavigationManager.NavigateTo("/lobby");
+        NavigationManager.NavigateTo("/lobby", forceLoad: true);
     }
 
     private async Task GenerateUUID()

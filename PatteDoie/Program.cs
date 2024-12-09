@@ -6,11 +6,13 @@ using PatteDoie.Hubs;
 using PatteDoie.Services.Platform;
 using PatteDoie.Services.Scattergories;
 using PatteDoie.Services.SpeedTyping;
+using PatteDoie.Views;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
 builder.Services.AddDbContextFactory<PatteDoieContext>(options =>
     options.UseSqlServer(string.Format(builder.Configuration.GetConnectionString("PatteDoieContext") ?? "", Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD"))));
 builder.Services.AddHttpClient();
@@ -18,8 +20,6 @@ builder.Services.AddScoped<ISpeedTypingService, SpeedTypingService>();
 builder.Services.AddScoped<IPlatformService, PlatformService>();
 builder.Services.AddScoped<IScattegoriesService, ScattegoriesService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
-
-builder.Services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
 builder.Services.AddSignalR(o =>
 {
     o.EnableDetailedErrors = true;
@@ -43,19 +43,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.MapBlazorHub();
-app.MapFallbackToController("Blazor", "Home");
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseAntiforgery();
 
 app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapHub<SpeedTypingHub>("/hub/speedtyping");
 app.MapHub<ScattergoriesHub>("/hub/scattergories");

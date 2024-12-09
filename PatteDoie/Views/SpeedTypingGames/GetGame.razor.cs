@@ -63,7 +63,7 @@ namespace PatteDoie.Views.SpeedTypingGames
             {
                 if (UUID != null)
                 {
-                    NavigationManager.NavigateTo("/");
+                    NavigationManager.NavigateTo("/", forceLoad: true);
                 }
             });
 
