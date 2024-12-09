@@ -235,6 +235,16 @@ namespace PatteDoie.Services.Platform
             }
         }
 
+        public async Task<List<PlatformHighScoreRow>> GetGameHighScores(string gameName)
+        {
+            var platformGame = await _context.PlatformGame
+                .Include(l => l.HighScores)
+                .FirstOrDefaultAsync(p => p.Name == gameName)
+                ?? throw new GameNotValidException("Game not valid");
+            var highScores = platformGame.HighScores.OrderByDescending(l => l.Score).ToList();
+            return _mapper.Map<List<PlatformHighScoreRow>>(highScores);
+        }
+
         private async Task<Guid?> CreateGame(GameType type, Lobby lobby)
         {
             switch (type)

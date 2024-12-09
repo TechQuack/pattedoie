@@ -21,10 +21,12 @@ namespace PatteDoie.Views.SpeedTypingGames
         private HubConnection? hubConnection;
         private int WordIndexToDisplay = 0;
         private string? inputValue;
+        private string? inputValueIncorrect;
         private bool IsInputDisabled = false;
         private string UUID;
         private List<SpeedTypingPlayerRow> FinalRanking = [];
         private bool IsTimerInitialized = false;
+        private bool IsInputIncorrect = false;
 
         private SpeedTypingGameRow? Row { get; set; } = null;
 
@@ -101,6 +103,7 @@ namespace PatteDoie.Views.SpeedTypingGames
         public async void CheckTextSpace(string Text)
         {
             inputValue = Text;
+            inputValueIncorrect = inputValue;
             await InvokeAsync(StateHasChanged);
             if (!Text.Contains(' '))
             {
@@ -111,6 +114,13 @@ namespace PatteDoie.Views.SpeedTypingGames
             {
                 this.WordIndexToDisplay += 1;
                 inputValue = "";
+                inputValueIncorrect = inputValue;
+                IsInputIncorrect = false;
+                await InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                IsInputIncorrect = true;
                 await InvokeAsync(StateHasChanged);
             }
         }

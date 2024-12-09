@@ -5,9 +5,9 @@
 
         public Guid Id { get; set; }
 
-        public string Player { get; set; }
+        public string PlayerName { get; set; }
 
-        public int Name { get; set; }
+        public int Score { get; set; }
 
     }
 }
