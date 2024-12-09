@@ -14,7 +14,7 @@
             <h2>@Row.CurrentLetter</h2>
         </div>
         <div>
-            @if(Row.IsHostCheckingPhase) {
+            @if(!Row.IsHostCheckingPhase) {
                 <table>
                     <thead>
                         <tr>
@@ -31,11 +31,15 @@
                             }
                             @foreach (var category in Row.Categories)
                             {
-                                var local = i;
-                                <input type="text" name="input_@category.Name" placeholder="@category.Name" 
-                                    class="@(AreWordsCorrect[local]? "CorrectWord": "IncorrectWord")"
-                                    @bind="inputs[local]" @bind:event="oninput" @onkeyup="() => SendWord(local)"/>
-                                ++i;
+                                <td>
+                                    @{
+                                        var local = i;
+                                        <input type="text" name="input_@category.Name" placeholder="@category.Name"
+                                               class="@(AreWordsCorrect[local]? "CorrectWord": "IncorrectWord")"
+                                               @bind="inputs[local]" @bind:event="oninput" @onkeyup="() => SendWord(local)" />
+                                        ++i;
+                                    }
+                                </td>
                             }
                         </tr>
                     </tbody>
