@@ -42,7 +42,7 @@ public partial class LobbiesList : AuthenticatedPage
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        base.OnAfterRender(firstRender);
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
             var userId = new Guid(await GetUUID());
@@ -72,7 +72,7 @@ public partial class LobbiesList : AuthenticatedPage
             // TODO : display an error to the user
         }
 
-        NavigationManager.NavigateTo($"/lobby/{Id}");
+        NavigationManager.NavigateTo($"/lobby/{Id}", forceLoad: true);
     }
 
     private static string GetLobbyTypeDescription(LobbyType type)

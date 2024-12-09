@@ -29,7 +29,7 @@ namespace PatteDoie.Views.Platform
                 // TODO : display an error to the user
             }
 
-            NavigationManager.NavigateTo($"/lobby/{Id}");
+            NavigationManager.NavigateTo($"/lobby/{Id}", forceLoad: true);
         }
 
     }

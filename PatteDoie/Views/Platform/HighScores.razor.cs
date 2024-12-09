@@ -4,7 +4,7 @@ using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Views.Platform
 {
-    public partial class HighScores
+    public partial class HighScores : AuthenticatedPage
     {
         private List<PlatformHighScoreRow> SpeedTypingHighScores = [];
         private List<PlatformHighScoreRow> ScattergoriesHighScores = [];

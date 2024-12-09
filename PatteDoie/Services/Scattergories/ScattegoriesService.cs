@@ -310,7 +310,7 @@ namespace PatteDoie.Services.Scattergories
         {
             await Task.Delay(TIME_BEFORE_DELETION);
             await DeleteGame(game.Id);
-            NavigationManager.NavigateTo("/home");
+            NavigationManager.NavigateTo("/home", forceLoad: true);
         }
 
 
