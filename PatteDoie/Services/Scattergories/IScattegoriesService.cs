@@ -10,7 +10,8 @@ namespace PatteDoie.Services.Scattergories
         public Task<ScattegoriesGameRow> GetGame(Guid gameId);
         public Task<IEnumerable<ScattegoriesGameRow>> SearchGames(/*TODO*/);
         public Task UpdateGame(Guid gameId /*, TODO*/);
-        public Task<ScattegoriesGameRow> AddPlayerWord(ScattergoriesGame game, ScattergoriesPlayer player, string word, ScattergoriesCategory category);
+        public Task<ScattegoriesGameRow> AddPlayerWord(Guid gameId, Guid userId, string word, ScattergoriesCategory category);
+        public Task<ScattegoriesGameRow> ConfirmWords(Guid gameId, Guid userId);
         public Task<ScattegoriesGameRow> NextRound(ScattergoriesGame game);
         public Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, Lobby lobby);
         public Task DeleteGame(Guid gameId);
@@ -18,5 +19,6 @@ namespace PatteDoie.Services.Scattergories
         public Task<ScattegoriesGameRow> HostVerifyWord(Guid gameId, Guid playerId, Guid answerId, bool decision);
         public Task<List<ScattergoriesCategoryRow>> GetCategories(Guid gameId);
         public Task<List<ScattergoriesPlayerRow>> GetRank(Guid gameId);
+        public Task<List<ScattergoriesPlayerRow>> GetPlayers(Guid gameId);
     }
 }

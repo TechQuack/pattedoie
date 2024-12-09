@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-
 #nullable disable
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
@@ -7,25 +6,25 @@
 namespace PatteDoie.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSecondsToFinishToPlayers : Migration
+    public partial class AddLobbyNameField : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "SecondsToFinish",
-                table: "SpeedTypingPlayer",
-                type: "int",
+            migrationBuilder.AddColumn<string>(
+                name: "LobbyName",
+                table: "PlatformLobby",
+                type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "SecondsToFinish",
-                table: "SpeedTypingPlayer");
+                name: "LobbyName",
+                table: "PlatformLobby");
         }
     }
 }

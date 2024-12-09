@@ -19,6 +19,7 @@ namespace PatteDoie.Views.Platform
             var uuid = await GetUUID();
             var name = await GetName();
 
+
             try
             {
                 await PlatformService.JoinLobby(new Guid(Id ?? ""), name, new Guid(uuid), Password);
@@ -28,7 +29,7 @@ namespace PatteDoie.Views.Platform
                 // TODO : display an error to the user
             }
 
-            NavigationManager.NavigateTo($"/lobby/{Id}");
+            NavigationManager.NavigateTo($"/lobby/{Id}", forceLoad: true);
         }
 
     }

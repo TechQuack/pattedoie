@@ -28,7 +28,7 @@ namespace PatteDoie.Services.Platform
         private readonly IHubContext<PlatformHub> _hub = hub;
 
 
-        public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type)
+        public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type, string lobbyName)
         {
             var gameName = type.GetDescription();
             var game = await _context.PlatformGame.AsQueryable().Where(g => g.Name == gameName).FirstOrDefaultAsync() ?? throw new GameNotFoundException("Game not found");
@@ -45,6 +45,7 @@ namespace PatteDoie.Services.Platform
                 Password = null,
                 Users = [],
                 Game = game,
+                LobbyName = lobbyName
             };
 
             if (!String.IsNullOrEmpty(password))
@@ -127,7 +128,7 @@ namespace PatteDoie.Services.Platform
                     break;
             }
 
-            return _mapper.Map<List<PlatformLobbyRow>>(await query.Include(l => l.Game).ToListAsync());
+            return _mapper.Map<List<PlatformLobbyRow>>(await query.Include(l => l.Game).Include(l => l.Users).ToListAsync());
         }
 
         public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command)
@@ -232,6 +233,16 @@ namespace PatteDoie.Services.Platform
                 default:
                     return null;
             }
+        }
+
+        public async Task<List<PlatformHighScoreRow>> GetGameHighScores(string gameName)
+        {
+            var platformGame = await _context.PlatformGame
+                .Include(l => l.HighScores)
+                .FirstOrDefaultAsync(p => p.Name == gameName)
+                ?? throw new GameNotValidException("Game not valid");
+            var highScores = platformGame.HighScores.OrderByDescending(l => l.Score).ToList();
+            return _mapper.Map<List<PlatformHighScoreRow>>(highScores);
         }
 
         private async Task<Guid?> CreateGame(GameType type, Lobby lobby)

@@ -6,27 +6,41 @@
 
 <PageTitle>Create a lobby</PageTitle>
 
-<h1>Create a lobby for the game @GameName</h1>
+<div id="lobbyHeader">
+    <div id="command">
+        <a asp-action="Index" href="/">
+            <img src="back-arrow.svg" />
+        </a>
+    </div>
+    <h1>Create a lobby for the game @GameName</h1>
+</div>
 
-<h4>PlatformLobby</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+<div id="form">
+    <div id="radio">
+        <InputRadioGroup @bind-Value="IsLobbyPublic">
+            <span class="radio-button"><InputRadio Value="true" />Public lobby</span>
+            <span class="radio-button"><InputRadio Value="false" />Private lobby</span>
+        </InputRadioGroup>
+    </div>
+    <div id="creation">
         <form @onsubmit="Submit">
             <AntiforgeryToken/>
             <div class="form-group">
-                <label class="control-label">Password</label>
-                <InputText @bind-Value="Password" class="form-control" />
+                <label class="label">Lobby Name: &nbsp;</label>
+                <InputText @bind-Value="LobbyName" class="form-control" />
             </div>
+            @if (!IsLobbyPublic)
+            {
+                <div class="form-group">
+                    <label class="label">Password: &nbsp; </label>
+                    <InputText type="password" @bind-Value="Password" class="form-control" />
+                </div>
+            }
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Create" class="btn btn-danger" />
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a href="/lobby">Back to List</a>
 </div>
 
 

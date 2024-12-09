@@ -1,0 +1,23 @@
+﻿#create-game  {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.create-option {
+    margin: 2rem;
+    background-color: orangered;
+    padding: 1rem;
+    border-radius: 15px;
+}
+
+.create-option > a  {
+    color: white;
+}
+
+.public-lobby-join {
+    text-decoration: underline;
+    color: #0000EE;
+    cursor: pointer;
+}

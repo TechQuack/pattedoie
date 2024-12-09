@@ -19,6 +19,8 @@ public partial class LobbiesList : AuthenticatedPage
 
     private FilterGameType GameTypeValue = FilterGameType.All;
 
+    private Dictionary<PlatformLobbyRow, bool> IsUserInLobbies = [];
+
     private readonly List<LobbyType> Types =
     [
         LobbyType.Public,
@@ -36,6 +38,41 @@ public partial class LobbiesList : AuthenticatedPage
                 GameUUIDFromLobbies.Add(item, await PlatformService.GetGameUUIDFromLobby(item.Id));
             }
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            var userId = new Guid(await GetUUID());
+            foreach (var item in Items)
+            {
+                if (item.Started)
+                {
+                    IsUserInLobbies[item] = item.Users.Exists(u => u.UserUUID == userId);
+                }
+            }
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async void JoinPublicLobby(Guid Id)
+    {
+        var uuid = await GetUUID();
+        var name = await GetName();
+
+
+        try
+        {
+            await PlatformService.JoinLobby(Id, name, new Guid(uuid), "");
+        }
+        catch (Exception ex)
+        {
+            // TODO : display an error to the user
+        }
+
+        NavigationManager.NavigateTo($"/lobby/{Id}", forceLoad: true);
     }
 
     private static string GetLobbyTypeDescription(LobbyType type)
