@@ -25,10 +25,11 @@ namespace PatteDoie.Views.ScattergoriesGames
         protected override async Task OnInitializedAsync()
         {
             this.Row = await ScattergoriesService.GetGame(new Guid(this.Id));
+
             inputs = new string[Row.Categories.Count];
             AreWordsCorrect = Enumerable.Repeat<bool>(true, Row.Categories.Count).ToArray();
-            _players = await ScattergoriesService.GetRank(new Guid(this.Id));
-            FinalRanking = _players;
+            _players = await ScattergoriesService.GetPlayers(new Guid(this.Id));
+            FinalRanking = await ScattergoriesService.GetRank(new Guid(this.Id));
             hubConnection = new HubConnectionBuilder()
                 .WithUrl(NavigationManager.ToAbsoluteUri("/hub/scattergories"), (opts) =>
                 {
@@ -105,6 +106,7 @@ namespace PatteDoie.Views.ScattergoriesGames
         public async void ConfirmWords()
         {
             Row = await ScattergoriesService.ConfirmWords(new Guid(Id), new Guid(UUID));
+            _players = await ScattergoriesService.GetPlayers(new Guid(Id));
             if (Row.IsHostCheckingPhase)
             {
                 await InvokeAsync(StateHasChanged);

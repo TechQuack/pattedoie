@@ -14,33 +14,67 @@
             <h2>@Row.CurrentLetter</h2>
         </div>
         <div>
-            <table>
-                <thead>
-                    <tr>
-                        @foreach (var category in Row.Categories)
-                        {
-                            <th>@category.Name</th>
+            @if(!Row.IsHostCheckingPhase) {
+                <table>
+                    <thead>
+                        <tr>
+                            @foreach (var category in Row.Categories)
+                            {
+                                <th>@category.Name</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            @{
+                                int i = 0;
+                            }
+                            @foreach (var category in Row.Categories)
+                            {
+                                <td>
+                                    @{
+                                        var local = i;
+                                        <input type="text" name="input_@category.Name" placeholder="@category.Name"
+                                               class="@(AreWordsCorrect[local]? "CorrectWord": "IncorrectWord")"
+                                               @bind="inputs[local]" @bind:event="oninput" @onkeyup="() => SendWord(local)" />
+                                        ++i;
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            } else {
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            @foreach (var category in Row.Categories)
+                            {
+                                <th>@category.Name</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(var player in _players) {
+                            <tr>
+                                <td>@player.User.Nickname</td>
+                                @foreach (var category in Row.Categories) {
+                                    @foreach (var answer in player.Answers) {
+                                        @if (answer.Category.Name == category.Name)
+                                        {
+                                            <td>
+                                                <input type="text" value="@answer.Text" disabled="disabled" />
+                                            </td>
+                                        }
+                                    }
+                                }
+                            </tr>
                         }
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        @{
-                            int i = 0;
-                        }
-                        @foreach (var category in Row.Categories)
-                        {
-                            var local = i;
-                            <td>
-                                <input type="text" name="input_@category.Name" placeholder="@category.Name" 
-                                class="@(AreWordsCorrect[local]? "CorrectWord": "IncorrectWord")"
-                                @bind="inputs[local]" @bind:event="oninput" @onkeyup="() => SendWord(local)"/>
-                            </td>
-                            ++i;
-                        }
-                    </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            }
+            
         </div>
         <div>
             <button type="button" @onclick="ConfirmWords">Envoyer les mots</button>
