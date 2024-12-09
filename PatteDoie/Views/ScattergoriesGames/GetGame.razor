@@ -56,14 +56,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach(var player in Row.Players) {
+                        @foreach(var player in _players) {
                             <tr>
                                 <td>@player.User.Nickname</td>
-                                @foreach (var anwnser in player.Answers)
-                                {
-                                    <td>
-                                        <input type="text" value="@anwnser.Text" disabled="disabled"/>
-                                    </td>
+                                @foreach (var category in Row.Categories) {
+                                    @foreach (var answer in player.Answers) {
+                                        @if (answer.Category.Name == category.Name)
+                                        {
+                                            <td>
+                                                <input type="text" value="@answer.Text" disabled="disabled" />
+                                            </td>
+                                        }
+                                    }
                                 }
                             </tr>
                         }

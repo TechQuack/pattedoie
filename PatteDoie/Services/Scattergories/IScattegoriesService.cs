@@ -19,5 +19,6 @@ namespace PatteDoie.Services.Scattergories
         public Task<ScattegoriesGameRow> HostVerifyWord(Guid gameId, Guid playerId, Guid answerId, bool decision);
         public Task<List<ScattergoriesCategoryRow>> GetCategories(Guid gameId);
         public Task<List<ScattergoriesPlayerRow>> GetRank(Guid gameId);
+        public Task<List<ScattergoriesPlayerRow>> GetPlayers(Guid gameId);
     }
 }
