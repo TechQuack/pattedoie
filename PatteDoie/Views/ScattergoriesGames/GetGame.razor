@@ -55,16 +55,11 @@
                         @foreach(var player in Row.Players) {
                             <tr>
                                 <td>@player.User.Nickname</td>
-                                @{
-                                    int i = 0;
-                                }
-                                @foreach (var category in Row.Categories)
+                                @foreach (var anwnser in player.Answers)
                                 {
-                                    var local = i;
                                     <td>
-                                        
+                                        <input type="text" value="@anwnser.Text" disabled="disabled"/>
                                     </td>
-                                    ++i;
                                 }
                             </tr>
                         }

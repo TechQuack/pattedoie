@@ -36,6 +36,7 @@ namespace PatteDoie.Services.Scattergories
                .ThenInclude(l => l.Users)
                .Include(g => g.Categories)
                .Include(g => g.Players)
+               .ThenInclude(p => p.Answers)
                .FirstOrDefault(g => g.Id == gameId)) ?? throw new GameNotValidException("Scattergories game cannot be null");
             await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
