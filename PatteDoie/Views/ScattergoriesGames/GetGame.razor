@@ -2,7 +2,7 @@
 @inherits GamePage
 
 
-<h1>GetGame</h1>
+<PageTitle>Scattergories</PageTitle>
 
 <div>
     <h4>Scattergories</h4>
@@ -32,7 +32,9 @@
                         {
                             var local = i;
                             <td>
-                                <input type="text" name="input_@category.Name" placeholder="@category.Name" @bind="inputs[local]" @bind:event="oninput" @onkeyup="() => SendWord(local)"/>
+                                <input type="text" name="input_@category.Name" placeholder="@category.Name" 
+                                class="@(AreWordsCorrect[local]? "CorrectWord": "IncorrectWord")"
+                                @bind="inputs[local]" @bind:event="oninput" @onkeyup="() => SendWord(local)"/>
                             </td>
                             ++i;
                         }
