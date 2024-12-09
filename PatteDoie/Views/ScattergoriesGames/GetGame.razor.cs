@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.VisualBasic;
 using PatteDoie.Rows.Scattegories;
 using PatteDoie.Services.Scattergories;
 
@@ -89,7 +88,8 @@ namespace PatteDoie.Views.ScattergoriesGames
             try
             {
                 Row = await ScattergoriesService.AddPlayerWord(new Guid(Id), new Guid(UUID), inputs[index], Row!.Categories[index]);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 AreWordsCorrect[index] = false;
                 await InvokeAsync(StateHasChanged);
