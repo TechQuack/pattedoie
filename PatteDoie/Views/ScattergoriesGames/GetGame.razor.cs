@@ -50,19 +50,19 @@ namespace PatteDoie.Views.ScattergoriesGames
                 _players = await ScattergoriesService.GetPlayers(new Guid(this.Id));
                 await InvokeAsync(StateHasChanged);
             });
+            hubConnection.On("SendWords", async (Guid gameId) =>
+            {
+                Row = await ScattergoriesService.GetGame(gameId);
+                _players = await ScattergoriesService.GetPlayers(new Guid(this.Id));
+                await InvokeAsync(StateHasChanged);
+
+            });
             hubConnection.On("RedirectToHome", async (Guid gameId) =>
             {
                 if (UUID != null)
                 {
                     NavigationManager.NavigateTo("/", forceLoad: true);
                 }
-            });
-
-            hubConnection.On("ShowRanking", async (Guid gameId) =>
-            {
-                FinalRanking = await ScattergoriesService.GetRank(gameId);
-                await InvokeAsync(StateHasChanged);
-
             });
 
             await hubConnection.StartAsync();
@@ -108,12 +108,8 @@ namespace PatteDoie.Views.ScattergoriesGames
 
         public async void ConfirmWords()
         {
-            Row = await ScattergoriesService.ConfirmWords(new Guid(Id), new Guid(UUID));
-            _players = await ScattergoriesService.GetPlayers(new Guid(Id));
-            if (Row.IsHostCheckingPhase)
-            {
-                await InvokeAsync(StateHasChanged);
-            }
+            await ScattergoriesService.ConfirmWords(new Guid(Id), new Guid(UUID));
+            await InvokeAsync(StateHasChanged);
         }
 
         public async void ValidateWord(Guid playerId, Guid answerId, bool descision)
