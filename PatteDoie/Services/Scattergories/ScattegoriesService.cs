@@ -276,6 +276,18 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<List<ScattergoriesPlayerRow>>(game.Players);
         }
 
+        public async Task<ScattergoriesPlayerRow> GetPlayerById(Guid id)
+        {
+            using var _context = _factory.CreateDbContext();
+            var platformUser = _context.PlatformUser.AsQueryable().FirstOrDefault(u => u.UserUUID == id);
+            var player = _context.ScattergoriesPlayer.AsQueryable()
+                .Include(p => p.Answers)
+                .ThenInclude(a => a.Category)
+                .FirstOrDefault(p => p.User == platformUser) ?? throw new PlayerNotValidException("Player not found");
+            _context.Dispose();
+            return _mapper.Map<ScattergoriesPlayerRow>(player);
+        }
+
         //TOOLS
 
         private static ScattergoriesPlayer CreatePlayer(User player, List<ScattergoriesAnswer> answers, bool isHost)
