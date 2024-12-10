@@ -20,5 +20,6 @@ namespace PatteDoie.Services.Scattergories
         public Task<List<ScattergoriesCategoryRow>> GetCategories(Guid gameId);
         public Task<List<ScattergoriesPlayerRow>> GetRank(Guid gameId);
         public Task<List<ScattergoriesPlayerRow>> GetPlayers(Guid gameId);
+        public Task<ScattergoriesPlayerRow> GetPlayerById(Guid id);
     }
 }

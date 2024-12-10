@@ -18,6 +18,7 @@ namespace PatteDoie.Views.ScattergoriesGames
         private string UUID;
         private string[] inputs = [];
         private bool[] AreWordsCorrect = [];
+        private ScattergoriesPlayerRow? Player { get; set; } = null;
 
         [Inject]
         protected IScattegoriesService ScattergoriesService { get; set; } = default!;
@@ -46,6 +47,7 @@ namespace PatteDoie.Views.ScattergoriesGames
             hubConnection.On<ScattergoriesPlayerRow>("ReceiveProgression", async (player) =>
             {
                 FinalRanking = await ScattergoriesService.GetRank(new Guid(this.Id));
+                _players = await ScattergoriesService.GetPlayers(new Guid(this.Id));
                 await InvokeAsync(StateHasChanged);
             });
             hubConnection.On("RedirectToHome", async (Guid gameId) =>
@@ -75,6 +77,7 @@ namespace PatteDoie.Views.ScattergoriesGames
             {
                 await base.OnAfterRenderAsync(firstRender);
                 UUID = await GetUUID();
+                Player = ScattergoriesService.GetPlayerById(new Guid(UUID)).Result;
             }
         }
 
@@ -111,6 +114,12 @@ namespace PatteDoie.Views.ScattergoriesGames
             {
                 await InvokeAsync(StateHasChanged);
             }
+        }
+
+        public async void ValidateWord(Guid playerId, Guid answerId, bool descision)
+        {
+            await ScattergoriesService.HostVerifyWord(new Guid(Id), playerId, answerId, descision);
+            await InvokeAsync(StateHasChanged);
         }
     }
 }
