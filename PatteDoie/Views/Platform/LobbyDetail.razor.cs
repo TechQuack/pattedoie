@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using PatteDoie.Enums;
 using PatteDoie.Rows.Platform;
+using PatteDoie.Services;
 using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Views.Platform;
@@ -16,8 +17,13 @@ public partial class LobbyDetail : AuthenticatedPage
 
     private HubConnection? hubConnection;
 
+
+
     [Inject]
     private IPlatformService PlatformService { get; set; } = default!;
+
+    [Inject]
+    private IClipboardService ClipboardService { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -67,6 +73,14 @@ public partial class LobbyDetail : AuthenticatedPage
         {
             await PlatformService.StartGame(Lobby.Id, new Guid(UUID));
 
+        }
+    }
+
+    protected async void CopyLink()
+    {
+        if (Lobby != null)
+        {
+            await ClipboardService.CopyLobbyLink(Lobby.Id);
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Views.Platform
@@ -14,11 +15,19 @@ namespace PatteDoie.Views.Platform
         [Inject]
         private IPlatformService PlatformService { get; set; } = default!;
 
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            await base.OnAfterRenderAsync(firstRender);
+            if (await IsPublic())
+            {
+                Submit();
+            }
+        }
+
         private async void Submit()
         {
             var uuid = await GetUUID();
             var name = await GetName();
-
 
             try
             {
@@ -30,6 +39,12 @@ namespace PatteDoie.Views.Platform
             }
 
             NavigationManager.NavigateTo($"/lobby/{Id}", forceLoad: true);
+        }
+
+        private async Task<Boolean> IsPublic()
+        {
+            var lobby = await PlatformService.GetLobby(new Guid(Id ?? ""));
+            return lobby?.Password?.Trim().IsNullOrEmpty() ?? true;
         }
 
     }
