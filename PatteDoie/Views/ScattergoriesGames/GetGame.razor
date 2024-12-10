@@ -65,6 +65,11 @@
                                         {
                                             <td>
                                                 <input type="text" value="@answer.Text" disabled="disabled" />
+                                                @if (!answer.IsChecked && (Player?.IsHost ?? false))
+                                                {
+                                                    <button name="validate word @answer.Text" onclick="">✔</button>
+                                                    <button name="invalidate word @answer.Text" onclick="">✘</button>
+                                                }
                                             </td>
                                         }
                                     }
@@ -90,49 +95,4 @@
             }
         </ol>
     </div>
-    @if (Row.IsHostCheckingPhase)
-    {
-        <table>
-            <thead>
-                <tr>
-                    <th>
-                        Joueur
-                    </th>
-                    @foreach (var category in Row.Categories)
-                    {
-                        <th>
-                            @category.Name
-                        </th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var player in Row.Players)
-                {
-                    <tr>
-                        <th>
-                            @player.User.Nickname
-                        </th>
-                        @foreach (var answer in player.Answers)
-                        {
-                            <th>
-                                <label>
-                                    @answer.Text
-                                </label>
-                                @if (!answer.IsChecked)
-                                {
-                                    <button name="approuve word @answer.Text" onclick="">✔</button>
-                                    <button name="disapprouve word @answer.Text" onclick="">✘</button>
-                                }
-                            </th>
-                        }
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        
-    }
 </div>

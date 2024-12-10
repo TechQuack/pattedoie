@@ -18,6 +18,7 @@ namespace PatteDoie.Views.ScattergoriesGames
         private string UUID;
         private string[] inputs = [];
         private bool[] AreWordsCorrect = [];
+        private ScattergoriesPlayerRow? Player { get; set; } = null;
 
         [Inject]
         protected IScattegoriesService ScattergoriesService { get; set; } = default!;
@@ -75,6 +76,7 @@ namespace PatteDoie.Views.ScattergoriesGames
             {
                 await base.OnAfterRenderAsync(firstRender);
                 UUID = await GetUUID();
+                Player = ScattergoriesService.GetPlayerById(new Guid(UUID)).Result;
             }
         }
 
