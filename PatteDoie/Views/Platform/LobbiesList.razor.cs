@@ -2,6 +2,7 @@
 using PatteDoie.Enums;
 using PatteDoie.Extensions;
 using PatteDoie.Rows.Platform;
+using PatteDoie.Services;
 using PatteDoie.Services.Platform;
 
 namespace PatteDoie.Views.Platform;
@@ -27,6 +28,9 @@ public partial class LobbiesList : AuthenticatedPage
         LobbyType.Private,
         LobbyType.All
     ];
+
+    [Inject]
+    private IClipboardService ClipboardService { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -57,6 +61,10 @@ public partial class LobbiesList : AuthenticatedPage
         }
     }
 
+    protected async void CopyLink(Guid lobbyId)
+    {
+        await ClipboardService.CopyLobbyLink(lobbyId);
+    }
     private async void JoinPublicLobby(Guid Id)
     {
         var uuid = await GetUUID();
