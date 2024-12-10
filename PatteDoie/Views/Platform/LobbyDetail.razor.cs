@@ -10,7 +10,8 @@ public partial class LobbyDetail : AuthenticatedPage
 {
     [Parameter]
     public string Id { get; set; } = string.Empty;
-
+    private string UUID;
+    private bool IsCreator = false;
     private PlatformLobbyRow? Lobby { get; set; } = null;
 
     private HubConnection? hubConnection;
@@ -47,20 +48,32 @@ public partial class LobbyDetail : AuthenticatedPage
                 await InvokeAsync(StateHasChanged);
             }
         });
-
         await hubConnection.StartAsync();
         await hubConnection.SendAsync("JoinLobby", this.Id);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            UUID = await GetUUID();
+            IsCreator = await IsHost(new Guid(UUID));
+        }
     }
 
     protected async Task StartGame()
     {
         if (Lobby != null)
         {
-            await PlatformService.StartGame(Lobby.Id);
+            await PlatformService.StartGame(Lobby.Id, new Guid(UUID));
 
         }
     }
 
+    private async Task<Boolean> IsHost(Guid uuid)
+    {
+        return await PlatformService.IsHost(uuid, Lobby.Creator.UserUUID);
+    }
     private async Task RedirectToGame(Guid gameId)
     {
         if (Lobby == null) { return; }

@@ -26,9 +26,12 @@
                 }
             </ul>
         </div>
-        <div id="start">
-            <input type="button" @onclick="StartGame" value="Start" class="btn btn-danger" />
-        </div>
+        @if (IsCreator) 
+        {
+            <div id="start">
+                <input type="button" @onclick="StartGame" value="Start" class="btn btn-danger" />
+            </div>
+        }
     } else {
         <p>Loading...</p>
     }

@@ -201,11 +201,15 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<List<PlatformHighScoreRow>>(highScores);
         }
 
-        public async Task<Guid?> StartGame(Guid lobbyId)
+        public async Task<Guid?> StartGame(Guid lobbyId, Guid playerId)
         {
             var lobby = await _context.PlatformLobby.AsQueryable()
                 .Include(l => l.Game)
                 .FirstOrDefaultAsync(l => l.Id == lobbyId) ?? throw new LobbyNotFoundException("Lobby not found");
+            if (!await IsHost(playerId, lobby.Creator.UserUUID))
+            {
+                throw new CreatorException("this player is not the host");
+            }
             lobby.Started = true;
             _context.PlatformLobby.Update(lobby);
             await _context.SaveChangesAsync();
@@ -243,6 +247,12 @@ namespace PatteDoie.Services.Platform
                 ?? throw new GameNotValidException("Game not valid");
             var highScores = platformGame.HighScores.OrderByDescending(l => l.Score).ToList();
             return _mapper.Map<List<PlatformHighScoreRow>>(highScores);
+        }
+
+        public async Task<Boolean> IsHost(Guid playerId, Guid creatorId)
+        {
+            var player = await GetUser(playerId);
+            return creatorId == player.UserUUID;
         }
 
         private async Task<Guid?> CreateGame(GameType type, Lobby lobby)
