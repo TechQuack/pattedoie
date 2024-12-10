@@ -205,7 +205,7 @@ namespace PatteDoie.Services.Scattergories
             {
                 throw new Exception("Scattergories game is not ended");
             }
-
+            await UpdateHighScores(game.Id);
             Task deleteGame = this.DelayedDeletion(game);
 
             return _mapper.Map<ScattegoriesGameRow>(game);
@@ -289,6 +289,48 @@ namespace PatteDoie.Services.Scattergories
         }
 
         //TOOLS
+
+        private async Task UpdateHighScores(Guid gameId)
+        {
+            using var _context = _factory.CreateDbContext();
+            var game = await _context.ScattergoriesGame.AsQueryable().AsNoTracking()
+                .Include(g => g.Players).ThenInclude(p => p.User)
+                .Include(g => g.Lobby)
+                .FirstOrDefaultAsync(g => g.Id == gameId) ?? throw new GameNotFoundException("Game not found");
+            var lobby = await _context.PlatformLobby
+               .Include(l => l.Game)
+               .FirstOrDefaultAsync(l => l.Id == game.Lobby.Id) ?? throw new LobbyNotFoundException("Lobby cannot be null");
+            var platformGame = await _context.PlatformGame.AsQueryable()
+                .Include(p => p.HighScores)
+                .FirstOrDefaultAsync(p => p.Name == "Scattergories") ?? throw new GameNotValidException("Game not valid");
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                foreach (var player in game.Players)
+                {
+                    var notExistingHighScore = await _context.PlatformHighScore.AsQueryable().FirstOrDefaultAsync(s => s.Id == player.Id) == null;
+                    if (notExistingHighScore)
+                    {
+                        var highScore = new HighScore
+                        {
+                            Id = player.Id,
+                            Score = player.Score,
+                            PlayerName = player.User.Nickname
+                        };
+                        await _context.PlatformHighScore.AddAsync(highScore);
+                        platformGame.HighScores.Add(highScore);
+                    }
+                }
+
+                var highScoresToDelete = platformGame.HighScores.OrderByDescending(h => h.Score).Skip(5).ToList();
+                platformGame.HighScores = platformGame.HighScores.OrderByDescending(h => h.Score).Take(5).ToList();
+                _context.PlatformHighScore.RemoveRange(highScoresToDelete);
+
+                _context.PlatformGame.Update(platformGame);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+        }
 
         private static ScattergoriesPlayer CreatePlayer(User player, List<ScattergoriesAnswer> answers, bool isHost)
         {
