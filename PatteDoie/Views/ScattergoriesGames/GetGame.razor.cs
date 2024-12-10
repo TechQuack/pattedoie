@@ -47,6 +47,7 @@ namespace PatteDoie.Views.ScattergoriesGames
             hubConnection.On<ScattergoriesPlayerRow>("ReceiveProgression", async (player) =>
             {
                 FinalRanking = await ScattergoriesService.GetRank(new Guid(this.Id));
+                _players = await ScattergoriesService.GetPlayers(new Guid(this.Id));
                 await InvokeAsync(StateHasChanged);
             });
             hubConnection.On("RedirectToHome", async (Guid gameId) =>
@@ -113,6 +114,12 @@ namespace PatteDoie.Views.ScattergoriesGames
             {
                 await InvokeAsync(StateHasChanged);
             }
+        }
+
+        public async void ValidateWord(Guid playerId, Guid answerId, bool descision)
+        {
+            await ScattergoriesService.HostVerifyWord(new Guid(Id), playerId, answerId, descision);
+            await InvokeAsync(StateHasChanged);
         }
     }
 }

@@ -67,8 +67,8 @@
                                                 <input type="text" value="@answer.Text" disabled="disabled" />
                                                 @if (!answer.IsChecked && (Player?.IsHost ?? false))
                                                 {
-                                                    <button name="validate word @answer.Text" onclick="">✔</button>
-                                                    <button name="invalidate word @answer.Text" onclick="">✘</button>
+                                                    <button name="validate word @answer.Text" @onclick="() => ValidateWord(player.Id, answer.Id, true)">✔</button>
+                                                    <button name="invalidate word @answer.Text" @onclick="() => ValidateWord(player.Id, answer.Id, false)">✘</button>
                                                 }
                                             </td>
                                         }
