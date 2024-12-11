@@ -47,7 +47,7 @@ public partial class LobbyDetail : AuthenticatedPage
         hubConnection.On<Guid>("ReceiveGameStarted", RedirectToGame);
         hubConnection.On<Guid>("ReceivePlayerJoined", async (id) =>
         {
-            var user = await PlatformService.GetUser(id);
+            var user = await PlatformService.GetUser(id, Lobby.Id);
             if (user != null)
             {
                 Lobby.Users.Add(user);
@@ -86,7 +86,7 @@ public partial class LobbyDetail : AuthenticatedPage
 
     private async Task<Boolean> IsHost(Guid uuid)
     {
-        return await PlatformService.IsHost(uuid, Lobby.Creator.UserUUID);
+        return await PlatformService.IsHost(uuid, Lobby.Creator.UserUUID, Lobby.Id);
     }
     private async Task RedirectToGame(Guid gameId)
     {
