@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Hubs;
+using PatteDoie.Migrations;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
 using PatteDoie.PatteDoieException;
@@ -13,7 +14,7 @@ namespace PatteDoie.Services.Scattergories
 {
     public class ScattegoriesService(IDbContextFactory<PatteDoieContext> factory, IMapper mapper, IHubContext<ScattergoriesHub> hub) : IScattegoriesService
     {
-        private readonly static int TIME_BEFORE_DELETION = 60000;
+        private readonly static int TIME_BEFORE_DELETION = 0;
 
         private readonly IDbContextFactory<PatteDoieContext> _factory = factory;
         private readonly IMapper _mapper = mapper;
@@ -195,7 +196,7 @@ namespace PatteDoie.Services.Scattergories
                 .FirstOrDefaultAsync(l => l.Id == game.Lobby.Id) ?? throw new LobbyNotFoundException("Lobby not found");
 
             var users = lobby?.Users;
-            using var transaction = await _context.Database.BeginTransactionAsync() 
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 foreach (var category in game.Categories)
                 {
@@ -213,7 +214,6 @@ namespace PatteDoie.Services.Scattergories
                 _context.PlatformUser.RemoveRange(users);
                 await _context.SaveChangesAsync();
 
-                await _context.DisposeAsync();
                 await transaction.CommitAsync();
             }
         }
@@ -225,7 +225,7 @@ namespace PatteDoie.Services.Scattergories
                 throw new Exception("Scattergories game is not ended");
             }
 
-            Task deleteGame = this.DelayedDeletion(game);
+            Task deleteGame = this.DelayedDeletion(game.Id);
 
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
@@ -353,11 +353,11 @@ namespace PatteDoie.Services.Scattergories
             return game.CurrentRound == game.MaxRound;
         }
 
-        private async Task DelayedDeletion(ScattergoriesGame game)
+        private async Task DelayedDeletion(Guid gameId)
         {
             await Task.Delay(TIME_BEFORE_DELETION);
-            await DeleteGame(game.Id);
-            NavigationManager.NavigateTo("/home", forceLoad: true);
+            await DeleteGame(gameId);
+            await _hub.Clients.Group(gameId.ToString()).SendAsync("RedirectToHome", gameId);
         }
 
 
