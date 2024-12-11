@@ -33,5 +33,10 @@ namespace PatteDoie.Hubs
         {
             await Clients.Group(gameId.ToString()).SendAsync("SendWords");
         }
+
+        public async Task EndVerify(Guid gameId)
+        {
+            await Clients.Group(gameId.ToString()).SendAsync("EndVerify");
+        }
     }
 }

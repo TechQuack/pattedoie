@@ -119,29 +119,6 @@ namespace PatteDoie.Services.Scattergories
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
-        public async Task<ScattegoriesGameRow> NextRound(ScattergoriesGame game)
-        {
-            using var _context = _factory.CreateDbContext();
-            if (HasGameEnded(game))
-            {
-                return EndScattergoriesGame(game).Result;
-            }
-            else
-            {
-                game.CurrentLetter = RandomLetter();
-                game.CurrentRound += 1;
-                game.IsHostCheckingPhase = false;
-                foreach (var player in game.Players)
-                {
-                    DeletePlayerAnswers(player);
-                    player.Answers = CreateEmptyAnswers(game.Categories).Result;
-                }
-                await _context.SaveChangesAsync();
-                await _context.DisposeAsync();
-                return _mapper.Map<ScattegoriesGameRow>(game);
-            }
-        }
-
         public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, Lobby lobby)
         {
             using var _context = _factory.CreateDbContext();
@@ -233,15 +210,20 @@ namespace PatteDoie.Services.Scattergories
 
             var game = _context.ScattergoriesGame.AsQueryable()
                 .Where(g => g.Id == gameId)
+                .Include(g => g.Players)
+                .ThenInclude(p => p.Answers)
                 .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Game not found");
-            await _context.DisposeAsync();
             await _hub.Clients.Group(gameId.ToString())
                     .SendAsync("ReceiveProgression", _mapper.Map<ScattergoriesPlayerRow>(player));
             if (AreAllWordsChecked(game))
             {
-                return NextRound(game).Result;
+                await NextRound(game, _context);
+                await _context.DisposeAsync();
+                await _hub.Clients.Group(gameId.ToString())
+                   .SendAsync("EndVerify", gameId);
+                return _mapper.Map<ScattegoriesGameRow>(game);
             }
-
+            await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
@@ -320,6 +302,27 @@ namespace PatteDoie.Services.Scattergories
                 await _context.ScattergoriesAnswer.AddAsync(answer);
             }
             return answers;
+        }
+
+        private async Task NextRound(ScattergoriesGame game, PatteDoieContext _context)
+        {
+            if (HasGameEnded(game))
+            {
+                await EndScattergoriesGame(game);
+            }
+            else
+            {
+                game.CurrentLetter = RandomLetter();
+                game.CurrentRound += 1;
+                game.IsHostCheckingPhase = false;
+                foreach (var player in game.Players)
+                {
+                    DeletePlayerAnswers(player);
+                    player.Answers = CreateEmptyAnswers(game.Categories).Result;
+                }
+                _context.Update(game);
+                await _context.SaveChangesAsync();
+            }
         }
 
         private void DeletePlayerAnswers(ScattergoriesPlayer player)

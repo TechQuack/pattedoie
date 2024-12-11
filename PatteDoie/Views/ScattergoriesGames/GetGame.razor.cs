@@ -57,6 +57,16 @@ namespace PatteDoie.Views.ScattergoriesGames
                 await InvokeAsync(StateHasChanged);
 
             });
+            hubConnection.On("EndVerify", async (Guid gameId) =>
+            {
+                Row = await ScattergoriesService.GetGame(gameId);
+                if (Row.IsHostCheckingPhase)
+                {
+                    throw new Exception("error");
+                }
+                await InvokeAsync(StateHasChanged);
+
+            });
             hubConnection.On("RedirectToHome", async (Guid gameId) =>
             {
                 if (UUID != null)
