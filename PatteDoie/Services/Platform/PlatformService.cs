@@ -188,10 +188,11 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<PlatformUserRow>(platformUser);
         }
 
-        public async Task<PlatformUserRow> GetUser(Guid userId)
+        public async Task<PlatformUserRow> GetUser(Guid userId, Guid lobbyId)
         {
-            var creator = await _context.PlatformUser.AsQueryable().Where(u => u.UserUUID == userId).FirstOrDefaultAsync();
-            return _mapper.Map<PlatformUserRow>(creator);
+            var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync();
+            var user = lobby?.Users.Find(u => u.UserUUID == userId) ?? null;
+            return _mapper.Map<PlatformUserRow>(user);
         }
 
         public async Task<IEnumerable<PlatformHighScoreRow>> GetHighestScoreFromGame(Guid gameId)
@@ -206,7 +207,7 @@ namespace PatteDoie.Services.Platform
             var lobby = await _context.PlatformLobby.AsQueryable()
                 .Include(l => l.Game)
                 .FirstOrDefaultAsync(l => l.Id == lobbyId) ?? throw new LobbyNotFoundException("Lobby not found");
-            if (!await IsHost(playerId, lobby.Creator.UserUUID))
+            if (!await IsHost(playerId, lobby.Creator.UserUUID, lobby.Id))
             {
                 throw new CreatorException("this player is not the host");
             }
@@ -249,9 +250,13 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<List<PlatformHighScoreRow>>(highScores);
         }
 
-        public async Task<Boolean> IsHost(Guid playerId, Guid creatorId)
+        public async Task<Boolean> IsHost(Guid playerId, Guid creatorId, Guid lobbyId)
         {
-            var player = await GetUser(playerId);
+            var player = await GetUser(playerId, lobbyId);
+            if (player == null)
+            {
+                return false;
+            }
             return creatorId == player.UserUUID;
         }
 
