@@ -256,6 +256,12 @@ namespace PatteDoie.Services.Platform
             return player != null && creatorId == player.UserUUID;
         }
 
+        public async Task<Boolean> IsInLobby(Guid playerId, Guid lobbyId)
+        {
+            var player = await GetUser(playerId, lobbyId);
+            return player != null;
+        }
+
         private async Task<Guid?> CreateGame(GameType type, Lobby lobby)
         {
             switch (type)

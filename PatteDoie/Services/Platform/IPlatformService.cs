@@ -32,5 +32,6 @@ namespace PatteDoie.Services.Platform
         public Task<List<PlatformHighScoreRow>> GetGameHighScores(string gameName);
 
         public Task<Boolean> IsHost(Guid playerId, Guid creatorId, Guid lobbyId);
+        public Task<Boolean> IsInLobby(Guid playerId, Guid lobbyId);
     }
 }

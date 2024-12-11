@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Hubs;
-using PatteDoie.Migrations;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
 using PatteDoie.PatteDoieException;
@@ -185,7 +184,7 @@ namespace PatteDoie.Services.Scattergories
                 }
                 foreach (var player in game.Players)
                 {
-                    DeletePlayerAnswers(player);
+                    DeletePlayerAnswers(player, _context);
                 }
                 _context.ScattergoriesPlayer.RemoveRange(game.Players);
                 _context.ScattergoriesGame.Remove(game);

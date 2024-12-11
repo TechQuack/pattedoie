@@ -26,13 +26,30 @@
                 }
             </ul>
         </div>
-        <input type="button" @onclick="CopyLink" value="Link"/>
-        @if (IsCreator) 
-        {
-            <div id="start">
-                <input type="button" @onclick="StartGame" value="Start" class="btn btn-danger" />
+        <div class="command">
+            <div>
+                <input type="button" @onclick="CopyLink" value="Link" class="btn btn-danger" />
             </div>
-        }
+            @if (IsCreator) 
+            {
+                <div id="start">
+                    <input type="button" @onclick="StartGame" value="Start" class="btn btn-danger" />
+                </div>
+            }
+            @if (!IsInLobby)
+            {
+                @if (!string.IsNullOrEmpty(Lobby.Password))
+                {
+                    <a href="/lobby/join/@Lobby.Id" class="btn btn-danger">Join lobby</a>
+                }
+                else
+                {
+                    <div id="join">
+                        <input type="button" @onclick="_ => JoinPublicLobby(Lobby.Id)" value="Join" class="btn btn-danger" />
+                    </div>
+                }
+            }
+        </div>
     } else {
         <p>Loading...</p>
     }

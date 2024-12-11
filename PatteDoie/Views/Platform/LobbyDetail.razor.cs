@@ -13,6 +13,7 @@ public partial class LobbyDetail : AuthenticatedPage
     public string Id { get; set; } = string.Empty;
     private string UUID;
     private bool IsCreator = false;
+    private bool IsInLobby = false;
     private PlatformLobbyRow? Lobby { get; set; } = null;
 
     private HubConnection? hubConnection;
@@ -60,10 +61,16 @@ public partial class LobbyDetail : AuthenticatedPage
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
             UUID = await GetUUID();
-            IsCreator = await IsHost(new Guid(UUID));
+            if (!Guid.TryParse(UUID, out Guid guid))
+            {
+                return;
+            }
+            IsCreator = await IsHost(guid);
+            IsInLobby = await IsPlayerInLobby(guid);
         }
     }
 
@@ -88,7 +95,29 @@ public partial class LobbyDetail : AuthenticatedPage
     {
         return await PlatformService.IsHost(uuid, Lobby.Creator.UserUUID, Lobby.Id);
     }
-    private async Task RedirectToGame(Guid gameId)
+
+    private async Task<Boolean> IsPlayerInLobby(Guid uuid)
+    {
+        return await PlatformService.IsInLobby(uuid, Lobby.Id);
+    }
+
+    private async void JoinPublicLobby(Guid Id)
+    {
+        var uuid = await GetUUID();
+        var name = await GetName();
+        try
+        {
+            await PlatformService.JoinLobby(Id, name, new Guid(uuid), "");
+        }
+        catch (Exception ex)
+        {
+            // TODO : display an error to the user
+        }
+
+        NavigationManager.NavigateTo($"/lobby/{Id}", forceLoad: true);
+    }
+
+    private void RedirectToGame(Guid gameId)
     {
         if (Lobby == null) { return; }
         var gameType = GameTypeHelper.GetGameTypeFromString(Lobby.Game.Name);

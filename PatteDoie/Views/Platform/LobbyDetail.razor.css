@@ -20,14 +20,17 @@ p, h2, ul {
     background-color: #DAAB3A;
 }
 
-#start {
+.command {
     width: 100%;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.command div {
+    margin: 1rem;
 }
 
 h1 {
     background-color: #FF7A00;
-}
-
-input {
-    width: 5%;
 }
