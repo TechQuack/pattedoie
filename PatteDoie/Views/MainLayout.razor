@@ -1,0 +1,13 @@
+﻿@inherits LayoutComponentBase
+@using PatteDoie.Views.Shared
+
+<PageTitle>PatteDoie</PageTitle>
+
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+<Navbar></Navbar>
+<div class="container">
+    <main role="main" class="pb-3">
+        @Body
+    </main>
+</div>
+<Footer></Footer>
