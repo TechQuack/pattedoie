@@ -21,3 +21,11 @@
     color: #0000EE;
     cursor: pointer;
 }
+
+.lobbies-list {
+    --bs-table-bg: transparent !important;
+}
+
+thead {
+    border-color: black;
+}
