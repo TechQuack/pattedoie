@@ -77,10 +77,11 @@ public partial class LobbiesList : AuthenticatedPage
         }
         catch (Exception ex)
         {
-            // TODO : display an error to the user
+            ToastService.Notify(new(BlazorBootstrap.ToastType.Danger, "Error joining lobby", ex.Message));
+            return;
         }
-
-        NavigationManager.NavigateTo($"/lobby/{Id}", forceLoad: true);
+        ToastService.Notify(new(BlazorBootstrap.ToastType.Success, "Success", "Lobby joined"));
+        NavigationManager.NavigateTo($"/lobby/{Id}");
     }
 
     private static string GetLobbyTypeDescription(LobbyType type)

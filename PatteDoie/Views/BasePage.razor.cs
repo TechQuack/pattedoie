@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorBootstrap;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace PatteDoie.Views;
@@ -10,6 +11,9 @@ public partial class BasePage : ComponentBase
 
     [Inject]
     protected NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
+    protected ToastService ToastService { get; set; } = default!;
 
     protected async Task<bool> IsAuthenticated()
     {

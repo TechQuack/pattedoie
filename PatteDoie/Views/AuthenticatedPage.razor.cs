@@ -6,7 +6,7 @@ public partial class AuthenticatedPage : BasePage
     {
         if (!await IsAuthenticated())
         {
-            NavigationManager.NavigateTo("/", forceLoad: true);
+            NavigationManager.NavigateTo("/");
         }
     }
 }

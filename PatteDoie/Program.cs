@@ -26,6 +26,7 @@ builder.Services.AddSignalR(o =>
 {
     o.EnableDetailedErrors = true;
 });
+builder.Services.AddBlazorBootstrap();
 
 builder.Services.AddResponseCompression(opts =>
 {
