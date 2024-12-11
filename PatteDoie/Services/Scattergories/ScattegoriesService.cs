@@ -37,6 +37,7 @@ namespace PatteDoie.Services.Scattergories
                .Include(g => g.Categories)
                .Include(g => g.Players)
                .ThenInclude(p => p.Answers)
+               .ThenInclude(a => a.Category)
                .FirstOrDefault(g => g.Id == gameId)) ?? throw new GameNotValidException("Scattergories game cannot be null");
             await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
@@ -101,7 +102,7 @@ namespace PatteDoie.Services.Scattergories
                 .Include(g => g.Players)
                 .ThenInclude(p => p.Answers)
                 .Include(g => g.Categories)
-                .FirstOrDefaultAsync(g => g.Id == gameId);
+                .FirstOrDefaultAsync(g => g.Id == gameId) ?? throw new GameNotFoundException("Game not found");
             var platformUser = await _context.PlatformUser.AsQueryable().FirstOrDefaultAsync(u => u.UserUUID == userId);
             var player = await _context.ScattergoriesPlayer.AsQueryable()
                 .Include(p => p.Answers)
@@ -112,6 +113,8 @@ namespace PatteDoie.Services.Scattergories
                 game.IsHostCheckingPhase = true;
                 _context.ScattergoriesGame.Update(game);
                 await _context.SaveChangesAsync();
+                await _hub.Clients.Group(gameId.ToString())
+                   .SendAsync("SendWords", gameId);
             }
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
