@@ -35,9 +35,10 @@ namespace PatteDoie.Views.Platform
             }
             catch (Exception ex)
             {
-                // TODO : display an error to the user
+                ToastService.Notify(new(BlazorBootstrap.ToastType.Danger, "Error joining lobby", ex.Message));
+                return;
             }
-
+            ToastService.Notify(new(BlazorBootstrap.ToastType.Success, "Success", "Lobby joined"));
             NavigationManager.NavigateTo($"/lobby/{Id}");
         }
 
