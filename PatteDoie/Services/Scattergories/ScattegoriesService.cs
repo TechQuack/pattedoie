@@ -185,21 +185,37 @@ namespace PatteDoie.Services.Scattergories
         public async Task DeleteGame(Guid gameId)
         {
             using var _context = _factory.CreateDbContext();
-            var game = _context.ScattergoriesGame.AsQueryable()
-               .Where(g => g.Id == gameId)
-               .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Scattergories game cannot be null");
-            foreach (var category in game.Categories)
+            var game = await _context.ScattergoriesGame.AsQueryable()
+                .Include(g => g.Players)
+                .ThenInclude(p => p.Answers)
+                .Include(g => g.Lobby)
+               .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Scattergories game cannot be null");
+            var lobby = await _context.PlatformLobby
+                .Include(l => l.Users)
+                .FirstOrDefaultAsync(l => l.Id == game.Lobby.Id) ?? throw new LobbyNotFoundException("Lobby not found");
+
+            var users = lobby?.Users;
+            using var transaction = await _context.Database.BeginTransactionAsync() 
             {
-                category.Games.Remove(game);
+                foreach (var category in game.Categories)
+                {
+                    category.Games.Remove(game);
+                }
+                foreach (var player in game.Players)
+                {
+                    DeletePlayerAnswers(player);
+                }
+                _context.ScattergoriesPlayer.RemoveRange(game.Players);
+                _context.ScattergoriesGame.Remove(game);
+                _context.PlatformLobby.Remove(lobby);
+                await _context.SaveChangesAsync();
+
+                _context.PlatformUser.RemoveRange(users);
+                await _context.SaveChangesAsync();
+
+                await _context.DisposeAsync();
+                await transaction.CommitAsync();
             }
-            foreach (var player in game.Players)
-            {
-                DeletePlayerAnswers(player);
-            }
-            _context.ScattergoriesPlayer.RemoveRange(game.Players);
-            _context.ScattergoriesGame.Remove(game);
-            await _context.SaveChangesAsync();
-            await _context.DisposeAsync();
         }
 
         public async Task<ScattegoriesGameRow> EndScattergoriesGame(ScattergoriesGame game)
