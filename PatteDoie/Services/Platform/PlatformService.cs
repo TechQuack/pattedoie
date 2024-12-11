@@ -253,11 +253,7 @@ namespace PatteDoie.Services.Platform
         public async Task<Boolean> IsHost(Guid playerId, Guid creatorId, Guid lobbyId)
         {
             var player = await GetUser(playerId, lobbyId);
-            if (player == null)
-            {
-                return false;
-            }
-            return creatorId == player.UserUUID;
+            return player != null && creatorId == player.UserUUID;
         }
 
         private async Task<Guid?> CreateGame(GameType type, Lobby lobby)
