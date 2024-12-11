@@ -210,15 +210,16 @@ namespace PatteDoie.Services.Scattergories
             }
             answer.IsChecked = true;
             _context.ScattergoriesAnswer.Update(answer);
+            await _hub.Clients.Group(gameId.ToString())
+                .SendAsync("ReceiveProgression", _mapper.Map<ScattergoriesPlayerRow>(player));
+            await _hub.Clients.Group(gameId.ToString())
+                .SendAsync("UpdateAnswers", gameId);
             await _context.SaveChangesAsync();
-
             var game = _context.ScattergoriesGame.AsQueryable()
                 .Include(g => g.Categories)
                 .Include(g => g.Players)
                 .ThenInclude(p => p.Answers)
                 .FirstOrDefault<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
-            await _hub.Clients.Group(gameId.ToString())
-                    .SendAsync("ReceiveProgression", _mapper.Map<ScattergoriesPlayerRow>(player));
             if (AreAllWordsChecked(game))
             {
                 await NextRound(game, _context);

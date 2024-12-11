@@ -47,9 +47,14 @@ namespace PatteDoie.Views.ScattergoriesGames
             hubConnection.On<ScattergoriesPlayerRow>("ReceiveProgression", async (player) =>
             {
                 FinalRanking = await ScattergoriesService.GetRank(new Guid(this.Id));
-                _players = await ScattergoriesService.GetPlayers(new Guid(this.Id));
                 await InvokeAsync(StateHasChanged);
             });
+            hubConnection.On("UpdateAnswers", async (Guid gameId) =>
+            {
+                _players = await ScattergoriesService.GetPlayers(new Guid(this.Id));
+                await InvokeAsync(StateHasChanged);
+            }
+            );
             hubConnection.On("SendWords", async (Guid gameId) =>
             {
                 Row = await ScattergoriesService.GetGame(gameId);
