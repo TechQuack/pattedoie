@@ -80,7 +80,7 @@ public partial class LobbiesList : AuthenticatedPage
             // TODO : display an error to the user
         }
 
-        NavigationManager.NavigateTo($"/lobby/{Id}", forceLoad: true);
+        NavigationManager.NavigateTo($"/lobby/{Id}");
     }
 
     private static string GetLobbyTypeDescription(LobbyType type)

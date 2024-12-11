@@ -95,10 +95,10 @@ public partial class LobbyDetail : AuthenticatedPage
         switch (gameType)
         {
             case GameType.SpeedTyping:
-                NavigationManager.NavigateTo($"/speedtyping/{gameId}", forceLoad: true);
+                NavigationManager.NavigateTo($"/speedtyping/{gameId}");
                 break;
             case GameType.Scattergories:
-                NavigationManager.NavigateTo($"/scattergories/{gameId}", forceLoad: true);
+                NavigationManager.NavigateTo($"/scattergories/{gameId}");
                 break;
         }
     }

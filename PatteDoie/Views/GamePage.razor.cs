@@ -20,19 +20,19 @@ public abstract partial class GamePage : BasePage
             var lobby = await PlatformService.GetLobby(id ?? new Guid());
             if (lobby == null)
             {
-                NavigationManager.NavigateTo("/", forceLoad: true);
+                NavigationManager.NavigateTo("/");
                 return;
             }
             var uuid = await GetUUID();
             if (!Guid.TryParse(uuid, out Guid guid))
             {
-                NavigationManager.NavigateTo("/lobby", forceLoad: true);
+                NavigationManager.NavigateTo("/lobby");
                 return;
             }
             var user = lobby.Users.Find(u => u.UserUUID == guid);
             if (user == null)
             {
-                NavigationManager.NavigateTo("/lobby", forceLoad: true);
+                NavigationManager.NavigateTo("/lobby");
                 return;
             }
         }

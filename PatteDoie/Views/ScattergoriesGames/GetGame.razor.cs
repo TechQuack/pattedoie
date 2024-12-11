@@ -61,7 +61,7 @@ namespace PatteDoie.Views.ScattergoriesGames
             {
                 if (UUID != null)
                 {
-                    NavigationManager.NavigateTo("/", forceLoad: true);
+                    NavigationManager.NavigateTo("/");
                 }
             });
 
