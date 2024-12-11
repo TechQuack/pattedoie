@@ -92,6 +92,8 @@ namespace PatteDoie.Services.Scattergories
 
             await _context.SaveChangesAsync();
 
+            await _context.DisposeAsync();
+
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
@@ -116,6 +118,8 @@ namespace PatteDoie.Services.Scattergories
                 await _hub.Clients.Group(gameId.ToString())
                    .SendAsync("SendWords", gameId);
             }
+
+            await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
 
@@ -132,7 +136,7 @@ namespace PatteDoie.Services.Scattergories
             var players = new List<ScattergoriesPlayer>();
             foreach (var user in lobby.Users)
             {
-                var player = CreatePlayer(user, CreateEmptyAnswers(categories).Result, user == lobby.Creator);
+                var player = CreatePlayer(user, CreateEmptyAnswers(categories, _context).Result, user == lobby.Creator);
                 players.Add(player);
                 _context.ScattergoriesPlayer.Add(player);
             }
@@ -171,7 +175,7 @@ namespace PatteDoie.Services.Scattergories
             }
             foreach (var player in game.Players)
             {
-                DeletePlayerAnswers(player);
+                DeletePlayerAnswers(player, _context);
             }
             _context.ScattergoriesPlayer.RemoveRange(game.Players);
             _context.ScattergoriesGame.Remove(game);
@@ -209,10 +213,10 @@ namespace PatteDoie.Services.Scattergories
             await _context.SaveChangesAsync();
 
             var game = _context.ScattergoriesGame.AsQueryable()
-                .Where(g => g.Id == gameId)
+                .Include(g => g.Categories)
                 .Include(g => g.Players)
                 .ThenInclude(p => p.Answers)
-                .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Game not found");
+                .FirstOrDefault<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
             await _hub.Clients.Group(gameId.ToString())
                     .SendAsync("ReceiveProgression", _mapper.Map<ScattergoriesPlayerRow>(player));
             if (AreAllWordsChecked(game))
@@ -232,7 +236,7 @@ namespace PatteDoie.Services.Scattergories
             using var _context = _factory.CreateDbContext();
             var game = await _context.ScattergoriesGame.AsQueryable()
                 .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
-
+            await _context.DisposeAsync();
             return _mapper.Map<List<ScattergoriesCategoryRow>>(game.Categories);
         }
 
@@ -242,6 +246,7 @@ namespace PatteDoie.Services.Scattergories
             var game = await _context.ScattergoriesGame.AsQueryable()
                 .Include(g => g.Players).ThenInclude(p => p.User)
                 .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+            await _context.DisposeAsync();
             return _mapper.Map<List<ScattergoriesPlayerRow>>(game.Players
                 .OrderByDescending(player => player.Score)
             );
@@ -257,7 +262,7 @@ namespace PatteDoie.Services.Scattergories
                 .Include(g => g.Players)
                 .ThenInclude(p => p.User)
                 .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
-
+            await _context.DisposeAsync();
             return _mapper.Map<List<ScattergoriesPlayerRow>>(game.Players);
         }
 
@@ -286,9 +291,8 @@ namespace PatteDoie.Services.Scattergories
             };
         }
 
-        private async Task<List<ScattergoriesAnswer>> CreateEmptyAnswers(List<ScattergoriesCategory> categories)
+        private async Task<List<ScattergoriesAnswer>> CreateEmptyAnswers(List<ScattergoriesCategory> categories, PatteDoieContext _context)
         {
-            using var _context = _factory.CreateDbContext();
             List<ScattergoriesAnswer> answers = [];
             foreach (var category in categories)
             {
@@ -317,17 +321,16 @@ namespace PatteDoie.Services.Scattergories
                 game.IsHostCheckingPhase = false;
                 foreach (var player in game.Players)
                 {
-                    DeletePlayerAnswers(player);
-                    player.Answers = CreateEmptyAnswers(game.Categories).Result;
+                    DeletePlayerAnswers(player, _context);
+                    player.Answers = CreateEmptyAnswers(game.Categories, _context).Result;
                 }
                 _context.Update(game);
                 await _context.SaveChangesAsync();
             }
         }
 
-        private void DeletePlayerAnswers(ScattergoriesPlayer player)
+        private void DeletePlayerAnswers(ScattergoriesPlayer player, PatteDoieContext _context)
         {
-            using var _context = _factory.CreateDbContext();
             foreach (var answer in player.Answers)
             {
                 _context.Remove(answer);
