@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Hubs;
+using PatteDoie.Migrations;
 using PatteDoie.Models.Platform;
 using PatteDoie.Models.Scattergories;
 using PatteDoie.PatteDoieException;
@@ -166,21 +167,36 @@ namespace PatteDoie.Services.Scattergories
         public async Task DeleteGame(Guid gameId)
         {
             using var _context = _factory.CreateDbContext();
-            var game = _context.ScattergoriesGame.AsQueryable()
-               .Where(g => g.Id == gameId)
-               .FirstOrDefault<ScattergoriesGame>() ?? throw new GameNotValidException("Scattergories game cannot be null");
-            foreach (var category in game.Categories)
+            var game = await _context.ScattergoriesGame.AsQueryable()
+                .Include(g => g.Players)
+                .ThenInclude(p => p.Answers)
+                .Include(g => g.Lobby)
+               .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Scattergories game cannot be null");
+            var lobby = await _context.PlatformLobby
+                .Include(l => l.Users)
+                .FirstOrDefaultAsync(l => l.Id == game.Lobby.Id) ?? throw new LobbyNotFoundException("Lobby not found");
+
+            var users = lobby?.Users;
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                category.Games.Remove(game);
+                foreach (var category in game.Categories)
+                {
+                    category.Games.Remove(game);
+                }
+                foreach (var player in game.Players)
+                {
+                    DeletePlayerAnswers(player);
+                }
+                _context.ScattergoriesPlayer.RemoveRange(game.Players);
+                _context.ScattergoriesGame.Remove(game);
+                _context.PlatformLobby.Remove(lobby);
+                await _context.SaveChangesAsync();
+
+                _context.PlatformUser.RemoveRange(users);
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
             }
-            foreach (var player in game.Players)
-            {
-                DeletePlayerAnswers(player, _context);
-            }
-            _context.ScattergoriesPlayer.RemoveRange(game.Players);
-            _context.ScattergoriesGame.Remove(game);
-            await _context.SaveChangesAsync();
-            await _context.DisposeAsync();
         }
 
         public async Task<ScattegoriesGameRow> EndScattergoriesGame(ScattergoriesGame game)
@@ -189,8 +205,8 @@ namespace PatteDoie.Services.Scattergories
             {
                 throw new Exception("Scattergories game is not ended");
             }
-
-            Task deleteGame = this.DelayedDeletion(game);
+            await UpdateHighScores(game.Id);
+            Task deleteGame = this.DelayedDeletion(game.Id);
 
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
@@ -281,6 +297,46 @@ namespace PatteDoie.Services.Scattergories
 
         //TOOLS
 
+        private async Task UpdateHighScores(Guid gameId)
+        {
+            using var _context = _factory.CreateDbContext();
+            var game = await _context.ScattergoriesGame.AsQueryable().AsNoTracking()
+                .Include(g => g.Players).ThenInclude(p => p.User)
+                .Include(g => g.Lobby)
+                .FirstOrDefaultAsync(g => g.Id == gameId) ?? throw new GameNotFoundException("Game not found");
+            var lobby = await _context.PlatformLobby
+               .Include(l => l.Game)
+               .FirstOrDefaultAsync(l => l.Id == game.Lobby.Id) ?? throw new LobbyNotFoundException("Lobby cannot be null");
+            var platformGame = await _context.PlatformGame.AsQueryable()
+                .Include(p => p.HighScores)
+                .FirstOrDefaultAsync(p => p.Name == "Scattergories") ?? throw new GameNotValidException("Game not valid");
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            foreach (var player in game.Players)
+            {
+                var notExistingHighScore = await _context.PlatformHighScore.AsQueryable().FirstOrDefaultAsync(s => s.Id == player.Id) == null;
+                if (notExistingHighScore)
+                {
+                    var highScore = new HighScore
+                    {
+                        Id = player.Id,
+                        Score = player.Score,
+                        PlayerName = player.User.Nickname
+                    };
+                    await _context.PlatformHighScore.AddAsync(highScore);
+                    platformGame.HighScores.Add(highScore);
+                }
+            }
+
+            var highScoresToDelete = platformGame.HighScores.OrderByDescending(h => h.Score).Skip(5).ToList();
+            platformGame.HighScores = platformGame.HighScores.OrderByDescending(h => h.Score).Take(5).ToList();
+            _context.PlatformHighScore.RemoveRange(highScoresToDelete);
+
+            _context.PlatformGame.Update(platformGame);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+
         private static ScattergoriesPlayer CreatePlayer(User player, List<ScattergoriesAnswer> answers, bool isHost)
         {
             return new ScattergoriesPlayer
@@ -344,11 +400,11 @@ namespace PatteDoie.Services.Scattergories
             return game.CurrentRound == game.MaxRound;
         }
 
-        private async Task DelayedDeletion(ScattergoriesGame game)
+        private async Task DelayedDeletion(Guid gameId)
         {
             await Task.Delay(TIME_BEFORE_DELETION);
-            await DeleteGame(game.Id);
-            NavigationManager.NavigateTo("/home", forceLoad: true);
+            await DeleteGame(gameId);
+            await _hub.Clients.Group(gameId.ToString()).SendAsync("RedirectToHome", gameId);
         }
 
 
