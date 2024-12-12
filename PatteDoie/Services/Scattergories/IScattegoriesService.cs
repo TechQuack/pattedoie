@@ -4,7 +4,7 @@ using PatteDoie.Rows.Scattegories;
 
 namespace PatteDoie.Services.Scattergories
 {
-    public interface IScattergoriesService
+    public interface IScattegoriesService
     {
         public Task<IEnumerable<ScattergoriesGameRow>> GetAllGames();
         public Task<ScattergoriesGameRow> GetGame(Guid gameId);

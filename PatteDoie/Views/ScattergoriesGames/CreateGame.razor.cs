@@ -8,7 +8,7 @@ namespace PatteDoie.Views.ScattergoriesGames
     public partial class CreateGame : ComponentBase
     {
         [Inject]
-        protected IScattergoriesService ScattegoriesService { get; set; } = default!;
+        protected IScattegoriesService ScattegoriesService { get; set; } = default!;
 
         private ScattergoriesGameRow? Row { get; set; } = null;
 

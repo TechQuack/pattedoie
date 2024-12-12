@@ -18,13 +18,13 @@ namespace PatteDoie.Services.Platform
     public class PlatformService(PatteDoieContext context,
         IMapper mapper,
         ISpeedTypingService speedTypingService,
-        IScattergoriesService scattergoriesService,
+        IScattegoriesService scattergoriesService,
         IHubContext<PlatformHub> hub) : IPlatformService
     {
         private readonly PatteDoieContext _context = context;
         private readonly IMapper _mapper = mapper;
         private readonly ISpeedTypingService _speedTypingService = speedTypingService;
-        private readonly IScattergoriesService _scattergoriesService = scattergoriesService;
+        private readonly IScattegoriesService _scattergoriesService = scattergoriesService;
         private readonly IHubContext<PlatformHub> _hub = hub;
 
 
