@@ -15,8 +15,8 @@ public partial class LobbyDetail : AuthenticatedPage
     private bool IsCreator = false;
     private bool IsInLobby = false;
     private PlatformLobbyRow? Lobby { get; set; } = null;
-
     private HubConnection? hubConnection;
+    private bool Initialized = false;
 
 
 
@@ -57,12 +57,13 @@ public partial class LobbyDetail : AuthenticatedPage
         });
         await hubConnection.StartAsync();
         await hubConnection.SendAsync("JoinLobby", this.Id);
+        Initialized = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
-        if (firstRender)
+        if (Initialized)
         {
             UUID = await GetUUID();
             if (!Guid.TryParse(UUID, out Guid guid))

@@ -15,83 +15,88 @@
             <h1>Scattergories</h1>
         </div>
 
-        <h2>Current Letter : @Row.CurrentLetter</h2>
+        @if (Row == null) {
+            <p>Loading...</p>
+        } else {
+            <h2>Current Letter : @Row.CurrentLetter</h2>
 
-        <div id="game">
-            @if(!Row.IsHostCheckingPhase) {
-                <table>
-                    <thead>
-                        <tr>
-                            @foreach (var category in Row.Categories)
-                            {
-                                <th>@category.Name</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            @{
-                                int i = 0;
-                            }
-                            @foreach (var category in Row.Categories)
-                            {
-                                <td>
-                                    @{
-                                        var local = i;
-                                        <input type="text" name="input_@category.Name" placeholder="@category.Name"
-                                               class="@(AreWordsCorrect[local]? "CorrectWord": "IncorrectWord")"
-                                               @bind="inputs[local]" @bind:event="oninput" @onkeyup="() => SendWord(local)" />
-                                        ++i;
-                                    }
-                                </td>
-                            }
-                        </tr>
-                    </tbody>
-                </table>
-                <div>
-                    <button type="button" @onclick="ConfirmWords" class="btn btn-danger">Envoyer les mots</button>
-                </div>
-            } else {
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Player</th>
-                            @foreach (var category in Row.Categories)
-                            {
-                                <th>@category.Name</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach(var player in _players) {
+            <div id="game">
+                @if(!Row.IsHostCheckingPhase) {
+                    <table>
+                        <thead>
                             <tr>
-                                <td>@player.User.Nickname</td>
-                                @foreach (var category in Row.Categories) {
-                                    @foreach (var answer in player.Answers) {
-                                        @if (answer.Category.Name == category.Name)
-                                        {
-                                            <td>
-                                                <div class="validation">
-                                                    <input type="text" value="@answer.Text" disabled="disabled" />
-                                                    <div>
-                                                        @if (!answer.IsChecked && (Player?.IsHost ?? false))
-                                                        {
-                                                            <button name="validate word @answer.Text" @onclick="() => ValidateWord(player.Id, answer.Id, true)">✔</button>
-                                                            <button name="invalidate word @answer.Text" @onclick="() => ValidateWord(player.Id, answer.Id, false)">✘</button>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        }
-                                    }
+                                @foreach (var category in Row.Categories)
+                                {
+                                    <th>@category.Name</th>
                                 }
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            }
+                        </thead>
+                        <tbody>
+                            <tr>
+                                @{
+                                    int i = 0;
+                                }
+                                @foreach (var category in Row.Categories)
+                                {
+                                    <td>
+                                        @{
+                                            var local = i;
+                                            <input type="text" name="input_@category.Name" placeholder="@category.Name"
+                                                   class="@(AreWordsCorrect[local]? "CorrectWord": "IncorrectWord")"
+                                                   @bind="inputs[local]" @bind:event="oninput" @onkeyup="() => SendWord(local)" />
+                                            ++i;
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div>
+                        <button type="button" @onclick="ConfirmWords" class="btn btn-danger">Envoyer les mots</button>
+                    </div>
+                } else {
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                @foreach (var category in Row.Categories)
+                                {
+                                    <th>@category.Name</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var player in _players) {
+                                <tr>
+                                    <td>@player.User.Nickname</td>
+                                    @foreach (var category in Row.Categories) {
+                                        @foreach (var answer in player.Answers) {
+                                            @if (answer.Category.Name == category.Name)
+                                            {
+                                                <td>
+                                                    <div class="validation">
+                                                        <input type="text" value="@answer.Text" disabled="disabled" />
+                                                        <div>
+                                                            @if (!answer.IsChecked && (Player?.IsHost ?? false))
+                                                            {
+                                                                <button name="validate word @answer.Text" @onclick="() => ValidateWord(player.Id, answer.Id, true)">✔</button>
+                                                                <button name="invalidate word @answer.Text" @onclick="() => ValidateWord(player.Id, answer.Id, false)">✘</button>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            }
+                                        }
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
             
-        </div>
+            </div>
+
+        }
     </div>
 
     <div id="ranking">
