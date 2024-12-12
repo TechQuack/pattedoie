@@ -19,17 +19,20 @@ namespace PatteDoie.Services.Platform
         IMapper mapper,
         ISpeedTypingService speedTypingService,
         IScattegoriesService scattergoriesService,
-        IHubContext<PlatformHub> hub) : IPlatformService
+        IHubContext<PlatformHub> hub,
+        IDbContextFactory<PatteDoieContext> factory) : IPlatformService
     {
         private readonly PatteDoieContext _context = context;
         private readonly IMapper _mapper = mapper;
         private readonly ISpeedTypingService _speedTypingService = speedTypingService;
         private readonly IScattegoriesService _scattergoriesService = scattergoriesService;
         private readonly IHubContext<PlatformHub> _hub = hub;
+        private readonly IDbContextFactory<PatteDoieContext> _factory = factory;
 
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type, string lobbyName)
         {
+            using var _context = _factory.CreateDbContext();
             var gameName = type.GetDescription();
             var game = await _context.PlatformGame.AsQueryable().Where(g => g.Name == gameName).FirstOrDefaultAsync() ?? throw new GameNotFoundException("Game not found");
 
@@ -75,8 +78,7 @@ namespace PatteDoie.Services.Platform
 
                 await transaction.CommitAsync();
             }
-
-            //TODO : Create game
+            await _context.DisposeAsync();
 
             return _mapper.Map<PlatformLobbyRow>(platformLobby);
         }
@@ -94,11 +96,14 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformLobbyRow> GetLobby(Guid lobbyId)
         {
+            using var _context = _factory.CreateDbContext();
+
             var lobby = await _context.PlatformLobby.AsQueryable()
                 .Include(l => l.Creator)
                 .Include(l => l.Game)
                 .Include(l => l.Users)
                 .FirstOrDefaultAsync(l => l.Id == lobbyId) ?? throw new LobbyNotFoundException("Lobby not found");
+            await _context.DisposeAsync();
             return _mapper.Map<PlatformLobbyRow>(lobby);
         }
 
@@ -138,8 +143,8 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID, string? password)
         {
-
-            var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
+            var lobby = await _context.PlatformLobby.AsQueryable().Include(l => l.Users)
+                .Where(l => l.Id == lobbyId).FirstOrDefaultAsync() ?? throw new LobbyNotFoundException("Lobby not found");
 
             if (IsLobbyContainingPlayer(userUUID, lobby))
             {
@@ -169,7 +174,7 @@ namespace PatteDoie.Services.Platform
                 UserUUID = userUUID
             };
 
-            _context.PlatformUser.Add(platformUser);
+            await _context.PlatformUser.AddAsync(platformUser);
 
             lobby.Users.Add(platformUser);
 
@@ -184,13 +189,13 @@ namespace PatteDoie.Services.Platform
 
             await _hub.Clients.Group(lobbyId.ToString())
                     .SendAsync("ReceivePlayerJoined", platformUser.UserUUID);
-
             return _mapper.Map<PlatformUserRow>(platformUser);
         }
 
         public async Task<PlatformUserRow> GetUser(Guid userId, Guid lobbyId)
         {
-            var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync();
+            var lobby = await _context.PlatformLobby.AsQueryable().Include(l => l.Users)
+                .Where(l => l.Id == lobbyId).FirstOrDefaultAsync();
             var user = lobby?.Users.Find(u => u.UserUUID == userId) ?? null;
             return _mapper.Map<PlatformUserRow>(user);
         }
@@ -206,6 +211,7 @@ namespace PatteDoie.Services.Platform
         {
             var lobby = await _context.PlatformLobby.AsQueryable()
                 .Include(l => l.Game)
+                .Include(l => l.Creator)
                 .FirstOrDefaultAsync(l => l.Id == lobbyId) ?? throw new LobbyNotFoundException("Lobby not found");
             if (!await IsHost(playerId, lobby.Creator.UserUUID, lobby.Id))
             {
