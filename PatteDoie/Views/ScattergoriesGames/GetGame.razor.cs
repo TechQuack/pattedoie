@@ -13,7 +13,7 @@ namespace PatteDoie.Views.ScattergoriesGames
 
         private HubConnection? hubConnection;
         private List<ScattergoriesPlayerRow> _players = [];
-        private ScattegoriesGameRow? Row { get; set; } = null;
+        private ScattergoriesGameRow? Row { get; set; } = null;
         private List<ScattergoriesPlayerRow> FinalRanking = [];
         private string UUID;
         private string[] inputs = [];

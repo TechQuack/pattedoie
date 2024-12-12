@@ -17,7 +17,7 @@ namespace PatteDoie.Configuration
             CreateMap<SpeedTypingPlayer, SpeedTypingPlayerRow>();
             CreateMap<SpeedTypingTimeProgress, SpeedTypingTimeProgressRow>();
             CreateMap<HighScore, PlatformHighScoreRow>();
-            CreateMap<ScattergoriesGame, ScattegoriesGameRow>();
+            CreateMap<ScattergoriesGame, ScattergoriesGameRow>();
             CreateMap<ScattergoriesPlayer, ScattergoriesPlayerRow>();
             CreateMap<ScattergoriesCategory, ScattergoriesCategoryRow>();
             CreateMap<User, PlatformUserRow>();

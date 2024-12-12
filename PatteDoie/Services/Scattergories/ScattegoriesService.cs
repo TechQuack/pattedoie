@@ -22,14 +22,14 @@ namespace PatteDoie.Services.Scattergories
 
         private readonly IHubContext<ScattergoriesHub> _hub = hub;
 
-        public async Task<IEnumerable<ScattegoriesGameRow>> GetAllGames()
+        public async Task<IEnumerable<ScattergoriesGameRow>> GetAllGames()
         {
             using var _context = _factory.CreateDbContext();
             var games = await _context.ScattergoriesGame.AsQueryable().ToListAsync();
-            return _mapper.Map<List<ScattegoriesGameRow>>(games);
+            return _mapper.Map<List<ScattergoriesGameRow>>(games);
         }
 
-        public async Task<ScattegoriesGameRow> GetGame(Guid gameId)
+        public async Task<ScattergoriesGameRow> GetGame(Guid gameId)
         {
             using var _context = _factory.CreateDbContext();
             var game = (_context.ScattergoriesGame.AsQueryable()
@@ -41,9 +41,9 @@ namespace PatteDoie.Services.Scattergories
                .ThenInclude(a => a.Category)
                .FirstOrDefault(g => g.Id == gameId)) ?? throw new GameNotValidException("Scattergories game cannot be null");
             await _context.DisposeAsync();
-            return _mapper.Map<ScattegoriesGameRow>(game);
+            return _mapper.Map<ScattergoriesGameRow>(game);
         }
-        public Task<IEnumerable<ScattegoriesGameRow>> SearchGames()
+        public Task<IEnumerable<ScattergoriesGameRow>> SearchGames()
         {
             throw new NotImplementedException();
         }
@@ -53,7 +53,7 @@ namespace PatteDoie.Services.Scattergories
             throw new NotImplementedException();
         }
 
-        public async Task<ScattegoriesGameRow> AddPlayerWord(Guid gameId, Guid userId, string word, ScattergoriesCategory category)
+        public async Task<ScattergoriesGameRow> AddPlayerWord(Guid gameId, Guid userId, string word, ScattergoriesCategory category)
         {
             using var _context = _factory.CreateDbContext();
             var game = await _context.ScattergoriesGame.AsQueryable()
@@ -95,10 +95,10 @@ namespace PatteDoie.Services.Scattergories
 
             await _context.DisposeAsync();
 
-            return _mapper.Map<ScattegoriesGameRow>(game);
+            return _mapper.Map<ScattergoriesGameRow>(game);
         }
 
-        public async Task<ScattegoriesGameRow> ConfirmWords(Guid gameId, Guid userId)
+        public async Task<ScattergoriesGameRow> ConfirmWords(Guid gameId, Guid userId)
         {
             using var _context = _factory.CreateDbContext();
             var game = await _context.ScattergoriesGame.AsQueryable()
@@ -121,10 +121,10 @@ namespace PatteDoie.Services.Scattergories
             }
 
             await _context.DisposeAsync();
-            return _mapper.Map<ScattegoriesGameRow>(game);
+            return _mapper.Map<ScattergoriesGameRow>(game);
         }
 
-        public async Task<ScattegoriesGameRow> CreateGame(int numberCategories, int roundNumber, Lobby lobby)
+        public async Task<ScattergoriesGameRow> CreateGame(int numberCategories, int roundNumber, Lobby lobby)
         {
             using var _context = _factory.CreateDbContext();
             await _context.Entry(lobby).ReloadAsync();
@@ -161,7 +161,7 @@ namespace PatteDoie.Services.Scattergories
 
             await _context.SaveChangesAsync();
             await _context.DisposeAsync();
-            return _mapper.Map<ScattegoriesGameRow>(game);
+            return _mapper.Map<ScattergoriesGameRow>(game);
         }
 
         public async Task DeleteGame(Guid gameId)
@@ -185,7 +185,7 @@ namespace PatteDoie.Services.Scattergories
                 }
                 foreach (var player in game.Players)
                 {
-                    DeletePlayerAnswers(player);
+                    DeletePlayerAnswers(player, _context);
                 }
                 _context.ScattergoriesPlayer.RemoveRange(game.Players);
                 _context.ScattergoriesGame.Remove(game);
@@ -199,7 +199,7 @@ namespace PatteDoie.Services.Scattergories
             }
         }
 
-        public async Task<ScattegoriesGameRow> EndScattergoriesGame(ScattergoriesGame game)
+        public async Task<ScattergoriesGameRow> EndScattergoriesGame(ScattergoriesGame game)
         {
             if (!HasGameEnded(game))
             {
@@ -208,10 +208,10 @@ namespace PatteDoie.Services.Scattergories
             await UpdateHighScores(game.Id);
             Task deleteGame = this.DelayedDeletion(game.Id);
 
-            return _mapper.Map<ScattegoriesGameRow>(game);
+            return _mapper.Map<ScattergoriesGameRow>(game);
         }
 
-        public async Task<ScattegoriesGameRow> HostVerifyWord(Guid gameId, Guid playerId, Guid answerId, bool decision)
+        public async Task<ScattergoriesGameRow> HostVerifyWord(Guid gameId, Guid playerId, Guid answerId, bool decision)
         {
             using var _context = _factory.CreateDbContext();
             var player = await _context.ScattergoriesPlayer.AsQueryable()
@@ -242,10 +242,10 @@ namespace PatteDoie.Services.Scattergories
                 await _context.DisposeAsync();
                 await _hub.Clients.Group(gameId.ToString())
                    .SendAsync("EndVerify", gameId);
-                return _mapper.Map<ScattegoriesGameRow>(game);
+                return _mapper.Map<ScattergoriesGameRow>(game);
             }
             await _context.DisposeAsync();
-            return _mapper.Map<ScattegoriesGameRow>(game);
+            return _mapper.Map<ScattergoriesGameRow>(game);
         }
 
         public async Task<List<ScattergoriesCategoryRow>> GetCategories(Guid gameId)

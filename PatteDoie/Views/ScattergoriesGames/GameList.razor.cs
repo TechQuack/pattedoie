@@ -6,7 +6,7 @@ namespace PatteDoie.Views.ScattergoriesGames
 {
     public partial class GameList : ComponentBase
     {
-        public IEnumerable<ScattegoriesGameRow> Items = [];
+        public IEnumerable<ScattergoriesGameRow> Items = [];
 
         [Inject]
         private IScattegoriesService ScattergoriesService { get; set; } = default!;

@@ -10,7 +10,7 @@ namespace PatteDoie.Views.ScattergoriesGames
         [Inject]
         protected IScattegoriesService ScattegoriesService { get; set; } = default!;
 
-        private ScattegoriesGameRow? Row { get; set; } = null;
+        private ScattergoriesGameRow? Row { get; set; } = null;
 
         public void NewGame()
         {
