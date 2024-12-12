@@ -9,7 +9,7 @@ namespace PatteDoie.Views.ScattergoriesGames
         public IEnumerable<ScattergoriesGameRow> Items = [];
 
         [Inject]
-        private IScattegoriesService ScattergoriesService { get; set; } = default!;
+        private IScattergoriesService ScattergoriesService { get; set; } = default!;
 
         protected override async Task OnInitializedAsync()
         {

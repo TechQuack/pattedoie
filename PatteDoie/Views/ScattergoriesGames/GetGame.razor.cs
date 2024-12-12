@@ -21,7 +21,7 @@ namespace PatteDoie.Views.ScattergoriesGames
         private ScattergoriesPlayerRow? Player { get; set; } = null;
 
         [Inject]
-        protected IScattegoriesService ScattergoriesService { get; set; } = default!;
+        protected IScattergoriesService ScattergoriesService { get; set; } = default!;
 
         protected override async Task OnInitializedAsync()
         {

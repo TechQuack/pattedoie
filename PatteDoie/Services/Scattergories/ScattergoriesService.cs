@@ -12,7 +12,7 @@ using PatteDoie.Rows.Scattegories;
 
 namespace PatteDoie.Services.Scattergories
 {
-    public class ScattegoriesService(IDbContextFactory<PatteDoieContext> factory, IMapper mapper, IHubContext<ScattergoriesHub> hub) : IScattegoriesService
+    public class ScattergoriesService(IDbContextFactory<PatteDoieContext> factory, IMapper mapper, IHubContext<ScattergoriesHub> hub) : IScattergoriesService
     {
         private readonly static int TIME_BEFORE_DELETION = 60000;
 

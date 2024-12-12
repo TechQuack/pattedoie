@@ -19,7 +19,7 @@ builder.Services.AddDbContextFactory<PatteDoieContext>(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ISpeedTypingService, SpeedTypingService>();
 builder.Services.AddScoped<IPlatformService, PlatformService>();
-builder.Services.AddScoped<IScattegoriesService, ScattegoriesService>();
+builder.Services.AddScoped<IScattergoriesService, ScattergoriesService>();
 builder.Services.AddScoped<IClipboardService, ClipboardService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddSignalR(o =>
