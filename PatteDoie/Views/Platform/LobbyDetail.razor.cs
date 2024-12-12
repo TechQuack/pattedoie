@@ -86,7 +86,8 @@ public partial class LobbyDetail : AuthenticatedPage
 
     private async Task<Boolean> IsHost(Guid uuid)
     {
-        return await PlatformService.IsHost(uuid, Lobby.Creator.UserUUID, Lobby.Id);
+
+        return Lobby != null && await PlatformService.IsHost(uuid, Lobby.Creator.UserUUID, Lobby.Id);
     }
     private async Task RedirectToGame(Guid gameId)
     {
