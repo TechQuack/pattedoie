@@ -130,7 +130,7 @@ namespace PatteDoie.Services.Scattergories
             {
                 var player = CreatePlayer(user, CreateEmptyAnswers(categories, _context).Result, user == lobby.Creator);
                 players.Add(player);
-                _context.ScattergoriesPlayer.Add(player);
+                await _context.ScattergoriesPlayer.AddAsync(player);
             }
 
             var game = new ScattergoriesGame
@@ -143,7 +143,7 @@ namespace PatteDoie.Services.Scattergories
                 IsHostCheckingPhase = false,
                 Lobby = lobby
             };
-            _context.ScattergoriesGame.Add(game);
+            await _context.ScattergoriesGame.AddAsync(game);
 
             foreach (var category in categories)
             {
@@ -277,11 +277,12 @@ namespace PatteDoie.Services.Scattergories
         public async Task<ScattergoriesPlayerRow> GetPlayerById(Guid id)
         {
             using var _context = _factory.CreateDbContext();
+            var user = await _context.PlatformUser.FirstOrDefaultAsync(u => u.Id == id);
             var player = await _context.ScattergoriesPlayer.AsQueryable()
                 .Include(p => p.Answers)
                 .ThenInclude(a => a.Category)
-                .FirstOrDefaultAsync(p => p.User.Id == id) ?? throw new PlayerNotValidException("Player not found");
-            _context.Dispose();
+                .FirstOrDefaultAsync(p => p.User == user) ?? throw new PlayerNotValidException("Player not found");
+            await _context.DisposeAsync();
             return _mapper.Map<ScattergoriesPlayerRow>(player);
         }
 

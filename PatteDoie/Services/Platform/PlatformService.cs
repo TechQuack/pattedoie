@@ -183,9 +183,11 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformUserRow> GetUser(Guid userId, Guid lobbyId)
         {
+            using var _context = _factory.CreateDbContext();
             var lobby = await _context.PlatformLobby.AsQueryable().Include(l => l.Users)
                 .Where(l => l.Id == lobbyId).FirstOrDefaultAsync();
             var user = lobby?.Users.Find(u => u.UserUUID == userId) ?? null;
+            await _context.DisposeAsync();
             return _mapper.Map<PlatformUserRow>(user);
         }
 
@@ -201,6 +203,7 @@ namespace PatteDoie.Services.Platform
             var lobby = await _context.PlatformLobby.AsQueryable()
                 .Include(l => l.Game)
                 .Include(l => l.Creator)
+                .Include(l => l.Users)
                 .FirstOrDefaultAsync(l => l.Id == lobbyId) ?? throw new LobbyNotFoundException("Lobby not found");
             if (!await IsHost(playerId, lobby.Creator.UserUUID, lobby.Id))
             {
