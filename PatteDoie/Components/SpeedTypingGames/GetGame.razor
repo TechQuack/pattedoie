@@ -1,0 +1,77 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@page "/speedtyping/{Id}"
+@inherits GamePage
+
+
+<PageTitle>SpeedTyping</PageTitle>
+
+<div id="gameHeader">
+    <div id="command">
+        <a asp-action="Index" href="/">
+            <img src="back-arrow.svg" />
+        </a>
+    </div>
+    <h1>Speed Typing</h1>
+</div>
+<div>
+    <div id="game">
+        <div class="clock">
+            <h1>@_secondsToRun</h1>
+        </div>
+        
+        <div>
+            @foreach (string Word in Row?.Words ?? [])
+            {
+                @if (Array.IndexOf(Row.Words, Word) == WordIndexToDisplay) {
+                    <span id="wordToDisplay"> @Word &nbsp;</span>
+                } else {
+                    <span> @Word &nbsp;</span>
+                }
+            }
+        </div>
+        <hr />
+        @if (!IsInputIncorrect)
+        {
+            <input type="text" id="inputText" name="inputText" @bind-value="@inputValue" disabled="@IsInputDisabled"
+               @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")' />
+        } 
+        else 
+        {
+            <input type="text" id="inputTextIncorrect" name="inputText" @bind-value="@inputValueIncorrect" disabled="@IsInputDisabled"
+                   @oninput='(e) => CheckTextSpace(e.Value?.ToString() ?? "")' />
+        }
+        
+    </div>
+
+    <div id="progression">
+        <h2>Progression</h2>
+        @foreach(var playerRow in _players)
+        {
+            <div class="playerProgression">
+                <label for="@playerRow.User.Nickname">@playerRow.User.Nickname</label>
+                <progress id="@playerRow.User.Nickname" value="@playerRow.Score" max="10"> 
+                    @(playerRow.Score / 10 * 100)
+                </progress>
+            </div>
+            <hr />
+        }
+    </div>
+    <div id="ranking">
+        <h2>Ranking</h2>
+        @{
+            int i = 1;
+            int wordsPerMinute = 0;
+        }
+        @foreach (var player in FinalRanking)
+        {
+            if (player.SecondsToFinish != 0)
+            {
+                wordsPerMinute = @player.Score * 60 / @player.SecondsToFinish;
+                <p>@i - @player.User.Nickname: @player.Score in @player.SecondsToFinish seconds (@wordsPerMinute words per minute)</p>
+                ++i;
+                <hr />
+            }
+        }
+    </div>
+</div>

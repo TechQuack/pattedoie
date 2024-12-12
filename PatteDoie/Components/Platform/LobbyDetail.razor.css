@@ -1,0 +1,36 @@
+﻿.informations, h1, #start {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+}
+
+p, h2, ul {
+    text-align: center;
+}
+
+.information, h1 {
+    margin: 2rem;
+    margin-inline: 5rem;
+    border-radius: 25px;
+}
+
+.information {
+    background-color: #DAAB3A;
+}
+
+.command {
+    width: 100%;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.command div {
+    margin: 1rem;
+}
+
+h1 {
+    background-color: #FF7A00;
+}

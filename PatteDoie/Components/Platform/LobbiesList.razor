@@ -1,0 +1,81 @@
+﻿@page "/lobby"
+@inherits AuthenticatedPage
+@using PatteDoie.Enums;
+@using PatteDoie.Extensions;
+
+<PageTitle>Lobbies</PageTitle>
+
+<h1>Game lobbies list</h1>
+
+<div id="create-game">
+    <div class="create-option">
+        <a href="/lobby/create?GameName=@GameType.SpeedTyping.GetDescription()">Create new Speedtyping game</a>
+    </div>
+    <div class="create-option">
+        <a href="/lobby/create?GameName=@GameType.Scattergories.GetDescription()">Create new Scattergories game</a>
+    </div>
+</div>
+<InputSelect @bind-Value="Type" @bind-Value:after="SearchLobbies">
+    @foreach (var type in Types)
+    {
+        <option value="@type">@GetLobbyTypeDescription(@type)</option>
+    }
+</InputSelect>
+<InputSelect @bind-Value="GameTypeValue" @bind-Value:after="SearchLobbies">
+    @foreach (Enum type in Enum.GetValues(typeof(FilterGameType)))
+    {
+        <option value="@type">@type.GetDescription()</option>
+    }
+</InputSelect>
+<table class="table lobbies-list">
+    <thead>
+        <tr>
+            <th>
+                Lobby Name
+            </th>
+            <th>
+                Game
+            </th>
+            <th>
+                Started
+            </th>
+            <th></th>
+            <th class="copy-link"></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Items) {
+        <tr>
+            <td>
+                @item.LobbyName
+            </td>
+            <td>
+                @item.Game.Name
+            </td>
+            <td>
+                @item.Started
+            </td>
+            <td>
+                @if (item.Started && IsUserInLobbies.GetValueOrDefault(item, false)) {
+                    <a href="/@item.Game.Name/@GameUUIDFromLobbies.GetValueOrDefault(item)">Join game</a>
+                } 
+                else if(!item.Started) {
+                    <a href="/lobby/@item.Id">Details</a> <span>|</span>
+                    @if (!string.IsNullOrEmpty(item.Password))
+                    {
+                    <a href="/lobby/join/@item.Id">Join lobby</a>
+                    } else
+                    {
+                        <a class="public-lobby-join" @onclick="_ => JoinPublicLobby(item.Id)">Join lobby</a>
+                    }
+                }
+            </td>
+            <td>
+                <button class="button-link" @onclick="_ => CopyLink(item.Id)" value="Copy link" >
+                    <img src="copy-link.svg" />
+                </button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

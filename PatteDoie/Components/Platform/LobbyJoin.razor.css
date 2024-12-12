@@ -1,0 +1,38 @@
+﻿#creation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin: 2rem;
+}
+
+#form {
+    padding-top: 8rem;
+}
+
+#command {
+    width: 5%;
+}
+
+.label {
+    white-space: nowrap;
+}
+
+img {
+    width: 5%;
+}
+
+#lobbyHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem;
+    height: 80%;
+}

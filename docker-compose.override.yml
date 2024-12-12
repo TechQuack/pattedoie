@@ -5,8 +5,8 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
     ports:
-      - "8080"
-      - "8081"
+      - "8080:8080"
+      - "8081:8081"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -23,15 +23,6 @@ services:
       retries: 10
       start_period: 10s
       timeout: 3s
-  
-  pattedoie-sqlserver.configurator:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    volumes:
-      - ./init:/docker-entrypoint-initdb.d
-    depends_on:
-      pattedoie-sqlserver:
-        condition: service_healthy
-    command: bash -c "/opt/mssql-tools18/bin/sqlcmd -S pattedoie-sqlserver -U sa -P Password1* -d master -i docker-entrypoint-initdb.d/init.sql -C"
 
 volumes:
   backup_pattedoie:
