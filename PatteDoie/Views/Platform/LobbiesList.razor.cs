@@ -49,7 +49,8 @@ public partial class LobbiesList : AuthenticatedPage
         await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
-            var userId = new Guid(await GetUUID());
+            var uuid = await GetUUID();
+            Guid.TryParse(uuid, out Guid userId);
             foreach (var item in Items)
             {
                 if (item.Started)

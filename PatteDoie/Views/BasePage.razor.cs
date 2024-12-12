@@ -31,21 +31,33 @@ public partial class BasePage : ComponentBase
     }
     protected async Task<string> GetUUID()
     {
-        var result = await ProtectedLocalStorage.GetAsync<string>("uuid");
-        if (!result.Success)
+       try
+        {
+            var result = await ProtectedLocalStorage.GetAsync<string>("uuid");
+            if (!result.Success)
+            {
+                return "";
+            }
+            return result.Value ?? "";
+        } catch
         {
             return "";
         }
-        return result.Value ?? "";
     }
 
     protected async Task<string> GetName()
     {
-        var result = await ProtectedLocalStorage.GetAsync<string>("name");
-        if (!result.Success)
+        try
+        {
+            var result = await ProtectedLocalStorage.GetAsync<string>("name");
+            if (!result.Success)
+            {
+                return "";
+            }
+            return result.Value ?? "";
+        } catch
         {
             return "";
         }
-        return result.Value ?? "";
     }
 }
