@@ -72,6 +72,7 @@ public partial class LobbyDetail : AuthenticatedPage
             }
             IsCreator = await IsHost(guid);
             IsInLobby = await IsPlayerInLobby(guid);
+            await InvokeAsync(StateHasChanged);
         }
     }
 

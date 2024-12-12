@@ -71,7 +71,6 @@ public partial class LobbiesList : AuthenticatedPage
         var uuid = await GetUUID();
         var name = await GetName();
 
-
         try
         {
             await PlatformService.JoinLobby(Id, name, new Guid(uuid), "");
