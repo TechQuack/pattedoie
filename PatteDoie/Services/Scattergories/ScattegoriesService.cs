@@ -41,15 +41,6 @@ namespace PatteDoie.Services.Scattergories
             await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
         }
-        public Task<IEnumerable<ScattegoriesGameRow>> SearchGames()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateGame(Guid gameId)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task<ScattegoriesGameRow> AddPlayerWord(Guid gameId, Guid userId, string word, ScattergoriesCategory category)
         {

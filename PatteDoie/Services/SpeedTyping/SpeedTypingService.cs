@@ -99,11 +99,6 @@ namespace PatteDoie.Services.SpeedTyping
             }
         }
 
-        public Task<IEnumerable<SpeedTypingGameRow>> GetAllGames()
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<SpeedTypingGameRow> GetGame(Guid gameId)
         {
             using var _context = _factory.CreateDbContext();
@@ -113,11 +108,6 @@ namespace PatteDoie.Services.SpeedTyping
                 .FirstOrDefaultAsync(g => g.Id == gameId);
             await _context.DisposeAsync();
             return _mapper.Map<SpeedTypingGameRow>(game);
-        }
-
-        public Task<IEnumerable<SpeedTypingGameRow>> SearchGames(CreateSpeedTypingGameCommand query)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<int> GetScore(Guid playerUUID)

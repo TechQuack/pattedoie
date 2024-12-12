@@ -89,11 +89,6 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<List<PlatformLobbyRow>>(lobbies);
         }
 
-        public Task<IEnumerable<PlatformLobbyRow>> GetLobbiesByGame(Guid gameId)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<PlatformLobbyRow> GetLobby(Guid lobbyId)
         {
             using var _context = _factory.CreateDbContext();
@@ -133,11 +128,6 @@ namespace PatteDoie.Services.Platform
             }
 
             return _mapper.Map<List<PlatformLobbyRow>>(await query.Include(l => l.Game).Include(l => l.Users).ToListAsync());
-        }
-
-        public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID, string? password)
