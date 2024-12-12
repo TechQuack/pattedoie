@@ -1,4 +1,4 @@
-﻿namespace PatteDoie.Views;
+﻿namespace PatteDoie.Components;
 
 public partial class AuthenticatedPage : BasePage
 {

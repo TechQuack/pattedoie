@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using PatteDoie.Services.Platform;
 
-namespace PatteDoie.Views;
+namespace PatteDoie.Components;
 
 public abstract partial class GamePage : BasePage
 {

@@ -5,7 +5,7 @@ using PatteDoie.Rows.Platform;
 using PatteDoie.Services;
 using PatteDoie.Services.Platform;
 
-namespace PatteDoie.Views.Platform;
+namespace PatteDoie.Components.Platform;
 
 public partial class LobbiesList : AuthenticatedPage
 {

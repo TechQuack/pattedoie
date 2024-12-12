@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
-namespace PatteDoie.Views;
+namespace PatteDoie.Components;
 
 public partial class BasePage : ComponentBase
 {

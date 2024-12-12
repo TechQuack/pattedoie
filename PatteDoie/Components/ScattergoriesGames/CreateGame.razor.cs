@@ -3,7 +3,7 @@ using PatteDoie.Models.Platform;
 using PatteDoie.Rows.Scattegories;
 using PatteDoie.Services.Scattergories;
 
-namespace PatteDoie.Views.ScattergoriesGames
+namespace PatteDoie.Components.ScattergoriesGames
 {
     public partial class CreateGame : ComponentBase
     {

@@ -7,7 +7,7 @@ using PatteDoie.Services;
 using PatteDoie.Services.Platform;
 using PatteDoie.Services.Scattergories;
 using PatteDoie.Services.SpeedTyping;
-using PatteDoie.Views;
+using PatteDoie.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 

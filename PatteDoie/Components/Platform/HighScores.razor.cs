@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 using PatteDoie.Rows.Platform;
 using PatteDoie.Services.Platform;
 
-namespace PatteDoie.Views.Platform
+namespace PatteDoie.Components.Platform
 {
     public partial class HighScores : AuthenticatedPage
     {
