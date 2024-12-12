@@ -5,15 +5,19 @@
 <PageTitle>Scattergories</PageTitle>
 
 <div>
-    <h4>Scattergories</h4>
-    <hr/>
-
     <div>
-        <div>
-            <h1>Current Letter</h1>
-            <h2>@Row.CurrentLetter</h2>
+        <div id="gameHeader">
+            <div id="command">
+                <a asp-action="Index" href="/">
+                    <img src="back-arrow.svg" />
+                </a>
+            </div>
+            <h1>Scattergories</h1>
         </div>
-        <div>
+
+        <h2>Current Letter : @Row.CurrentLetter</h2>
+
+        <div id="game">
             @if(!Row.IsHostCheckingPhase) {
                 <table>
                     <thead>
@@ -45,7 +49,7 @@
                     </tbody>
                 </table>
                 <div>
-                    <button type="button" @onclick="ConfirmWords">Envoyer les mots</button>
+                    <button type="button" @onclick="ConfirmWords" class="btn btn-danger">Envoyer les mots</button>
                 </div>
             } else {
                 <table>
@@ -67,12 +71,16 @@
                                         @if (answer.Category.Name == category.Name)
                                         {
                                             <td>
-                                                <input type="text" value="@answer.Text" disabled="disabled" />
-                                                @if (!answer.IsChecked && (Player?.IsHost ?? false))
-                                                {
-                                                    <button name="validate word @answer.Text" @onclick="() => ValidateWord(player.Id, answer.Id, true)">✔</button>
-                                                    <button name="invalidate word @answer.Text" @onclick="() => ValidateWord(player.Id, answer.Id, false)">✘</button>
-                                                }
+                                                <div class="validation">
+                                                    <input type="text" value="@answer.Text" disabled="disabled" />
+                                                    <div>
+                                                        @if (!answer.IsChecked && (Player?.IsHost ?? false))
+                                                        {
+                                                            <button name="validate word @answer.Text" @onclick="() => ValidateWord(player.Id, answer.Id, true)">✔</button>
+                                                            <button name="invalidate word @answer.Text" @onclick="() => ValidateWord(player.Id, answer.Id, false)">✘</button>
+                                                        }
+                                                    </div>
+                                                </div>
                                             </td>
                                         }
                                     }
@@ -86,7 +94,7 @@
         </div>
     </div>
 
-    <div>
+    <div id="ranking">
         <h4>Ranking</h4>
         <ol>
             @foreach(var player in FinalRanking)

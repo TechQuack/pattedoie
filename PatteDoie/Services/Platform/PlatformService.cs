@@ -16,6 +16,7 @@ using PatteDoie.Services.SpeedTyping;
 namespace PatteDoie.Services.Platform
 {
     public class PlatformService(PatteDoieContext context,
+        IDbContextFactory<PatteDoieContext> factory,
         IMapper mapper,
         ISpeedTypingService speedTypingService,
         IScattegoriesService scattergoriesService,
@@ -26,6 +27,7 @@ namespace PatteDoie.Services.Platform
         private readonly ISpeedTypingService _speedTypingService = speedTypingService;
         private readonly IScattegoriesService _scattergoriesService = scattergoriesService;
         private readonly IHubContext<PlatformHub> _hub = hub;
+        private readonly IDbContextFactory<PatteDoieContext> _factory = factory;
 
 
         public async Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type, string lobbyName)
@@ -94,11 +96,13 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformLobbyRow> GetLobby(Guid lobbyId)
         {
+            using var _context = _factory.CreateDbContext();
             var lobby = await _context.PlatformLobby.AsQueryable()
                 .Include(l => l.Creator)
                 .Include(l => l.Game)
                 .Include(l => l.Users)
                 .FirstOrDefaultAsync(l => l.Id == lobbyId) ?? throw new LobbyNotFoundException("Lobby not found");
+            await _context.DisposeAsync();
             return _mapper.Map<PlatformLobbyRow>(lobby);
         }
 
@@ -190,7 +194,7 @@ namespace PatteDoie.Services.Platform
 
         public async Task<PlatformUserRow> GetUser(Guid userId, Guid lobbyId)
         {
-            var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).FirstOrDefaultAsync();
+            var lobby = await _context.PlatformLobby.AsQueryable().Where(l => l.Id == lobbyId).Include(l => l.Users).FirstOrDefaultAsync();
             var user = lobby?.Users.Find(u => u.UserUUID == userId) ?? null;
             return _mapper.Map<PlatformUserRow>(user);
         }
