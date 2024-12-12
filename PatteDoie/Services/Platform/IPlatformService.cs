@@ -11,11 +11,7 @@ namespace PatteDoie.Services.Platform
 
         public Task<PlatformLobbyRow> GetLobby(Guid lobbyId);
 
-        public Task<IEnumerable<PlatformLobbyRow>> GetLobbiesByGame(Guid gameId);
-
         public Task<IEnumerable<PlatformLobbyRow>> SearchLobbies(LobbyType type, FilterGameType gameType);
-
-        public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command);
 
         public Task<PlatformLobbyRow> CreateLobby(Guid creatorId, string creatorName, string? password, GameType type, string lobbyName);
 
@@ -32,5 +28,6 @@ namespace PatteDoie.Services.Platform
         public Task<List<PlatformHighScoreRow>> GetGameHighScores(string gameName);
 
         public Task<Boolean> IsHost(Guid playerId, Guid creatorId, Guid lobbyId);
+        public Task<Boolean> IsInLobby(Guid playerId, Guid lobbyId);
     }
 }

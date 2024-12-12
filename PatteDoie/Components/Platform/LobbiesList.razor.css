@@ -29,3 +29,11 @@
 thead {
     border-color: black;
 }
+
+.copy-link {
+    width: 5%;
+}
+
+img {
+    max-width: 100%;
+}

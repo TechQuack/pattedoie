@@ -5,7 +5,7 @@ using PatteDoie.Rows.Platform;
 using PatteDoie.Services;
 using PatteDoie.Services.Platform;
 
-namespace PatteDoie.Views.Platform;
+namespace PatteDoie.Components.Platform;
 
 public partial class LobbyDetail : AuthenticatedPage
 {
@@ -13,9 +13,10 @@ public partial class LobbyDetail : AuthenticatedPage
     public string Id { get; set; } = string.Empty;
     private string UUID;
     private bool IsCreator = false;
+    private bool IsInLobby = false;
     private PlatformLobbyRow? Lobby { get; set; } = null;
-
     private HubConnection? hubConnection;
+    private bool Initialized = false;
 
 
 
@@ -56,14 +57,21 @@ public partial class LobbyDetail : AuthenticatedPage
         });
         await hubConnection.StartAsync();
         await hubConnection.SendAsync("JoinLobby", this.Id);
+        Initialized = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        await base.OnAfterRenderAsync(firstRender);
+        if (Initialized)
         {
             UUID = await GetUUID();
-            IsCreator = await IsHost(new Guid(UUID));
+            if (!Guid.TryParse(UUID, out Guid guid))
+            {
+                return;
+            }
+            IsCreator = await IsHost(guid);
+            IsInLobby = await IsPlayerInLobby(guid);
         }
     }
 
@@ -89,6 +97,29 @@ public partial class LobbyDetail : AuthenticatedPage
 
         return Lobby != null && await PlatformService.IsHost(uuid, Lobby.Creator.UserUUID, Lobby.Id);
     }
+
+    private async Task<Boolean> IsPlayerInLobby(Guid uuid)
+    {
+        return await PlatformService.IsInLobby(uuid, Lobby.Id);
+    }
+
+    private async void JoinPublicLobby(Guid Id)
+    {
+        var uuid = await GetUUID();
+        var name = await GetName();
+        try
+        {
+            await PlatformService.JoinLobby(Id, name, new Guid(uuid), "");
+        }
+        catch (Exception ex)
+        {
+            // TODO : display an error to the user
+        }
+
+        NavigationManager.NavigateTo($"/lobby/{Id}", forceLoad: true);
+    }
+
+    // Method need to be async because of redirection, even if there is no await
     private async Task RedirectToGame(Guid gameId)
     {
         if (Lobby == null) { return; }

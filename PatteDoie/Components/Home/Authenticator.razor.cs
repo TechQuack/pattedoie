@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 
-namespace PatteDoie.Views.Home;
+namespace PatteDoie.Components.Home;
 
 public partial class Authenticator : ComponentBase
 {

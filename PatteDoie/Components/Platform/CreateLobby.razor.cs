@@ -3,7 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using PatteDoie.Enums;
 using PatteDoie.Services.Platform;
 
-namespace PatteDoie.Views.Platform;
+namespace PatteDoie.Components.Platform;
 
 public partial class CreateLobby : AuthenticatedPage
 {

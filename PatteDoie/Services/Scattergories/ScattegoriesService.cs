@@ -17,7 +17,6 @@ namespace PatteDoie.Services.Scattergories
 
         private readonly IDbContextFactory<PatteDoieContext> _factory = factory;
         private readonly IMapper _mapper = mapper;
-        private readonly NavigationManager NavigationManager = default!;
 
         private readonly IHubContext<ScattergoriesHub> _hub = hub;
 
@@ -31,25 +30,16 @@ namespace PatteDoie.Services.Scattergories
         public async Task<ScattegoriesGameRow> GetGame(Guid gameId)
         {
             using var _context = _factory.CreateDbContext();
-            var game = (_context.ScattergoriesGame.AsQueryable()
+            var game = (await _context.ScattergoriesGame.AsQueryable()
                .Include(g => g.Lobby)
                .ThenInclude(l => l.Users)
                .Include(g => g.Categories)
                .Include(g => g.Players)
                .ThenInclude(p => p.Answers)
                .ThenInclude(a => a.Category)
-               .FirstOrDefault(g => g.Id == gameId)) ?? throw new GameNotValidException("Scattergories game cannot be null");
+               .FirstOrDefaultAsync(g => g.Id == gameId)) ?? throw new GameNotValidException("Scattergories game cannot be null");
             await _context.DisposeAsync();
             return _mapper.Map<ScattegoriesGameRow>(game);
-        }
-        public Task<IEnumerable<ScattegoriesGameRow>> SearchGames()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateGame(Guid gameId)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<ScattegoriesGameRow> AddPlayerWord(Guid gameId, Guid userId, string word, ScattergoriesCategory category)
@@ -59,6 +49,8 @@ namespace PatteDoie.Services.Scattergories
                 .Include(g => g.Players)
                 .ThenInclude(p => p.Answers)
                 .Include(g => g.Categories)
+                .Include(g => g.Lobby)
+                .ThenInclude(l => l.Users)
                 .FirstOrDefaultAsync(g => g.Id == gameId);
             var platformUser = await _context.PlatformUser.AsQueryable().FirstOrDefaultAsync(u => u.UserUUID == userId);
             var player = await _context.ScattergoriesPlayer.AsQueryable()
@@ -230,11 +222,11 @@ namespace PatteDoie.Services.Scattergories
             await _hub.Clients.Group(gameId.ToString())
                 .SendAsync("UpdateAnswers", gameId);
             await _context.SaveChangesAsync();
-            var game = _context.ScattergoriesGame.AsQueryable()
+            var game = await _context.ScattergoriesGame.AsQueryable()
                 .Include(g => g.Categories)
                 .Include(g => g.Players)
                 .ThenInclude(p => p.Answers)
-                .FirstOrDefault<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
+                .FirstOrDefaultAsync<ScattergoriesGame>(g => g.Id == gameId) ?? throw new GameNotValidException("Game not found");
             if (AreAllWordsChecked(game))
             {
                 await NextRound(game, _context);
@@ -285,11 +277,10 @@ namespace PatteDoie.Services.Scattergories
         public async Task<ScattergoriesPlayerRow> GetPlayerById(Guid id)
         {
             using var _context = _factory.CreateDbContext();
-            var platformUser = _context.PlatformUser.AsQueryable().FirstOrDefault(u => u.UserUUID == id);
-            var player = _context.ScattergoriesPlayer.AsQueryable()
+            var player = await _context.ScattergoriesPlayer.AsQueryable()
                 .Include(p => p.Answers)
                 .ThenInclude(a => a.Category)
-                .FirstOrDefault(p => p.User == platformUser) ?? throw new PlayerNotValidException("Player not found");
+                .FirstOrDefaultAsync(p => p.User.Id == id) ?? throw new PlayerNotValidException("Player not found");
             _context.Dispose();
             return _mapper.Map<ScattergoriesPlayerRow>(player);
         }
@@ -378,7 +369,7 @@ namespace PatteDoie.Services.Scattergories
                 foreach (var player in game.Players)
                 {
                     DeletePlayerAnswers(player, _context);
-                    player.Answers = CreateEmptyAnswers(game.Categories, _context).Result;
+                    player.Answers = await CreateEmptyAnswers(game.Categories, _context);
                 }
                 _context.Update(game);
                 await _context.SaveChangesAsync();

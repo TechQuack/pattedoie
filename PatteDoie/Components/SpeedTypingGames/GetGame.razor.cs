@@ -7,7 +7,7 @@ using PatteDoie.Services.SpeedTyping;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
-namespace PatteDoie.Views.SpeedTypingGames
+namespace PatteDoie.Components.SpeedTypingGames
 {
     public partial class GetGame : GamePage
     {

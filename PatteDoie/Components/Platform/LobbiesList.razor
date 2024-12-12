@@ -40,6 +40,7 @@
                 Started
             </th>
             <th></th>
+            <th class="copy-link"></th>
         </tr>
     </thead>
     <tbody>
@@ -69,7 +70,11 @@
                     }
                 }
             </td>
-            <input type="button" @onclick="_ => CopyLink(item.Id)" value="Copy link" />
+            <td>
+                <button class="button-link" @onclick="_ => CopyLink(item.Id)" value="Copy link" >
+                    <img src="copy-link.svg" />
+                </button>
+            </td>
         </tr>
     }
     </tbody>

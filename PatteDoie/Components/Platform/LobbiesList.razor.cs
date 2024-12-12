@@ -5,7 +5,7 @@ using PatteDoie.Rows.Platform;
 using PatteDoie.Services;
 using PatteDoie.Services.Platform;
 
-namespace PatteDoie.Views.Platform;
+namespace PatteDoie.Components.Platform;
 
 public partial class LobbiesList : AuthenticatedPage
 {
@@ -49,7 +49,8 @@ public partial class LobbiesList : AuthenticatedPage
         await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
-            var userId = new Guid(await GetUUID());
+            var uuid = await GetUUID();
+            Guid.TryParse(uuid, out Guid userId);
             foreach (var item in Items)
             {
                 if (item.Started)

@@ -1,5 +1,5 @@
 ﻿
-namespace PatteDoie.Views.Home;
+namespace PatteDoie.Components.Home;
 
 public partial class Home : BasePage
 {

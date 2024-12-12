@@ -16,11 +16,11 @@ using PatteDoie.Services.SpeedTyping;
 namespace PatteDoie.Services.Platform
 {
     public class PlatformService(PatteDoieContext context,
+        IDbContextFactory<PatteDoieContext> factory,
         IMapper mapper,
         ISpeedTypingService speedTypingService,
         IScattegoriesService scattergoriesService,
-        IHubContext<PlatformHub> hub,
-        IDbContextFactory<PatteDoieContext> factory) : IPlatformService
+        IHubContext<PlatformHub> hub) : IPlatformService
     {
         private readonly PatteDoieContext _context = context;
         private readonly IMapper _mapper = mapper;
@@ -89,15 +89,9 @@ namespace PatteDoie.Services.Platform
             return _mapper.Map<List<PlatformLobbyRow>>(lobbies);
         }
 
-        public Task<IEnumerable<PlatformLobbyRow>> GetLobbiesByGame(Guid gameId)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<PlatformLobbyRow> GetLobby(Guid lobbyId)
         {
             using var _context = _factory.CreateDbContext();
-
             var lobby = await _context.PlatformLobby.AsQueryable()
                 .Include(l => l.Creator)
                 .Include(l => l.Game)
@@ -134,11 +128,6 @@ namespace PatteDoie.Services.Platform
             }
 
             return _mapper.Map<List<PlatformLobbyRow>>(await query.Include(l => l.Game).Include(l => l.Users).ToListAsync());
-        }
-
-        public Task UpdateLobby(Guid lobbyId, CreatePlatformLobbyCommand command)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<PlatformUserRow> JoinLobby(Guid lobbyId, string nickname, Guid userUUID, string? password)
@@ -260,6 +249,12 @@ namespace PatteDoie.Services.Platform
         {
             var player = await GetUser(playerId, lobbyId);
             return player != null && creatorId == player.UserUUID;
+        }
+
+        public async Task<Boolean> IsInLobby(Guid playerId, Guid lobbyId)
+        {
+            var player = await GetUser(playerId, lobbyId);
+            return player != null;
         }
 
         private async Task<Guid?> CreateGame(GameType type, Lobby lobby)

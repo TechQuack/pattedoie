@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
-namespace PatteDoie.Views;
+namespace PatteDoie.Components;
 
 public partial class BasePage : ComponentBase
 {
@@ -23,18 +23,41 @@ public partial class BasePage : ComponentBase
             var name = await ProtectedLocalStorage.GetAsync<string>("name");
 
             return (uuid.Value ?? "") != "" && (name.Value ?? "") != "";
-        } catch
+        }
+        catch
         {
             return false;
         }
     }
     protected async Task<string> GetUUID()
     {
-        return (await ProtectedLocalStorage.GetAsync<string>("uuid")).Value ?? "";
+       try
+        {
+            var result = await ProtectedLocalStorage.GetAsync<string>("uuid");
+            if (!result.Success)
+            {
+                return "";
+            }
+            return result.Value ?? "";
+        } catch
+        {
+            return "";
+        }
     }
 
     protected async Task<string> GetName()
     {
-        return (await ProtectedLocalStorage.GetAsync<string>("name")).Value ?? "";
+        try
+        {
+            var result = await ProtectedLocalStorage.GetAsync<string>("name");
+            if (!result.Success)
+            {
+                return "";
+            }
+            return result.Value ?? "";
+        } catch
+        {
+            return "";
+        }
     }
 }

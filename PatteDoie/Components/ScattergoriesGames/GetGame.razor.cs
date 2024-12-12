@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using PatteDoie.Rows.Scattegories;
+using PatteDoie.Services.Platform;
 using PatteDoie.Services.Scattergories;
 
-namespace PatteDoie.Views.ScattergoriesGames
+namespace PatteDoie.Components.ScattergoriesGames
 {
     public partial class GetGame : GamePage
     {
@@ -15,7 +16,7 @@ namespace PatteDoie.Views.ScattergoriesGames
         private List<ScattergoriesPlayerRow> _players = [];
         private ScattegoriesGameRow? Row { get; set; } = null;
         private List<ScattergoriesPlayerRow> FinalRanking = [];
-        private string UUID;
+        private string UUID = "";
         private string[] inputs = [];
         private bool[] AreWordsCorrect = [];
         private ScattergoriesPlayerRow? Player { get; set; } = null;
@@ -25,7 +26,7 @@ namespace PatteDoie.Views.ScattergoriesGames
 
         protected override async Task OnInitializedAsync()
         {
-            this.Row = await ScattergoriesService.GetGame(new Guid(this.Id));
+            Row = await ScattergoriesService.GetGame(new Guid(this.Id));
 
             inputs = new string[Row.Categories.Count];
             AreWordsCorrect = Enumerable.Repeat<bool>(true, Row.Categories.Count).ToArray();
@@ -92,7 +93,8 @@ namespace PatteDoie.Views.ScattergoriesGames
             {
                 await base.OnAfterRenderAsync(firstRender);
                 UUID = await GetUUID();
-                Player = ScattergoriesService.GetPlayerById(new Guid(UUID)).Result;
+                var platformUser = await PlatformService.GetUser(new Guid(UUID), Row.Lobby.Id);
+                Player = await ScattergoriesService.GetPlayerById(platformUser.Id);
             }
         }
 
@@ -125,6 +127,10 @@ namespace PatteDoie.Views.ScattergoriesGames
         {
             await ScattergoriesService.ConfirmWords(new Guid(Id), new Guid(UUID));
             await InvokeAsync(StateHasChanged);
+            for (int i = 0; i < inputs.Length; ++i)
+            {
+                inputs[i] = "";
+            }
         }
 
         public async void ValidateWord(Guid playerId, Guid answerId, bool descision)

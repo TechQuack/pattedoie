@@ -8,11 +8,7 @@ namespace PatteDoie.Services.SpeedTyping
 {
     public interface ISpeedTypingService
     {
-        public Task<IEnumerable<SpeedTypingGameRow>> GetAllGames();
-
         public Task<SpeedTypingGameRow> GetGame(Guid gameId);
-
-        public Task<IEnumerable<SpeedTypingGameRow>> SearchGames(CreateSpeedTypingGameCommand query);
 
         public Task SetTimeProgress(SpeedTypingGame game, SpeedTypingPlayer player, DateTime timeProgress);
 
