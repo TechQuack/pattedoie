@@ -125,10 +125,6 @@ namespace PatteDoie.Views.ScattergoriesGames
         {
             await ScattergoriesService.ConfirmWords(new Guid(Id), new Guid(UUID));
             await InvokeAsync(StateHasChanged);
-            for (int i = 0; i < inputs.Length; ++i)
-            {
-                inputs[i] = "";
-            } 
         }
 
         public async void ValidateWord(Guid playerId, Guid answerId, bool descision)
