@@ -118,7 +118,8 @@ public partial class LobbyDetail : AuthenticatedPage
         NavigationManager.NavigateTo($"/lobby/{Id}", forceLoad: true);
     }
 
-    private void RedirectToGame(Guid gameId)
+    // Method need to be async because of redirection, even if there is no await
+    private async Task RedirectToGame(Guid gameId)
     {
         if (Lobby == null) { return; }
         var gameType = GameTypeHelper.GetGameTypeFromString(Lobby.Game.Name);
